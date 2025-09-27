@@ -162,8 +162,12 @@ fetch(BIN_URL, {
 
     if (user) {
       // Подставляем ключ
-      document.querySelector(".menu-item .fa-key").parentNode.innerHTML =
-        `<span class="fa-solid fa-key"></span> Ключ: ${user.key}`;
+      // Подставляем ключ с иконкой копирования
+      document.querySelector(".menu-item .fa-key").parentNode.innerHTML = `
+        <span class="fa-solid fa-key"></span> 
+        Ключ: <span id="userKey">${user.key}</span>
+        <i id="copyKeyBtn" class="fa-solid fa-copy" style="cursor:pointer; margin-left:8px;"></i>
+      `;
 
       // Считаем сколько осталось
       const buy1Left = getDaysLeft(user.buy1.start, user.buy1.days);
@@ -179,3 +183,20 @@ fetch(BIN_URL, {
     }
   })
   .catch(err => console.error("Ошибка загрузки JSON:", err));
+
+// Копирование ключа
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "copyKeyBtn") {
+    const keyText = document.getElementById("userKey").textContent;
+    navigator.clipboard.writeText(keyText).then(() => {
+      e.target.classList.remove("fa-copy");
+      e.target.classList.add("fa-check"); // галочка
+      setTimeout(() => {
+        e.target.classList.remove("fa-check");
+        e.target.classList.add("fa-copy");
+      }, 1500);
+    }).catch(err => {
+      console.error("Ошибка копирования:", err);
+    });
+  }
+});
