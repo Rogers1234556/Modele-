@@ -69,13 +69,14 @@
     <div class="profile">
       <div class="profile-header">
         <div class="avatar big"></div>
-        <div class="user-id">User ID 4506119</div>
+        <div class="user-id">ID: </div>
       </div>
 
       <!-- Меню профиля -->
-      <div class="profile-menu">
-        <div class="menu-item"><span class="fa-solid fa-key"></span> Ключ: 6XOVHunhebiG</div>
-        <div class="menu-item"><span class="fa-solid fa-basket-shopping"></span> Доступные подписки:<br>Polices Helper: 0 дн<br>Leaders Helper: 0 дн</div>
+        <div class="profile-menu">
+          <div class="menu-item"><span class="fa-solid fa-key"></span> Ключ: </div>
+          <div class="menu-item"><span class="fa-solid fa-basket-shopping"></span> Доступные подписки:</div>
+        </div>
         
       </div>
 
@@ -128,11 +129,8 @@
 
     if (user) {
       // Подставляем ID
-      document.querySelector('.user-id').textContent = `User ID: ${user.id}`;
+      document.querySelector('.user-id').textContent = `ID: ${user.id}`;
 
-      // Вставляем "фейковую" аватарку (привязанную к ID)
-      document.querySelector('.avatar.big').style.backgroundImage =
-        "url('https://i.pravatar.cc/150?u=" + user.id + "')";
     }
   </script>
 
