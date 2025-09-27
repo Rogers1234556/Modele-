@@ -136,8 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
 const currentUserId = 7660364996;
 
 // твой bin URL (проверь, что он публичный или используй API-ключ)
-const BIN_URL = "https://api.jsonbin.io/v3/b/ТВОЙ_BIN_ID/latest";
-const API_KEY = "ТВОЙ_SECRET_KEY"; // если bin приватный
+const BIN_URL = "https://api.jsonbin.io/v3/b/68a9a92043b1c97be9266774/latest";
+const API_KEY = "$2a$10$Dz1aHgMBI1fp1vjHgzv4KuScT5dgtyLfpRCxBszMOg6Zv/xOdJ0K6"; // если bin приватный
 
 fetch(BIN_URL, {
   headers: {
