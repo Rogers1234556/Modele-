@@ -146,6 +146,8 @@ function getDaysLeft(startDate, totalDays) {
 // id текущего юзера (например, из Telegram WebApp)
 const currentUserId = window.currentUserId;
 
+const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
+
 // твой bin URL (проверь, что он публичный или используй API-ключ)
 const BIN_URL = "https://api.jsonbin.io/v3/b/68a9a92043b1c97be9266774/latest";
 const API_KEY = "$2a$10$Dz1aHgMBI1fp1vjHgzv4KuScT5dgtyLfpRCxBszMOg6Zv/xOdJ0K6"; // если bin приватный
@@ -184,19 +186,64 @@ fetch(BIN_URL, {
   })
   .catch(err => console.error("Ошибка загрузки JSON:", err));
 
-// Копирование ключа
+
+
+// 2. Загружаем админов
+fetch(BIN_URL_A, {
+  headers: { "X-Master-Key": API_KEY }
+})
+  .then(res => res.json())
+  .then(data => {
+    const admins = data.record.admins;
+    const admin = admins.find(a => a.id === currentUserId);
+
+    if (admin && admin.level >= 3) {
+      const bottomNav = document.querySelector(".bottom-nav");
+
+      if (!document.querySelector(".nav-item[data-section='admin']")) {
+        const adminTab = document.createElement("div");
+        adminTab.className = "nav-item";
+        adminTab.dataset.section = "admin";
+        adminTab.innerHTML = `
+          <i class="fa-solid fa-lock nav-icon"></i>
+          <div class="nav-label">ADM</div>
+        `;
+        bottomNav.appendChild(adminTab);
+
+        const adminSection = document.createElement("div");
+        adminSection.id = "admin";
+        adminSection.className = "section";
+        adminSection.innerHTML = `
+          <div class="admin-panel">
+            <h2>Админ-панель</h2>
+            <p>Добро пожаловать, ${admin.nickname} (уровень: ${admin.level})</p>
+          </div>
+        `;
+        document.body.appendChild(adminSection);
+
+        adminTab.addEventListener("click", () => {
+          document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+          document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+          adminTab.classList.add("active");
+          adminSection.classList.add("active");
+        });
+      }
+    }
+  })
+  .catch(err => console.error("Ошибка загрузки ADMINS JSON:", err));
+
+
+// 3. Копирование ключа
 document.addEventListener("click", (e) => {
   if (e.target && e.target.id === "copyKeyBtn") {
     const keyText = document.getElementById("userKey").textContent;
     navigator.clipboard.writeText(keyText).then(() => {
       e.target.classList.remove("fa-copy");
-      e.target.classList.add("fa-check"); // галочка
+      e.target.classList.add("fa-check");
       setTimeout(() => {
         e.target.classList.remove("fa-check");
         e.target.classList.add("fa-copy");
       }, 1500);
-    }).catch(err => {
-      console.error("Ошибка копирования:", err);
-    });
+    }).catch(err => console.error("Ошибка копирования:", err));
   }
 });
