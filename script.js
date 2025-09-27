@@ -131,6 +131,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// Функция расчёта оставшихся дней
+function getDaysLeft(startDate, totalDays) {
+  const start = new Date(startDate);
+  const end = new Date(start);
+  end.setDate(start.getDate() + totalDays); // дата окончания подписки
+  const today = new Date();
+
+  const diff = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0; // если уже истекло, возвращаем 0
+}
+
 
 // id текущего юзера (например, из Telegram WebApp)
 const currentUserId = window.currentUserId;
@@ -154,11 +165,15 @@ fetch(BIN_URL, {
       document.querySelector(".menu-item .fa-key").parentNode.innerHTML =
         `<span class="fa-solid fa-key"></span> Ключ: ${user.key}`;
 
+      // Считаем сколько осталось
+      const buy1Left = getDaysLeft(user.buy1.start, user.buy1.days);
+      const buy2Left = getDaysLeft(user.buy2.start, user.buy2.days);
+
       // Подставляем подписки
       document.querySelector(".fa-basket-shopping").parentNode.innerHTML =
         `<span class="fa-solid fa-basket-shopping"></span> Доступные подписки:<br>
-         Polices Helper: ${user.buy1.days} дн<br>
-         Leaders Helper: ${user.buy2.days} дн`;
+         Polices Helper: ${buy1Left} дн<br>
+         Leaders Helper: ${buy2Left} дн`;
     } else {
       console.error("Пользователь не найден");
     }
