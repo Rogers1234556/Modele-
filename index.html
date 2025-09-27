@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>SR Mods</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <!-- Верх -->
+  <div class="top-bar">
+    <div class="avatar"></div>
+    <div class="stats"><div class="stat">🎟️ <span>0</span></div></div>
+  </div>
+
+  <!-- Товары -->
+  <main id="main-slides" class="section wrap active">
+    <section class="product-slider">
+      <div class="slides" id="slides"></div>
+      <div class="dots" id="dots"></div>
+      <div class="thumbs" id="thumbs"></div>
+    </section>
+  </main>
+
+  <!-- Контент вкладки Друзья -->
+  <div id="friends" class="section">
+    <div class="friends">
+      <h2>Приглашай друзей – Получай Награды!</h2>
+      <p>Каждый приглашенный друг = 🎟️ билет</p>
+
+      <div class="invite-row">
+        <button class="btn-main">Пригласить друга</button>
+        <button class="btn-copy">📋</button>
+      </div>
+      <div class="promo-title">Создание промокода</div>
+      <div class="promo-container">
+        <button class="btn-promo" id="createPromoBtn">Создать промокод</button>
+
+        <!-- поле ввода скрыто по умолчанию -->
+        <div class="promo-input" id="promoInputBox">
+          <label for="promoText">ПРОМОКОД:</label>
+          <input type="text" id="promoText" placeholder="Введите ваш промокод">
+          <span class="promo-icon confirm">✔</span>
+          <span class="promo-icon cancel">✖</span>
+        </div>
+
+        <!-- результат тоже скрыт по умолчанию -->
+        <div class="promo-result" id="promoResultBox">
+          <span id="promoResultText"></span>
+          <span class="promo-icon cancel">✖</span>
+        </div>
+      </div>
+
+      <div class="invited-title">Приглашенные друзья (1)</div>
+      <div class="hint">Друг должен зайти в приложение по вашей ссылке, чтобы вы получили билет.</div>
+
+      <div class="friend-card">
+        <span>Начисление бонусов</span>
+        <span>+1 🎟️</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Профиль -->
+  <!-- Секция Профиль -->
+  <div id="profile" class="section">
+    <div class="profile">
+      <div class="profile-header">
+        <div class="avatar big"></div>
+        <div class="user-id">ID: </div>
+      </div>
+
+      <!-- Меню профиля -->
+        <div class="profile-menu">
+          <div class="menu-item"><span class="fa-solid fa-key"></span> Ключ: </div>
+          <div class="menu-item"><span class="fa-solid fa-basket-shopping"></span> Доступные подписки:</div>
+        </div>
+        
+      </div>
+
+      <div class="profile-actions">
+        <button class="btn-main">Активировать промокод</button>
+        <button class="btn-support">Поддержка</button>
+      </div>
+
+      
+    </div>
+  </div>
+
+  
+  <!-- Нижнее меню -->
+  <div class="bottom-nav">
+    <div class="nav-item" data-section="contests">
+      <i class="fa-solid fa-trophy nav-icon"></i>
+      <div class="nav-label">Конкурсы</div>
+    </div>
+
+    <div class="nav-item" data-section="info">
+      <i class="fa-solid fa-circle-info nav-icon"></i>
+      <div class="nav-label">Информация</div>
+    </div>
+
+    <div class="nav-item active" data-section="main-slides">
+      <i class="fa-solid fa-box nav-icon"></i>
+      <div class="nav-label">Товары</div>
+    </div>
+
+    <div class="nav-item" data-section="friends">
+      <i class="fa-solid fa-user-group nav-icon"></i>
+      <div class="nav-label">Друзья</div>
+    </div>
+
+    <div class="nav-item" data-section="profile">
+      <i class="fa-solid fa-circle-user nav-icon"></i>
+      <div class="nav-label">Профиль</div>
+    </div>
+  </div>
+  </div>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // разворачиваем приложение
+
+    const user = tg.initDataUnsafe.user;
+
+    if (user) {
+      const currentUserId = user.id;   // <-- вот тут настоящий id
+      const login = user.username;     // логин
+      const name = user.first_name;    // имя
+
+      // Вставляем в профиль
+      document.querySelector(".user-id").textContent = `ID: ${currentUserId}`;
+    }
+  </script>
+
+  <!-- JS -->
+  <script src="script.js"></script>
+</body>
+</html>
