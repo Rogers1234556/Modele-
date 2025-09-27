@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // id текущего юзера (например, из Telegram WebApp)
-const currentUserId = user.id;
+const currentUserId = window.currentUserId;
 
 // твой bin URL (проверь, что он публичный или используй API-ключ)
 const BIN_URL = "https://api.jsonbin.io/v3/b/68a9a92043b1c97be9266774/latest";
