@@ -71,15 +71,16 @@ function attachEvents(){
 render();
 
 /* Переключение вкладок */
-const navItems = document.querySelectorAll('.nav-item[data-section]');
-const sections = document.querySelectorAll('.section');
-navItems.forEach(item=>{
-  item.addEventListener('click',()=>{
-    navItems.forEach(i=>i.classList.remove('active'));
-    sections.forEach(s=>s.classList.remove('active'));
-    item.classList.add('active');
-    document.getElementById(item.dataset.section).classList.add('active');
-  });
+/* Переключение вкладок (делегирование) */
+document.querySelector(".bottom-nav").addEventListener("click", (e) => {
+  const item = e.target.closest(".nav-item");
+  if (!item) return;
+
+  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+
+  item.classList.add("active");
+  document.getElementById(item.dataset.section).classList.add("active");
 });
 
 /* Промокод */
