@@ -132,34 +132,35 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+// id текущего юзера (например, из Telegram WebApp)
+const currentUserId = tg.initDataUnsafe.user;
 
 // твой bin URL (проверь, что он публичный или используй API-ключ)
 const BIN_URL = "https://api.jsonbin.io/v3/b/68a9a92043b1c97be9266774/latest";
 const API_KEY = "$2a$10$Dz1aHgMBI1fp1vjHgzv4KuScT5dgtyLfpRCxBszMOg6Zv/xOdJ0K6"; // если bin приватный
 
-const tg = window.Telegram.WebApp;
-const user = tg.initDataUnsafe.user;
+fetch(BIN_URL, {
+  headers: {
+    "X-Master-Key": API_KEY // убери эту строчку, если bin публичный
+  }
+})
+  .then(res => res.json())
+  .then(data => {
+    const users = data.record.users; // в jsonbin данные хранятся в `record`
+    const user = users.find(u => u.id === currentUserId);
 
-if (user) {
-  const currentUserId = user.id; // <-- берём из Telegram
-  fetch(BIN_URL, {
-    headers: {
-      "X-Master-Key": API_KEY
+    if (user) {
+      // Подставляем ключ
+      document.querySelector(".menu-item .fa-key").parentNode.innerHTML =
+        `<span class="fa-solid fa-key"></span> Ключ: ${user.key}`;
+
+      // Подставляем подписки
+      document.querySelector(".fa-basket-shopping").parentNode.innerHTML =
+        `<span class="fa-solid fa-basket-shopping"></span> Доступные подписки:<br>
+         Polices Helper: ${user.buy1.days} дн<br>
+         Leaders Helper: ${user.buy2.days} дн`;
+    } else {
+      console.error("Пользователь не найден");
     }
   })
-    .then(res => res.json())
-    .then(data => {
-      const users = data.record.users;
-      const foundUser = users.find(u => u.id === currentUserId);
-
-      if (foundUser) {
-        document.querySelector(".menu-item .fa-key").parentNode.innerHTML =
-          `<span class="fa-solid fa-key"></span> Ключ: ${foundUser.key}`;
-
-        document.querySelector(".fa-basket-shopping").parentNode.innerHTML =
-          `<span class="fa-solid fa-basket-shopping"></span> Доступные подписки:<br>
-           Polices Helper: ${foundUser.buy1.days} дн<br>
-           Leaders Helper: ${foundUser.buy2.days} дн`;
-      }
-    });
-}
+  .catch(err => console.error("Ошибка загрузки JSON:", err));
