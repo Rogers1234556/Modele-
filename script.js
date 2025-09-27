@@ -220,14 +220,9 @@ fetch(BIN_URL_A, {
             <p>Добро пожаловать, ${admin.nickname} (уровень: ${admin.level})</p>
           </div>
         `;
-        document.body.appendChild(adminSection);
 
-        adminTab.addEventListener("click", () => {
-          document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
-          document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-          adminTab.classList.add("active");
-          adminSection.classList.add("active");
-        });
+        // вставляем секцию перед .bottom-nav
+        bottomNav.insertAdjacentElement("beforebegin", adminSection);
       }
     }
   })
