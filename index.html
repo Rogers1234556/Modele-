@@ -12,7 +12,7 @@
   <!-- Верх -->
   <div class="top-bar">
     <div class="avatar"></div>
-    <div class="stats"><div class="stat">🎟️ <span>0</span></div></div>
+    <div class="stats"><div class="stat"><span><i class="fa-solid fa-ticket"></i> 0</span></div></div>
   </div>
 
   <!-- Товары -->
@@ -28,11 +28,11 @@
   <div id="friends" class="section">
     <div class="friends">
       <h2>Приглашай друзей – Получай Награды!</h2>
-      <p>Каждый приглашенный друг = 🎟️ билет</p>
+      <p>Каждый приглашенный друг = <i class="fa-solid fa-ticket"></i> билет</p>
 
       <div class="invite-row">
         <button class="btn-main">Пригласить друга</button>
-        <button class="btn-copy">📋</button>
+        <button class="btn-copy"><i class="fa-solid fa-copy"></i></button>
       </div>
       <div class="promo-title">Создание промокода</div>
       <div class="promo-container">
@@ -58,7 +58,7 @@
 
       <div class="friend-card">
         <span>Начисление бонусов</span>
-        <span>+1 🎟️</span>
+        <span>+1 <i class="fa-solid fa-ticket"></i></span>
       </div>
     </div>
   </div>
@@ -80,12 +80,67 @@
         
       </div>
 
-      <div class="profile-actions">
-        <button class="btn-main">Активировать промокод</button>
+      <div class="promo-container">
+        <button class="btn-promo">Активировать промокод</button>
         <button class="btn-support">Поддержка</button>
       </div>
 
       
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3 id="modalTitle">Управление пользователем</h3>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Вкладка Конкурсы -->
+  <div id="contests" class="section">
+    <div class="contests">
+
+      <!-- Карточка конкурса -->
+      <div class="contest-card">
+        <div class="contest-header">
+          <span>Конкурс</span>
+          <span class="contest-timer">1 день 06:29:54 <i class="fa-solid fa-clock"></i></span>
+        </div>
+
+        <div class="contest-body">
+          <img src="img/logo.jpeg" alt="Ring" class="contest-img">
+          <div class="contest-info">
+            <div class="contest-title">Police Helper</div>
+            <div class="contest-price">30 дней</div>
+            <div class="contest-sub">Подпишитесь на: <a href="https://t.me/">@</a></div>
+            <div class="contest-users"><i class="fa-solid fa-user-group"></i> 0</div>
+          </div>
+        </div>
+
+        <button class="contest-btn">Участвовать</button>
+      </div>
+
+      <!-- Вторая карточка -->
+      <div class="contest-card">
+        <div class="contest-header">
+          <span>Конкурс</span>
+          <span class="contest-timer">1 день 06:29:54 <i class="fa-solid fa-clock"></i></span>
+        </div>
+
+        <div class="contest-body">
+          <img src="img/logo.jpeg" alt="Toy Bear" class="contest-img">
+          <div class="contest-info">
+            <div class="contest-title">Leader Helper</div>
+            <div class="contest-price">30 дней</div>
+            <div class="contest-sub">Подпишитесь на: <a href="https://t.me/">@</a></div>
+            <div class="contest-users"><i class="fa-solid fa-user-group"></i> 1</div>
+          </div>
+        </div>
+
+        <button class="contest-btn disabled">Вы уже участвуете</button>
+      </div>
+
     </div>
   </div>
 
@@ -108,7 +163,7 @@
     </div>
 
     <div class="nav-item" data-section="friends">
-      <i class="fa-solid fa-user-group nav-icon"></i>
+      <i class="fa-solid fa-user-plus nav-icon"></i>
       <div class="nav-label">Друзья</div>
     </div>
 
