@@ -1,4 +1,3 @@
-/* Данные */
 const data = [
   { title: "Polices Helper", desc: "Игровой помощник для МВД / ФСБ", price: "250⭐️", img: "img/logo.jpeg", thumb: "img/logo.jpeg" },
   { title: "Leaders Helper", desc: "Игровой помощник для лидеров", price: "250⭐️", img: "img/logo.jpeg", thumb: "img/logo.jpeg" },
@@ -10,7 +9,6 @@ const thumbsEl = document.getElementById('thumbs');
 const dotsEl = document.getElementById('dots');
 let current = 0;
 
-/* Рендер */
 function render(){
   slidesEl.innerHTML = '';
   thumbsEl.innerHTML = '';
@@ -49,7 +47,7 @@ function render(){
   attachEvents();
 }
 
-/* Показ слайда */
+
 function show(index){
   if(index<0) index=data.length-1;
   if(index>=data.length) index=0;
@@ -59,7 +57,7 @@ function show(index){
   dotsEl.querySelectorAll('.dot').forEach((d,i)=> d.classList.toggle('active',i===index));
 }
 
-/* Навигация */
+
 function attachEvents(){
   thumbsEl.querySelectorAll('.thumb').forEach(t=>{
     t.onclick=()=>show(+t.dataset.index);
@@ -70,8 +68,7 @@ function attachEvents(){
 }
 render();
 
-/* Переключение вкладок */
-/* Переключение вкладок (делегирование) */
+
 document.querySelector(".bottom-nav").addEventListener("click", (e) => {
   const item = e.target.closest(".nav-item");
   if (!item) return;
@@ -83,13 +80,12 @@ document.querySelector(".bottom-nav").addEventListener("click", (e) => {
   document.getElementById(item.dataset.section).classList.add("active");
 });
 
-/* Промокод */
 const createBtn = document.getElementById("createPromoBtn");
 const promoInputBox = document.getElementById("promoInputBox");
 const promoText = document.getElementById("promoText");
 const promoResultBox = document.getElementById("promoResultBox");
 const promoResultText = document.getElementById("promoResultText");
-// Скрываем промо-блоки при загрузке
+
 promoInputBox.style.display = "none";
 promoResultBox.style.display = "none";
 
@@ -114,19 +110,18 @@ promoResultBox.querySelector(".cancel").onclick=()=>{
   promoText.value="";
 };
 
-// Кнопка поддержки
 document.addEventListener("DOMContentLoaded", () => {
   const supportBtn = document.querySelector(".btn-support");
   if (supportBtn) {
     supportBtn.addEventListener("click", () => {
-      window.location.href = "https://t.me/your_support_chat"; // твоя ссылка
+      window.location.href = "https://t.me/your_support_chat";
     });
   }
 
   const promoBtn = document.querySelector(".btn-main");
   if (promoBtn) {
     promoBtn.addEventListener("click", () => {
-      // тут можешь открыть окно ввода промокода или что-то ещё
+      
       alert("Окно активации промокода в разработке 🙂");
     });
   }
@@ -145,31 +140,26 @@ function getDaysLeft(startDate, totalDays) {
 
 
 
-// id текущего юзера (например, из Telegram WebApp)
-const currentUserId = window.currentUserId;
-//const BIN_URL_A = process.env.BIN_URL_A;
-const BIN_URL = process.env.BIN_URL;
-const API_KEY = process.env.API_KEY;
-const BIN_URL_A = process.env.BIN_URL_A; // "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
 
-// твой bin URL (проверь, что он публичный или используй API-ключ)
-//const BIN_URL = "https://api.jsonbin.io/v3/b/68a9a92043b1c97be9266774/latest";
-//const API_KEY = "$2a$10$Dz1aHgMBI1fp1vjHgzv4KuScT5dgtyLfpRCxBszMOg6Zv/xOdJ0K6"; // если bin приватный
+const currentUserId = window.currentUserId;
+const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
+
+const BIN_URL = "https://api.jsonbin.io/v3/b/68a9a92043b1c97be9266774/latest";
+const API_KEY = "$2a$10$Dz1aHgMBI1fp1vjHgzv4KuScT5dgtyLfpRCxBszMOg6Zv/xOdJ0K6"; 
 
 fetch(BIN_URL, {
   headers: {
-    "X-Master-Key": API_KEY // убери эту строчку, если bin публичный
+    "X-Master-Key": API_KEY 
   }
 })
   .then(res => res.json())
   .then(data => {
     const users = data.record.users;
-    window.allUsers = users;// в jsonbin данные хранятся в `record`
+    window.allUsers = users;
     const user = users.find(u => u.id === currentUserId);
 
     if (user) {
-      // Подставляем ключ
-      // Подставляем ключ с иконкой копирования
+      
       document.querySelector(".menu-item .fa-key").parentNode.innerHTML = `
         <span class="fa-solid fa-key"></span> 
         Ключ: <span id="userKey">${user.key}</span>
