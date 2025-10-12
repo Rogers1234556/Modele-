@@ -1172,35 +1172,34 @@ function openBot() {
 
 async function initUser() {
   try {
-    // 🧠 Получаем Telegram-пользователя
-    const tg = window.Telegram.WebApp;
-    const user = tg.initDataUnsafe.user;
+    const tg = window.Telegram?.WebApp;
+    const user = tg?.initDataUnsafe?.user;
 
-    if (!user) return;
+    // Если не в Telegram (тест в браузере)
+    const userId = user?.id || 9999999999;
+    const username = user?.username || "test_user";
 
-    const userId = user.id;
-    const username = user.username || "unknown";
+    const res = await fetch(`${BIN_URL}`, {
+      headers: {
+        "X-Master-Key": API_KEY
+      }
+    });
 
-    // 1️⃣ Загружаем текущее содержимое JSONBin
-    const res = await fetch(`${BIN_URL}/latest`);
-    const json = await res.json();
-    const record = json.record || {};
-
+    if (!res.ok) throw new Error("Ошибка загрузки JSONBin");
+    const data = await res.json();
+    const record = data.record || {};
     if (!record.users) record.users = [];
 
-    // 2️⃣ Проверяем — есть ли пользователь с таким ID
-    const existingUser = record.users.find(u => u.id === userId);
-
-    if (existingUser) {
-      console.log("✅ Пользователь уже есть:", existingUser.login);
+    const exists = record.users.some(u => u.id === userId);
+    if (exists) {
+      console.log("✅ Пользователь уже существует:", username);
       return;
     }
 
-    // 3️⃣ Если нет — создаём новую запись
     const newUser = {
       id: userId,
       login: username,
-      key: generateKey(12), // создадим ниже
+      key: generateKey(12),
       hwid: null,
       buy1: { days: 0, start: null, issuedBy: null },
       buy2: { days: 0, start: null },
@@ -1209,32 +1208,37 @@ async function initUser() {
 
     record.users.push(newUser);
 
-    // 4️⃣ Сохраняем обновлённый список
-    await fetch(BIN_URL, {
+    // если хочешь, можешь добавить логирование сюда 👇
+    if (!record.logs) record.logs = [];
+    record.logs.push({
+      time: new Date().toLocaleString(),
+      admin: "System",
+      action: `Добавлен новый пользователь: ${username} | ${userId}`
+    });
+
+    const putRes = await fetch(BIN_URL, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        ...(API_KEY ? { "X-Master-Key": API_KEY } : {})
+        "X-Master-Key": API_KEY
       },
       body: JSON.stringify(record)
     });
 
+    if (!putRes.ok) throw new Error("Ошибка сохранения данных");
     console.log("🆕 Новый пользователь добавлен:", newUser);
 
   } catch (err) {
-    console.error("Ошибка инициализации пользователя:", err);
+    console.error("❌ Ошибка initUser:", err);
   }
 }
 
-// Генератор ключа (как у тебя в примерах)
 function generateKey(length = 10) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let key = "";
-  for (let i = 0; i < length; i++) {
-    key += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return key;
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 }
 
-// Запускаем после загрузки
-window.addEventListener("DOMContentLoaded", initUser);
+window.addEventListener("DOMContentLoaded", () => {
+  if (window.Telegram?.WebApp) Telegram.WebApp.ready();
+  initUser();
+});
