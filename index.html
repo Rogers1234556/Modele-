@@ -4,18 +4,15 @@
   <meta charset="UTF-8">
   <title>SR Mods</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-  <!-- Верх -->
   <div class="top-bar">
     <div class="avatar"></div>
     <div class="stats"><div class="stat"><span><i class="fa-solid fa-ticket"></i> 0</span></div></div>
   </div>
 
-  <!-- Товары -->
   <main id="main-slides" class="section wrap active">
     <section class="product-slider">
       <div class="slides" id="slides"></div>
@@ -24,47 +21,6 @@
     </section>
   </main>
 
-  <!-- Контент вкладки Друзья -->
-  <div id="friends" class="section">
-    <div class="friends">
-      <h2>Приглашай друзей – Получай Награды!</h2>
-      <p>Каждый приглашенный друг = <i class="fa-solid fa-ticket"></i> билет</p>
-
-      <div class="invite-row">
-        <button class="btn-main">Пригласить друга</button>
-        <button class="btn-copy"><i class="fa-solid fa-copy"></i></button>
-      </div>
-      <div class="promo-title">Создание промокода</div>
-      <div class="promo-container">
-        <button class="btn-promo" id="createPromoBtn">Создать промокод</button>
-
-        <!-- поле ввода скрыто по умолчанию -->
-        <div class="promo-input" id="promoInputBox">
-          <label for="promoText">ПРОМОКОД:</label>
-          <input type="text" id="promoText" placeholder="Введите ваш промокод">
-          <span class="promo-icon confirm">✔</span>
-          <span class="promo-icon cancel">✖</span>
-        </div>
-
-        <!-- результат тоже скрыт по умолчанию -->
-        <div class="promo-result" id="promoResultBox">
-          <span id="promoResultText"></span>
-          <span class="promo-icon cancel">✖</span>
-        </div>
-      </div>
-
-      <div class="invited-title">Приглашенные друзья (1)</div>
-      <div class="hint">Друг должен зайти в приложение по вашей ссылке, чтобы вы получили билет.</div>
-
-      <div class="friend-card">
-        <span>Начисление бонусов</span>
-        <span>+1 <i class="fa-solid fa-ticket"></i></span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Профиль -->
-  <!-- Секция Профиль -->
   <div id="profile" class="section">
     <div class="profile">
       <div class="profile-header">
@@ -72,20 +28,31 @@
         <div class="user-id">ID: </div>
       </div>
 
-      <!-- Меню профиля -->
         <div class="profile-menu">
           <div class="menu-item"><span class="fa-solid fa-key"></span> Ключ: </div>
           <div class="menu-item"><span class="fa-solid fa-basket-shopping"></span> Доступные подписки:</div>
         </div>
-        
-      </div>
+  <div class="profile-actions">
+    <button class="btn-support">Поддержка</button>
+    <a href="https://github.com/galebxkwn/Jdskvehv/raw/refs/heads/main/SR%20Launcher_setup.exe" 
+       download 
+       class="btn-support btn-launcher" 
+       style="display:none;">
+      Скачать лаунчер
+    </a>
+    <button class="btn-support btn-online" id="radmirOnlineBtn" style="display:none;">Онлайн Radmir RP</button>
+  </div>    
+    </div>
+  </div>
 
-      <div class="promo-container">
-        <button class="btn-promo">Активировать промокод</button>
-        <button class="btn-support">Поддержка</button>
+  <!-- Модальное окно Онлайн -->
+  <div id="onlineModal" class="online-modal">
+    <div class="online-content">
+      <span id="closeOnlineModal" class="close-online">&times;</span>
+      <h2>Онлайн Radmir RP</h2>
+      <div id="serversList" class="servers-list">
+        <p>Загрузка...</p>
       </div>
-
-      
     </div>
   </div>
 
@@ -97,17 +64,13 @@
     </div>
   </div>
 
-  <!-- Вкладка Конкурсы -->
   <div id="contests" class="section">
     <div class="contests">
-
-      <!-- Карточка конкурса -->
       <div class="contest-card">
         <div class="contest-header">
           <span>Конкурс</span>
-          <span class="contest-timer">1 день 06:29:54 <i class="fa-solid fa-clock"></i></span>
+          <span class="contest-timer">0 день 00:00:00 <i class="fa-solid fa-clock"></i></span>
         </div>
-
         <div class="contest-body">
           <img src="img/logo.jpeg" alt="Ring" class="contest-img">
           <div class="contest-info">
@@ -117,35 +80,116 @@
             <div class="contest-users"><i class="fa-solid fa-user-group"></i> 0</div>
           </div>
         </div>
-
-        <button class="contest-btn">Участвовать</button>
+        <button class="contest-btn disabled">Конкурс завершен</button>
       </div>
-
-      <!-- Вторая карточка -->
       <div class="contest-card">
         <div class="contest-header">
           <span>Конкурс</span>
-          <span class="contest-timer">1 день 07:29:54 <i class="fa-solid fa-clock"></i></span>
+          <span class="contest-timer">0 день 00:00:00 <i class="fa-solid fa-clock"></i></span>
         </div>
-
         <div class="contest-body">
           <img src="img/logo.jpeg" alt="Toy Bear" class="contest-img">
           <div class="contest-info">
             <div class="contest-title">Leader Helper</div>
             <div class="contest-price">30 дней</div>
             <div class="contest-sub">Подпишитесь на: <a href="https://t.me/">@</a></div>
-            <div class="contest-users"><i class="fa-solid fa-user-group"></i> 1</div>
+            <div class="contest-users"><i class="fa-solid fa-user-group"></i> 0</div>
           </div>
         </div>
-
-        <button class="contest-btn disabled">Вы уже участвуете</button>
+        <button class="contest-btn disabled">Конкурс завершен</button>
       </div>
-
     </div>
   </div>
 
-  
-  <!-- Нижнее меню -->
+  <div id="info" class="section">
+    <div class="info">
+      <div class="info-tabs">
+        <button class="info-tab active" data-target="police">
+          <i class="fa-solid fa-shield-halved"></i> Police Helper
+        </button>
+        <button class="info-tab" data-target="leader">
+          <i class="fa-solid fa-crown"></i> Leader Helper
+        </button>
+      </div>
+
+      <div class="info-content">
+        <div id="police" class="info-box active">
+          <h2><i class="fa-solid fa-shield-halved"></i> Police Helper</h2>
+          <div class="info-card">
+            <h3>Функции плагина</h3>
+            <ul>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+              <li>info1</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>Меню</h3>
+            <p>info2</p>
+          </div>
+
+          <div class="info-card">
+            <h3>Горячие клавиши</h3>
+            <ul>
+              <li><b>info3</b> – info3</li>
+              <li><b>info3</b> – info3</li>
+              <li><b>info3</b> – info3</li>
+              <li><b>info3</b> – info3</li>
+              <li><b>info3</b> – info3</li>
+              <li><b>info3</b> – info3</li>
+              <li><b>info3</b> – info3</li>
+            </ul>
+          </div>
+        </div>
+
+        <div id="leader" class="info-box">
+          <h2><i class="fa-solid fa-crown"></i> Leader Helper</h2>
+          <div class="info-card">
+            <h3>В разработке</h3>
+            <!--<ul>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+              <li>info4</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>Меню</h3>
+            <p>info5</p>
+          </div>
+
+          <div class="info-card">
+            <h3>Горячие клавиши</h3>
+            <ul>
+              <li><b>info6</b> – info6</li>
+              <li><b>info6</b> – info6</li>
+              <li><b>info6</b> – info6</li>
+              <li><b>info6</b> – info6</li>
+              <li><b>info6 </b> – info6</li>
+            </ul>-->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="bottom-nav">
     <div class="nav-item" data-section="contests">
       <i class="fa-solid fa-trophy nav-icon"></i>
@@ -162,11 +206,6 @@
       <div class="nav-label">Товары</div>
     </div>
 
-    <div class="nav-item" data-section="friends">
-      <i class="fa-solid fa-user-plus nav-icon"></i>
-      <div class="nav-label">Друзья</div>
-    </div>
-
     <div class="nav-item" data-section="profile">
       <i class="fa-solid fa-circle-user nav-icon"></i>
       <div class="nav-label">Профиль</div>
@@ -177,22 +216,20 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     const tg = window.Telegram.WebApp;
-    tg.expand(); // разворачиваем приложение
+    tg.expand();
 
     const user = tg.initDataUnsafe.user;
 
     if (user) {
-      const currentUserId = user.id;   // <-- вот тут настоящий id
-      const login = user.username;     // логин
-      const name = user.first_name;    // имя
+      const currentUserId = user.id;
+      const login = user.username;
+      const name = user.first_name;
 
-      // Вставляем в профиль
       document.querySelector(".user-id").textContent = `ID: ${currentUserId}`;
       window.currentUserId = currentUserId;
     }
   </script>
 
-  <!-- JS -->
   <script src="script.js"></script>
 </body>
 </html>
