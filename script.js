@@ -1,90 +1,24 @@
-const data = [
-  { title: "Polices Helper", desc: "Игровой помощник для МВД / ФСБ", price: "250⭐️", img: "img/logo.jpeg", thumb: "img/logo.jpeg" },
-  { title: "Leaders Helper", desc: "Игровой помощник для лидеров", price: "250⭐️", img: "img/logo.jpeg", thumb: "img/logo.jpeg" },
-  { title: "RADMIR Helper", desc: "Игровой помощник", price: "250⭐️", img: "img/logo.jpeg", thumb: "img/logo.jpeg" }
-];
-
-const slidesEl = document.getElementById('slides');
-const thumbsEl = document.getElementById('thumbs');
-const dotsEl = document.getElementById('dots');
-let current = 0;
-
-function render(){
-  slidesEl.innerHTML = '';
-  thumbsEl.innerHTML = '';
-  dotsEl.innerHTML = '';
-  data.forEach((it,i)=>{
-    const s = document.createElement('div');
-    s.className = 'slide' + (i===0?' active':'');
-    s.innerHTML = `
-      <article class="card">
-        <div class="bg" style="background-image:url('${it.img}')"></div>
-        <div class="overlay"></div>
-        <div class="content">
-          <div class="title">${it.title}</div>
-          <div class="desc">${it.desc}</div>
-          <div class="bottom">
-            <div class="price">${it.price}</div>
-            <button class="btn-order" onclick="openBot()">КУПИТЬ</button>
-          </div>
-        </div>
-      </article>`;
-    slidesEl.appendChild(s);
-
-    const t = document.createElement('div');
-    t.className = 'thumb' + (i===0?' active':'');
-    t.dataset.index = i;
-    t.innerHTML = `<div class="thumb-img" style="background-image:url('${it.thumb}')"></div>
-                   <div class="t-title">${it.title}</div>
-                   <div class="t-price">${it.price}</div>`;
-    thumbsEl.appendChild(t);
-
-    const d = document.createElement('div');
-    d.className = 'dot' + (i===0?' active':'');
-    d.dataset.index = i;
-    dotsEl.appendChild(d);
-  });
-  attachEvents();
-}
-
-function show(index){
-  if(index<0) index=data.length-1;
-  if(index>=data.length) index=0;
-  current=index;
-  slidesEl.querySelectorAll('.slide').forEach((s,i)=> s.classList.toggle('active',i===index));
-  thumbsEl.querySelectorAll('.thumb').forEach((t,i)=> t.classList.toggle('active',i===index));
-  dotsEl.querySelectorAll('.dot').forEach((d,i)=> d.classList.toggle('active',i===index));
-}
-
-function attachEvents(){
-  thumbsEl.querySelectorAll('.thumb').forEach(t=>{
-    t.onclick=()=>show(+t.dataset.index);
-  });
-  dotsEl.querySelectorAll('.dot').forEach(d=>{
-    d.onclick=()=>show(+d.dataset.index);
-  });
-}
-render();
-
-document.querySelector(".bottom-nav").addEventListener("click", (e) => {
-  const item = e.target.closest(".nav-item");
-  if (!item) return;
-
-  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-
-  item.classList.add("active");
-  document.getElementById(item.dataset.section).classList.add("active");
+document.querySelector('.btn-buy').addEventListener('click', () => {
+  // Здесь будет логика покупки или окно подтверждения
+  alert('Спасибо за покупку Premium Pass!');
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const supportBtn = document.querySelector(".btn-support");
-  if (supportBtn) {
-    supportBtn.addEventListener("click", () => {
-      window.location.href = "https://t.me/SR_Helper_RadmirRP_Bot";
-    });
-  }
+// === Переключение вкладок ===
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('.section');
 
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.getAttribute('data-section');
+
+    // убираем активные классы
+    navItems.forEach(i => i.classList.remove('active'));
+    sections.forEach(sec => sec.classList.remove('active'));
+
+    // добавляем активные
+    item.classList.add('active');
+    document.getElementById(target).classList.add('active');
+  });
 });
 
 function getDaysLeft(startDate, totalDays) {
@@ -923,11 +857,6 @@ function renderAdminsList(admins) {
   return html;
 }
 
-
-
-
-// === Онлайн Radmir RP ===
-
 const onlineBtn = document.getElementById('radmirOnlineBtn');
 const onlineModal = document.getElementById('onlineModal');
 const closeOnline = document.getElementById('closeOnlineModal');
@@ -938,10 +867,10 @@ if (onlineBtn) {
 
   onlineBtn.addEventListener('click', async () => {
     onlineModal.style.display = 'flex';
-    serversList.innerHTML = '<p>🔄 Загружаем данные...</p>';
+    serversList.innerHTML = '<p> Загружаем данные...</p>';
 
     try {
-      // Используем прокси, чтобы обойти CORS
+      
       const proxyUrl = 'https://api.allorigins.win/get?url=';
       const targetUrl = 'http://launcher.hassle-games.com:3000/online.json';
       const res = await fetch(proxyUrl + encodeURIComponent(targetUrl));
@@ -953,7 +882,7 @@ if (onlineBtn) {
 
       if (!crmp) {
         serversList.innerHTML = `
-          <div class="error-message">❌ Не удалось получить данные CRMP.</div>`;
+          <div class="error-message">Не удалось получить данные CRMP.</div>`;
         return;
       }
 
@@ -981,7 +910,7 @@ if (onlineBtn) {
       console.error(e);
       serversList.innerHTML = `
         <div class="error-message">
-          ⚠️ Ошибка загрузки данных.<br>
+           Ошибка загрузки данных.<br>
           Проверьте подключение к интернету или попробуйте позже.
         </div>`;
     }
@@ -1002,18 +931,18 @@ function showAdminButtons() {
   const launcherBtn = document.querySelector(".btn-launcher");
   const onlineBtn = document.querySelector(".btn-online");
 
-  // Сначала скрываем обе кнопки
+  
   if (launcherBtn) launcherBtn.style.display = "none";
   if (onlineBtn) onlineBtn.style.display = "none";
 
-  // Показываем только если админ и уровень >= 1
+  
   if (window.currentAdmin && window.currentAdmin.level >= 1) {
     if (launcherBtn) launcherBtn.style.display = "block";
     if (onlineBtn) onlineBtn.style.display = "block";
   }
 }
 
-// === ВЫДАТЬ АДМИНКУ ===
+
 function startGiveAdminFlow(userId) {
   modalBody.innerHTML = `
     <h4>Укажите уровень админки (1–5):</h4>
@@ -1077,7 +1006,6 @@ function confirmGiveAdmin(userId, level, nickname) {
   document.getElementById("cancelAdminFlow").onclick = () => renderModalButtons(selectedSection);
 }
 
-// === ИЗМЕНИТЬ УРОВЕНЬ ===
 function changeAdminLevel(adminId) {
   modalBody.innerHTML = `
     <h4>Введите новый уровень (1–5):</h4>
@@ -1103,7 +1031,7 @@ function changeAdminLevel(adminId) {
   document.getElementById("cancelLevelChange").onclick = () => renderModalButtons(selectedSection);
 }
 
-// === УДАЛИТЬ АДМИНА ===
+
 function removeAdmin(adminId) {
   if (!confirm("Точно забрать админку?")) return;
   const admins = window.currentAdminList || [];
@@ -1116,10 +1044,9 @@ function removeAdmin(adminId) {
   modal.style.display = "none";
 }
 
-// === СОХРАНЕНИЕ СПИСКА АДМИНОВ ===
+
 async function saveAdminsToBin(admins) {
   try {
-    // 1️⃣ Загружаем текущее содержимое JSONBin
     const getRes = await fetch("https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest", {
       headers: {
         "X-Master-Key": API_KEY
@@ -1128,16 +1055,14 @@ async function saveAdminsToBin(admins) {
     if (!getRes.ok) throw new Error("Ошибка загрузки bin: " + getRes.status);
     const currentData = await getRes.json();
 
-    // 2️⃣ Берем старые данные, чтобы не стереть logs, users и т.п.
+    
     const old = currentData.record || {};
 
-    // 3️⃣ Обновляем только раздел admins
     const updated = {
       ...old,
       admins: admins
     };
 
-    // 4️⃣ Сохраняем обратно
     const putRes = await fetch("https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199", {
       method: "PUT",
       headers: {
@@ -1150,7 +1075,7 @@ async function saveAdminsToBin(admins) {
     if (!putRes.ok) throw new Error("Ошибка сохранения: " + putRes.status);
 
     const data = await putRes.json();
-    console.log("✅ Админы сохранены (данные не затирались):", data);
+    console.log("Админы сохранены", data);
     window.currentAdminList = admins;
 
   } catch (err) {
@@ -1160,7 +1085,7 @@ async function saveAdminsToBin(admins) {
 }
 
 function openBot() {
-  const botUrl = "https://t.me/SR_Helper_RadmirRP_Bot"; // 👈 замени на своего бота
+  const botUrl = "https://t.me/SR_Helper_RadmirRP_Bot";
 
   if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.openTelegramLink(botUrl);
@@ -1168,77 +1093,3 @@ function openBot() {
     window.open(botUrl, "_blank");
   }
 }
-
-
-async function initUser() {
-  try {
-    const tg = window.Telegram?.WebApp;
-    const user = tg?.initDataUnsafe?.user;
-
-    // Если не в Telegram (тест в браузере)
-    const userId = user?.id || 9999999999;
-    const username = user?.username || "test_user";
-
-    const res = await fetch(`${BIN_URL}`, {
-      headers: {
-        "X-Master-Key": API_KEY
-      }
-    });
-
-    if (!res.ok) throw new Error("Ошибка загрузки JSONBin");
-    const data = await res.json();
-    const record = data.record || {};
-    if (!record.users) record.users = [];
-
-    const exists = record.users.some(u => u.id === userId);
-    if (exists) {
-      console.log("✅ Пользователь уже существует:", username);
-      return;
-    }
-
-    const newUser = {
-      id: userId,
-      login: username,
-      key: generateKey(12),
-      hwid: null,
-      buy1: { days: 0, start: null, issuedBy: null },
-      buy2: { days: 0, start: null },
-      ban: { status: false, reason: "", until: null }
-    };
-
-    record.users.push(newUser);
-
-    // если хочешь, можешь добавить логирование сюда 👇
-    if (!record.logs) record.logs = [];
-    record.logs.push({
-      time: new Date().toLocaleString(),
-      admin: "System",
-      action: `Добавлен новый пользователь: ${username} | ${userId}`
-    });
-
-    const putRes = await fetch(BIN_URL, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": API_KEY
-      },
-      body: JSON.stringify(record)
-    });
-
-    if (!putRes.ok) throw new Error("Ошибка сохранения данных");
-    console.log("🆕 Новый пользователь добавлен:", newUser);
-
-  } catch (err) {
-    console.error("❌ Ошибка initUser:", err);
-  }
-}
-
-function generateKey(length = 10) {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  if (window.Telegram?.WebApp) Telegram.WebApp.ready();
-  initUser();
-});
