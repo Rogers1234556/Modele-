@@ -1,82 +1,3 @@
-// === Переключение вкладок ===
-const navItems = document.querySelectorAll('.nav-item');
-const sections = document.querySelectorAll('.section');
-
-navItems.forEach(item => {
-  item.addEventListener('click', () => {
-    const target = item.getAttribute('data-section');
-
-    // убираем активные классы
-    navItems.forEach(i => i.classList.remove('active'));
-    sections.forEach(sec => sec.classList.remove('active'));
-
-    // добавляем активные
-    item.classList.add('active');
-    document.getElementById(target).classList.add('active');
-  });
-});
-
-const slidesEl = document.getElementById('slides');
-const thumbsEl = document.getElementById('thumbs');
-const dotsEl = document.getElementById('dots');
-let current = 0;
-
-function render(){
-  slidesEl.innerHTML = '';
-  thumbsEl.innerHTML = '';
-  dotsEl.innerHTML = '';
-  data.forEach((it,i)=>{
-    const s = document.createElement('div');
-    s.className = 'slide' + (i===0?' active':'');
-    s.innerHTML = `
-      <article class="card">
-        <div class="bg" style="background-image:url('${it.img}')"></div>
-        <div class="overlay"></div>
-        <div class="content">
-          <div class="title">${it.title}</div>
-          <div class="desc">${it.desc}</div>
-          <div class="bottom">
-            <div class="price">${it.price}</div>
-            <button class="btn-order" onclick="openBot()">КУПИТЬ</button>
-          </div>
-        </div>
-      </article>`;
-    slidesEl.appendChild(s);
-
-    const t = document.createElement('div');
-    t.className = 'thumb' + (i===0?' active':'');
-    t.dataset.index = i;
-    t.innerHTML = `<div class="thumb-img" style="background-image:url('${it.thumb}')"></div>
-                   <div class="t-title">${it.title}</div>
-                   <div class="t-price">${it.price}</div>`;
-    thumbsEl.appendChild(t);
-
-    const d = document.createElement('div');
-    d.className = 'dot' + (i===0?' active':'');
-    d.dataset.index = i;
-    dotsEl.appendChild(d);
-  });
-  attachEvents();
-}
-
-function show(index){
-  if(index<0) index=data.length-1;
-  if(index>=data.length) index=0;
-  current=index;
-  slidesEl.querySelectorAll('.slide').forEach((s,i)=> s.classList.toggle('active',i===index));
-  thumbsEl.querySelectorAll('.thumb').forEach((t,i)=> t.classList.toggle('active',i===index));
-  dotsEl.querySelectorAll('.dot').forEach((d,i)=> d.classList.toggle('active',i===index));
-}
-
-function attachEvents(){
-  thumbsEl.querySelectorAll('.thumb').forEach(t=>{
-    t.onclick=()=>show(+t.dataset.index);
-  });
-  dotsEl.querySelectorAll('.dot').forEach(d=>{
-    d.onclick=()=>show(+d.dataset.index);
-  });
-}
-render();
 
 document.querySelector(".bottom-nav").addEventListener("click", (e) => {
   const item = e.target.closest(".nav-item");
@@ -1171,3 +1092,21 @@ function openBot() {
     window.open(botUrl, "_blank");
   }
 }
+
+// === Переключение вкладок ===
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('.section');
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.getAttribute('data-section');
+
+    // убираем активные классы
+    navItems.forEach(i => i.classList.remove('active'));
+    sections.forEach(sec => sec.classList.remove('active'));
+
+    // добавляем активные
+    item.classList.add('active');
+    document.getElementById(target).classList.add('active');
+  });
+});
