@@ -9,7 +9,7 @@ body { margin: 0; font-family: Arial, sans-serif; background-color: #111; color:
 
 .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px; background-color: #111; }
 
-.avatar { width: 40px; height: 40px; border-radius: 50%; background: #222;}
+.avatar { width: 40px; height: 40px; border-radius: 50%; background-image: url('img/avatar.jpeg'); background-size: cover; background-position: center; background-repeat: no-repeat; border: 2px solid rgba(255,255,255,0.1); }
 
 .stats { display: flex; gap: 8px; }
 
@@ -35,7 +35,6 @@ body { margin: 0; font-family: Arial, sans-serif; background-color: #111; color:
 
 .card .overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.65) 80%); }
 
-.card .content { position: relative; z-index: 2; height: 100%; padding: 14px; display: flex; flex-direction: column; }
 
 .title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
 
@@ -69,7 +68,7 @@ body { margin: 0; font-family: Arial, sans-serif; background-color: #111; color:
 
 .profile-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 16px; }
 
-.avatar.big { width: 80px; height: 80px; border-radius: 50%; background: #222; margin-bottom: 8px; }
+.avatar.big { width: 80px; height: 80px; border-radius: 50%; background-image: url('img/avatar.jpeg'); background-size: cover; background-position: center; background-repeat: no-repeat; border: 2px solid rgba(255,255,255,0.1); margin-bottom: 8px; }
 
 .user-id { font-size: 14px; color: #bbb; }
 
@@ -93,27 +92,13 @@ body { margin: 0; font-family: Arial, sans-serif; background-color: #111; color:
 
 .profile-actions { display: flex; flex-direction: column; gap: 5px; }
 
-.btn-support { display: block; width: auto; width: 350px; margin: 3px auto; padding: 10px 18px; background: #444; border: none; border-radius: 8px; font-size: 15px; color: #fff; cursor: pointer; transition: background 0.2s; }
+.btn-support { display: block; width: 350px; margin: 3px auto; padding: 10px 18px; background: #444; border: none; border-radius: 8px; font-size: 15px; color: #fff; cursor: pointer; transition: background 0.2s; }
 
 .btn-support:hover { background: #666; }
 
 .btn-support, 
 .btn-support:link, 
-.btn-support:visited {
-  display: inline-block;
-  text-decoration: none;
-  text-align: center;
-  color: #fff;
-  background: #444;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background 0.2s;
-  padding: 10px 18px;
-  width: 350px;
-  box-sizing: border-box; /* важно! выравнивает ширину */
-}
+.btn-support:visited { display: inline-block; text-decoration: none; text-align: center; color: #fff; background: #444; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: background 0.2s; padding: 10px 18px; width: 350px; box-sizing: border-box; }
 
 .admin-panel { padding: 20px; background: #1e1e1e; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
 
@@ -167,34 +152,6 @@ body { margin: 0; font-family: Arial, sans-serif; background-color: #111; color:
 .search-bar input { width: 40%; padding: 5px 8px; font-size: 13px; border-radius: 4px; border: 1px solid #444; background: #2b2b2b; color: #fff; outline: none; }
 
 .search-bar input::placeholder { color: #aaa; font-style: italic; }
-
-.contests { padding: 16px; }
-
-.contest-card { background: #1a1a1a; border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 3px 8px rgba(0,0,0,0.3); }
-
-.contest-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-bottom: 12px; }
-
-.contest-timer { font-size: 13px; color: #bbb; }
-
-.contest-body { display: flex; gap: 12px; margin-bottom: 12px; }
-
-.contest-img { width: 64px; height: 64px; border-radius: 8px; background: #222; object-fit: cover; }
-
-.contest-info { flex: 1; }
-
-.contest-title { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
-
-.contest-price { color: #4da6ff; font-weight: bold; margin-bottom: 6px; }
-
-.contest-sub { font-size: 13px; color: #bbb; }
-
-.contest-sub a { color: #4da6ff; text-decoration: none; }
-
-.contest-users { font-size: 13px; margin-top: 4px; color: #aaa; }
-
-.contest-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; background: #007bff; color: #fff; cursor: pointer; margin-bottom: 10px; }
-
-.contest-btn.disabled { background: #333; cursor: default; color: #aaa; }
 
 .winners-link { display: block; text-align: center; font-size: 14px; color: #4da6ff; text-decoration: underline; }
 
@@ -256,131 +213,140 @@ body { margin: 0; font-family: Arial, sans-serif; background-color: #111; color:
 
 .error-message { background: #ff4d4d20; color: #ff6666; padding: 10px; border: 1px solid #ff4d4d60; border-radius: 8px; font-weight: 500; margin-top: 10px; }
 
-.product-modern {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
+.product-modern { display: flex; justify-content: center; margin-top: 10px; }
 
-.product-card {
-  position: relative;
-  background: linear-gradient(145deg, #151820, #10131a);
-  border-radius: 20px;
-  overflow: hidden;
-  max-width: 390px;
-  width: 100%;
-  box-shadow: 0 0 25px rgba(0,0,0,0.6);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+.product-card { position: relative; background: linear-gradient(145deg, #151820, #10131a); border-radius: 20px; overflow: hidden; max-width: 390px; width: 100%; box-shadow: 0 0 25px rgba(0,0,0,0.6); transition: transform 0.3s ease, box-shadow 0.3s ease; }
 
-.product-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 0 40px rgba(111,158,255,0.4);
-}
+.product-card:hover { transform: translateY(-6px); box-shadow: 0 0 40px rgba(111,158,255,0.4); }
 
-.product-bg {
-  position: relative;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
+.product-bg { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.08); }
 
-.product-cover {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  filter: brightness(0.85);
-  transition: filter 0.3s ease, transform 0.3s ease;
-}
+.product-cover { width: 100%; height: 220px; object-fit: cover; filter: brightness(0.85); transition: filter 0.3s ease, transform 0.3s ease; }
 
-.product-card:hover .product-cover {
-  filter: brightness(1);
-  transform: scale(1.05);
-}
+.product-card:hover .product-cover { filter: brightness(1); transform: scale(1.05); }
 
-.glow {
-  position: absolute;
-  top: -40%;
-  left: -40%;
-  width: 180%;
-  height: 180%;
-  background: radial-gradient(circle, rgba(111,158,255,0.15), transparent 70%);
-  transform: rotate(25deg);
-  animation: pulseGlow 6s infinite ease-in-out;
-}
+.glow { position: absolute; top: -40%; left: -40%; width: 180%; height: 180%; background: radial-gradient(circle, rgba(111,158,255,0.15), transparent 70%); transform: rotate(25deg); animation: pulseGlow 6s infinite ease-in-out; }
 
 @keyframes pulseGlow {
   0%, 100% { opacity: 0.6; transform: scale(1) rotate(25deg); }
   50% { opacity: 1; transform: scale(1.2) rotate(25deg); }
 }
 
-.product-body {
-  padding: 20px 22px 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.product-body { padding: 20px 22px 26px; display: flex; flex-direction: column; gap: 14px; }
+
+.product-title { font-size: 22px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+
+.product-title i { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+
+.product-desc { color: #a8a8a8; font-size: 14px; line-height: 1.5; }
+
+.product-features { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; font-size: 14px; color: #ccc; }
+
+.product-features i { color: var(--accent); margin-right: 8px; }
+
+.product-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+
+.product-price { font-size: 18px; font-weight: 900; color: var(--accent); text-shadow: 0 0 6px rgba(111,158,255,0.6); }
+
+.btn-buy { background: linear-gradient(135deg, var(--accent), #4a6cff); border: none; color: #fff; padding: 10px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 0 12px rgba(111,158,255,0.4); }
+
+.btn-buy:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(111,158,255,0.7); }
+
+.compact-info .info { padding: 14px; text-align: center; animation: fadeIn 0.6s ease forwards; }
+
+.info-main-title { font-size: 20px; font-weight: 600; color: var(--accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+.info-intro { color: #aaa; font-size: 13px; margin-bottom: 22px; line-height: 1.5; }
+
+.factions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+
+.faction-card { background: rgba(20, 22, 30, 0.7); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 12px 14px; text-align: left; transition: all 0.35s ease; transform: translateY(12px); opacity: 0; animation: cardAppear 0.6s ease forwards; cursor: pointer; position: relative; }
+
+.faction-card:hover { transform: translateY(-3px); border-color: rgba(111, 158, 255, 0.35); box-shadow: 0 0 20px rgba(111, 158, 255, 0.2); }
+
+.faction-card:nth-child(1){animation-delay:0.1s;}
+.faction-card:nth-child(2){animation-delay:0.2s;}
+.faction-card:nth-child(3){animation-delay:0.3s;}
+.faction-card:nth-child(4){animation-delay:0.4s;}
+.faction-card:nth-child(5){animation-delay:0.5s;}
+.faction-card:nth-child(6){animation-delay:0.6s;}
+
+.faction-header { display: flex; align-items: center; justify-content: space-between; }
+
+.faction-left { display: flex; align-items: center; gap: 8px; }
+
+.faction-icon { font-size: 22px; color: var(--accent); opacity: 0.9; }
+
+.faction-title { font-size: 15px; font-weight: 600; color: #fff; }
+
+.arrow { font-size: 16px; color: #888; transition: transform 0.3s ease, color 0.3s ease; }
+
+.faction-card.active .arrow { transform: rotate(180deg); color: var(--accent); }
+
+.faction-short { font-size: 12px; color: #aaa; margin: 6px 0; }
+
+.faction-hidden { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease; }
+
+.faction-card.active .faction-hidden { max-height: 240px; opacity: 1; margin-top: 6px; }
+
+.faction-list { list-style: none; margin: 0; padding: 0; }
+
+.faction-list li { font-size: 12px; color: #ddd; padding-left: 16px; position: relative; margin-bottom: 4px; }
+
+.faction-list li::before { content: "•"; color: var(--accent); position: absolute; left: 4px; font-size: 14px; line-height: 1; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.product-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(15px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.product-title i {
-  color: #ffd700;
-  text-shadow: 0 0 8px rgba(255,215,0,0.5);
+#contests.active { display: flex; align-items: center; justify-content: center; min-height: calc(100dvh - 120px); box-sizing: border-box; padding: 30px 16px; }
+
+@media (max-height: 700px) {
+  #contests {
+    min-height: calc(100vh - 100px);
+  }
 }
 
-.product-desc {
-  color: #a8a8a8;
-  font-size: 14px;
-  line-height: 1.5;
+.contest-card { background: rgba(20, 22, 30, 0.85); backdrop-filter: blur(12px); border-radius: 18px; border: 1px solid rgba(255,255,255,0.06); padding: 22px 20px; text-align: center; width: 100%; max-width: 280px; box-shadow: 0 0 25px rgba(111,158,255,0.25); transform: translateY(15px); opacity: 0; animation: contestAppear 0.8s ease forwards; transition: all 0.3s ease; }
+
+.contest-card:hover { transform: translateY(-4px); box-shadow: 0 0 35px rgba(111,158,255,0.35); }
+
+.contest-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+
+.contest-icon { font-size: 28px; color: var(--accent); animation: pulse 2.5s infinite ease-in-out; }
+
+.contest-title { font-size: 20px; font-weight: 600; color: #fff; margin: 0; }
+
+.contest-desc { font-size: 13px; color: #aaa; margin: 10px 0 18px; line-height: 1.5; }
+
+.contest-details { text-align: left; background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px 12px; margin-bottom: 18px; }
+
+.detail-item { font-size: 13px; color: #ddd; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+
+.detail-item span { font-size: 15px; }
+
+.contest-btn { background: linear-gradient(90deg, var(--accent), #628cff); color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.25s ease; width: 100%; }
+
+.contest-btn:hover { transform: scale(1.04); box-shadow: 0 0 15px rgba(111,158,255,0.4); }
+
+.contest-btn.disabled { background: #333; color: #aaa; cursor: default; transform: none; }
+
+@keyframes contestAppear {
+  from { opacity: 0; transform: translateY(25px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.product-features {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 6px;
-  font-size: 14px;
-  color: #ccc;
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.15); opacity: 1; }
 }
 
-.product-features i {
-  color: var(--accent);
-  margin-right: 8px;
-}
+.section { display: none; }
 
-.product-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
-.product-price {
-  font-size: 18px;
-  font-weight: 900;
-  color: var(--accent);
-  text-shadow: 0 0 6px rgba(111,158,255,0.6);
-}
-
-.btn-buy {
-  background: linear-gradient(135deg, var(--accent), #4a6cff);
-  border: none;
-  color: #fff;
-  padding: 10px 24px;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 0 12px rgba(111,158,255,0.4);
-}
-
-.btn-buy:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(111,158,255,0.7);
-}
+.section.active { display: block; }

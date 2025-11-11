@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>MR Mods</title>
+  <title>MR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -12,7 +12,7 @@
     <div class="avatar"></div>
     <div class="stats"><div class="stat"><span><i class="fa-solid fa-ticket"></i> 0</span></div></div>
   </div>
-
+  
   <main id="main-slides" class="section wrap active">
     <section class="product-modern">
       <div class="product-card">
@@ -65,8 +65,6 @@
   </div>    
     </div>
   </div>
-
-  <!-- Модальное окно Онлайн -->
   <div id="onlineModal" class="online-modal">
     <div class="online-content">
       <span id="closeOnlineModal" class="close-online">&times;</span>
@@ -76,7 +74,7 @@
       </div>
     </div>
   </div>
-
+  
   <div id="modal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
@@ -85,130 +83,133 @@
     </div>
   </div>
 
-  <div id="contests" class="section">
-    <div class="contests">
-      <div class="contest-card">
-        <div class="contest-header">
-          <span>Конкурс</span>
-          <span class="contest-timer">0 день 00:00:00 <i class="fa-solid fa-clock"></i></span>
-        </div>
-        <div class="contest-body">
-          <img src="img/logo.jpeg" alt="Ring" class="contest-img">
-          <div class="contest-info">
-            <div class="contest-title">Police Helper</div>
-            <div class="contest-price">30 дней</div>
-            <div class="contest-sub">Подпишитесь на: <a href="https://t.me/">@</a></div>
-            <div class="contest-users"><i class="fa-solid fa-user-group"></i> 0</div>
+  <div id="info" class="section compact-info">
+    <div class="info">
+      <h2 class="info-main-title">Информация о GOV Helper</h2>
+      <p class="info-intro">Выберите фракцию, чтобы узнать о функционале:</p>
+
+      <div class="factions-grid">
+        <div class="faction-card">
+          <div class="faction-header">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span class="faction-title">МВД</span>
+          </div>
+          <div class="faction-short">Министерство Внутренних Дел</div>
+
+          <div class="faction-hidden">
+            <ul class="faction-list">
+              <li>В разработке</li>
+            </ul>
           </div>
         </div>
-        <button class="contest-btn disabled">Конкурс завершен</button>
-      </div>
-      <div class="contest-card">
-        <div class="contest-header">
-          <span>Конкурс</span>
-          <span class="contest-timer">0 день 00:00:00 <i class="fa-solid fa-clock"></i></span>
-        </div>
-        <div class="contest-body">
-          <img src="img/logo.jpeg" alt="Toy Bear" class="contest-img">
-          <div class="contest-info">
-            <div class="contest-title">Leader Helper</div>
-            <div class="contest-price">30 дней</div>
-            <div class="contest-sub">Подпишитесь на: <a href="https://t.me/">@</a></div>
-            <div class="contest-users"><i class="fa-solid fa-user-group"></i> 0</div>
+
+        <div class="faction-card">
+          <div class="faction-header">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span class="faction-title">ФСБ</span>
+          </div>
+          <div class="faction-short">Федеральная Служба Безопасности</div>
+
+          <div class="faction-hidden">
+            <ul class="faction-list">
+              <li>В разработке</li>
+            </ul>
           </div>
         </div>
-        <button class="contest-btn disabled">Конкурс завершен</button>
+
+        <div class="faction-card">
+          <div class="faction-header">
+            <i class="fa-solid fa-briefcase-medical"></i>
+            <span class="faction-title">МЗ</span>
+          </div>
+          <div class="faction-short">Министерство Здравоохранения</div>
+
+          <div class="faction-hidden">
+            <ul class="faction-list">
+              <li>В разработке</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faction-card">
+          <div class="faction-header">
+            <i class="fa-solid fa-briefcase-medical"></i>
+            <span class="faction-title">МО</span>
+          </div>
+          <div class="faction-short">Министерство Обороны</div>
+
+          <div class="faction-hidden">
+            <ul class="faction-list">
+              <li>В разработке</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faction-card">
+          <div class="faction-header">
+            <i class="fa-solid fa-briefcase-medical"></i>
+            <span class="faction-title">ФСИН</span>
+          </div>
+          <div class="faction-short">Федеральная Служба Исполнения Наказаний</div>
+
+          <div class="faction-hidden">
+            <ul class="faction-list">
+              <li>В разработке</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faction-card">
+          <div class="faction-header">
+            <i class="fa-solid fa-briefcase-medical"></i>
+            <span class="faction-title">Пра-во</span>
+          </div>
+          <div class="faction-short">Правительство</div>
+
+          <div class="faction-hidden">
+            <ul class="faction-list">
+              <li>В разработке</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faction-card">
+          <div class="faction-header">
+            <i class="fa-solid fa-briefcase-medical"></i>
+            <span class="faction-title">ТРК</span>
+          </div>
+          <div class="faction-short">ТРК "Ритм"</div>
+
+          <div class="faction-hidden">
+            <ul class="faction-list">
+              <li>В разработке</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div id="info" class="section">
-    <div class="info">
-      <div class="info-tabs">
-        <button class="info-tab active" data-target="police">
-          <i class="fa-solid fa-shield-halved"></i> Police Helper
-        </button>
-        <button class="info-tab" data-target="leader">
-          <i class="fa-solid fa-crown"></i> Leader Helper
-        </button>
-      </div>
-
-      <div class="info-content">
-        <div id="police" class="info-box active">
-          <h2><i class="fa-solid fa-shield-halved"></i> Police Helper</h2>
-          <div class="info-card">
-            <h3>Функции плагина</h3>
-            <ul>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-              <li>info1</li>
-            </ul>
-          </div>
-
-          <div class="info-card">
-            <h3>Меню</h3>
-            <p>info2</p>
-          </div>
-
-          <div class="info-card">
-            <h3>Горячие клавиши</h3>
-            <ul>
-              <li><b>info3</b> – info3</li>
-              <li><b>info3</b> – info3</li>
-              <li><b>info3</b> – info3</li>
-              <li><b>info3</b> – info3</li>
-              <li><b>info3</b> – info3</li>
-              <li><b>info3</b> – info3</li>
-              <li><b>info3</b> – info3</li>
-            </ul>
-          </div>
+  <div id="contests" class="section contests">
+    <section class="contest-section">
+      <div class="contest-card">
+        <div class="contest-header">
+          <i class="fa-solid fa-trophy contest-icon"></i>
+          <h3 class="contest-title">Конкурс на GOV Helper</h3>
         </div>
 
-        <div id="leader" class="info-box">
-          <h2><i class="fa-solid fa-crown"></i> Leader Helper</h2>
-          <div class="info-card">
-            <h3>В разработке</h3>
-            <!--<ul>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-              <li>info4</li>
-            </ul>
-          </div>
+        <p class="contest-desc">
+          Участвуй в конкурсе и получи доступ к GOV Helper на 30 дней!
+        </p>
 
-          <div class="info-card">
-            <h3>Меню</h3>
-            <p>info5</p>
-          </div>
-
-          <div class="info-card">
-            <h3>Горячие клавиши</h3>
-            <ul>
-              <li><b>info6</b> – info6</li>
-              <li><b>info6</b> – info6</li>
-              <li><b>info6</b> – info6</li>
-              <li><b>info6</b> – info6</li>
-              <li><b>info6 </b> – info6</li>
-            </ul>-->
-          </div>
+        <div class="contest-details">
+          <div class="detail-item"><span><i class="fa-solid fa-clock"></i></span>00:00:00</div>
+          <div class="detail-item"><span><i class="fa-solid fa-users"></i></span> Участников: 0 </div>
+          <div class="detail-item"><span><i class="fa-brands fa-telegram"></i></span> Подпишись: @mr</div>
         </div>
+        <button class="contest-btn disabled">Конкурс завершён</button>
       </div>
-    </div>
+    </section>
   </div>
 
   <div class="bottom-nav">

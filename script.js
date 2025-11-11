@@ -40,7 +40,8 @@ document.querySelectorAll(".info-tab").forEach(btn => {
   });
 });
 
-const currentUserId = window.currentUserId;
+const currentUserId = 7660364996; 
+// window.currentUserId;
 
 const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
 
@@ -67,13 +68,11 @@ fetch(BIN_URL, {
       `;
 
       const buy1Left = getDaysLeft(user.buy1.start, user.buy1.days);
-      const buy2Left = getDaysLeft(user.buy2.start, user.buy2.days);
 
       
       document.querySelector(".fa-basket-shopping").parentNode.innerHTML =
         `<span class="fa-solid fa-basket-shopping"></span> Доступные подписки:<br>
-         Polices Helper: ${buy1Left} дн<br>
-         Leaders Helper: ${buy2Left} дн`;
+         GOV Helper: ${buy1Left} дн`;
     } else {
       console.error("Пользователь не найден");
     }
@@ -160,7 +159,6 @@ function renderUsersList(users) {
 
   users.forEach((u, index) => {
     const buy1Left = getDaysLeft(u.buy1.start, u.buy1.days);
-    const buy2Left = getDaysLeft(u.buy2.start, u.buy2.days);
 
     html += `
       <div class="user-card">
@@ -172,8 +170,7 @@ function renderUsersList(users) {
           <p><strong>ID:</strong> ${u.id}</p>
           <p><strong>Ключ:</strong> <span class="user-key">${u.key}</span>
              </p>
-          <p><strong><span class="fa-solid fa-basket-shopping"></span> Police Helper:</strong> ${buy1Left} дней</p>
-          <p><strong><span class="fa-solid fa-basket-shopping"></span> Leader Helper:</strong> ${buy2Left} дней</p>
+          <p><strong><span class="fa-solid fa-basket-shopping"></span> GOV Helper:</strong> ${buy1Left} дней</p>
         </div>
       </div>
     `;
@@ -397,7 +394,6 @@ function renderBuyersList(users) {
 
   buyers.forEach((u, index) => {
     const buy1Left = getDaysLeft(u.buy1.start, u.buy1.days);
-    const buy2Left = getDaysLeft(u.buy2.start, u.buy2.days);
 
     html += `
       <div class="user-card">
@@ -409,10 +405,9 @@ function renderBuyersList(users) {
           <p><strong>ID:</strong> ${u.id}</p>
           <p><strong>Ключ:</strong> <span class="user-key">${u.key}</span>
              </p>
-          <p><strong><span class="fa-solid fa-basket-shopping"></span> Police Helper:</strong> ${buy1Left} дней</p>
+          <p><strong><span class="fa-solid fa-basket-shopping"></span> GOV Helper:</strong> ${buy1Left} дней</p>
           <p>INFO: ${u.buy1.start || "-"} | ${u.buy1.issuedBy || "-"}</p>
-          <p><strong><span class="fa-solid fa-basket-shopping"></span> Leader Helper:</strong> ${buy2Left} дней</p>
-          <p>INFO: ${u.buy2.start || "-"} | ${u.buy2.issuedBy || "-"}</p>
+        
           
           <p><strong>HWID:</strong> ${u.hwid || "-"}</p>
           
@@ -476,12 +471,10 @@ function renderBansList(users) {
 function openGiveDaysFlow(userId) {
   modalBody.innerHTML = `
     <h4>Выберите продукт:</h4>
-    <button class="modal-btn" id="product1Btn">Police Helper</button>
-    <button class="modal-btn" id="product2Btn">Leader Helper</button>
+    <button class="modal-btn" id="product1Btn">GOV Helper</button>
     <button class="modal-btn danger" id="cancelFlow">Отмена</button>
   `;
-  document.getElementById("product1Btn").onclick = () => askDays(userId, "buy1", "Police Helper");
-  document.getElementById("product2Btn").onclick = () => askDays(userId, "buy2", "Leader Helper");
+  document.getElementById("product1Btn").onclick = () => askDays(userId, "buy1", "GOV Helper");
   document.getElementById("cancelFlow").onclick = () => renderModalButtons(selectedSection);
 }
 
@@ -545,13 +538,11 @@ async function saveUsersToBin(users) {
 function openRemoveDaysFlow(userId) {
   modalBody.innerHTML = `
     <h4>Выберите продукт:</h4>
-    <button class="modal-btn" id="product1Btn">Police Helper</button>
-    <button class="modal-btn" id="product2Btn">Leader Helper</button>
+    <button class="modal-btn" id="product1Btn">GOV Helper</button>
     <button class="modal-btn danger" id="cancelFlow">Отмена</button>
   `;
 
-  document.getElementById("product1Btn").onclick = () => askRemoveDays(userId, "buy1", "Police Helper");
-  document.getElementById("product2Btn").onclick = () => askRemoveDays(userId, "buy2", "Leader Helper");
+  document.getElementById("product1Btn").onclick = () => askRemoveDays(userId, "buy1", "GOV Helper");
   document.getElementById("cancelFlow").onclick = () => renderModalButtons(selectedSection);
 }
 
@@ -739,21 +730,28 @@ function unbanUser(userId) {
   modal.style.display = "none";
 }
 
-function addLog(action) {
-  const now = new Date();
-  const time = now.toLocaleString("ru-RU", { hour12: false });
+async function addLog(action) {
+  try {
+    // Загружаем актуальные логи
+    const latest = await loadLogsFromBin();
 
-  const logEntry = {
-    time,
-    admin: window.currentAdmin?.nickname || "Неизвестный админ",
-    action
-  };
+    const now = new Date();
+    const logEntry = {
+      time: now.toLocaleString("ru-RU", { hour12: false }),
+      admin: window.currentAdmin?.nickname || "Неизвестный админ",
+      action
+    };
 
-  if (!window.allLogs) window.allLogs = [];
-  window.allLogs.unshift(logEntry); 
+    const logs = Array.isArray(latest) ? latest : [];
+    logs.unshift(logEntry);
 
-  saveLogsToBin(window.allLogs);
+    await saveLogsToBin(logs);
+    console.log("✅ Лог добавлен:", logEntry);
+  } catch (err) {
+    console.error("Ошибка при добавлении лога:", err);
+  }
 }
+
 async function loadLogsFromBin() {
   try {
     const res = await fetch("https://api.jsonbin.io/v3/b/68821839ae596e708fbafe08/latest", {
@@ -776,25 +774,22 @@ async function loadLogsFromBin() {
 
 async function saveLogsToBin(logs) {
   try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/68821839ae596e708fbafe08`, {
+    const res = await fetch("https://api.jsonbin.io/v3/b/68821839ae596e708fbafe08", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         "X-Master-Key": API_KEY
       },
-      body: JSON.stringify({ logs }) 
+      body: JSON.stringify({ logs })
     });
 
-    if (!res.ok) {
-      throw new Error("Ошибка сохранения: " + res.status);
-    }
-
-    const data = await res.json();
-    console.log(" Логи сохранены:", data);
+    if (!res.ok) throw new Error(`Ошибка сохранения: ${res.status}`);
+    console.log("✅ Логи успешно сохранены");
   } catch (err) {
-    console.error(" Ошибка сохранения логов:", err);
+    console.error("Ошибка сохранения логов:", err);
   }
 }
+
 
 function renderLogs(logs) {
   if (!Array.isArray(logs) || logs.length === 0) {
@@ -941,7 +936,6 @@ function showAdminButtons() {
   }
 }
 
-
 function startGiveAdminFlow(userId) {
   modalBody.innerHTML = `
     <h4>Укажите уровень админки (1–5):</h4>
@@ -985,7 +979,7 @@ function confirmGiveAdmin(userId, level, nickname) {
     <p>ID: ${userId}</p>
     <p>Уровень: ${level}</p>
     <p>Ник: ${nickname}</p>
-    <button class="modal-btn" id="applyGiveAdmin">✅ Выдать админку</button>
+    <button class="modal-btn" id="applyGiveAdmin">Выдать админку</button>
     <button class="modal-btn danger" id="cancelAdminFlow">Отмена</button>
   `;
 
@@ -1030,7 +1024,6 @@ function changeAdminLevel(adminId) {
   document.getElementById("cancelLevelChange").onclick = () => renderModalButtons(selectedSection);
 }
 
-
 function removeAdmin(adminId) {
   if (!confirm("Точно забрать админку?")) return;
   const admins = window.currentAdminList || [];
@@ -1042,7 +1035,6 @@ function removeAdmin(adminId) {
   alert("Админка успешно забрана.");
   modal.style.display = "none";
 }
-
 
 async function saveAdminsToBin(admins) {
   try {
@@ -1092,8 +1084,6 @@ function openBot() {
     window.open(botUrl, "_blank");
   }
 }
-
-// === Переключение вкладок ===
 const navItems = document.querySelectorAll('.nav-item');
 const sections = document.querySelectorAll('.section');
 
@@ -1101,12 +1091,16 @@ navItems.forEach(item => {
   item.addEventListener('click', () => {
     const target = item.getAttribute('data-section');
 
-    // убираем активные классы
     navItems.forEach(i => i.classList.remove('active'));
-    sections.forEach(sec => sec.classList.remove('active'));
+    sections.forEach(s => s.classList.remove('active'));
 
-    // добавляем активные
     item.classList.add('active');
     document.getElementById(target).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.faction-card').forEach(card => {
+  card.addEventListener('click', () => {
+    card.classList.toggle('active');
   });
 });
