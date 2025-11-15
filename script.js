@@ -1,3 +1,14 @@
+const buyBtn = document.getElementById("buyBtn");
+
+buyBtn.addEventListener("click", () => {
+    tg.payments.openInvoice({
+        title: "GOV Helper — 30 дней",
+        description: "Подписка",
+        currency: "XTR",
+        prices: [{ label: "Подписка", amount: 250 }],
+        payload: "pass_30_days"
+    });
+});
 
 document.querySelector(".bottom-nav").addEventListener("click", (e) => {
   const item = e.target.closest(".nav-item");
@@ -40,8 +51,7 @@ document.querySelectorAll(".info-tab").forEach(btn => {
   });
 });
 
-const currentUserId = 7660364996; 
-// window.currentUserId;
+const currentUserId = window.currentUserId;
 
 const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
 
