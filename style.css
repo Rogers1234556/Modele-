@@ -350,3 +350,45 @@ body { margin: 0; font-family: Arial, sans-serif; background-color: #111; color:
 .section { display: none; }
 
 .section.active { display: block; }
+
+
+
+.ban-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0e0e0e;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  padding: 20px;
+  text-align: center;
+}
+
+.ban-box {
+  background: #141414;
+  padding: 20px 22px;
+  border-radius: 14px;
+  width: 85%;
+  max-width: 300px; /* 🔥 уменьшено окно */
+  box-shadow: 0 0 18px rgba(255, 0, 0, 0.25); /* мягче */
+}
+
+.ban-screen.hidden {
+  display: none;
+}
+
+.ban-box h2 {
+  margin-bottom: 12px;
+  font-size: 18px; /* 🔥 чуть меньше */
+  color: #ff3b3b;
+}
+
+.ban-box p {
+  margin: 6px 0;
+  font-size: 13px; /* 🔥 уменьшен текст */
+}

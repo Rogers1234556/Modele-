@@ -52,6 +52,7 @@ document.querySelectorAll(".info-tab").forEach(btn => {
 });
 
 const currentUserId = window.currentUserId;
+// const currentUserId = 7660364996;
 
 const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
 
@@ -69,7 +70,13 @@ fetch(BIN_URL, {
     window.allUsers = users;
     const user = users.find(u => u.id === currentUserId);
 
-    if (user) {
+      if (user) {
+
+      // 🔥 Проверка бана
+      if (user.ban && user.ban.status === true) {
+          showBanScreen(user.ban);
+          return; // полностью останавливаем работу приложения
+      }
       
       document.querySelector(".menu-item .fa-key").parentNode.innerHTML = `
         <span class="fa-solid fa-key"></span> 
@@ -1114,3 +1121,19 @@ document.querySelectorAll('.faction-card').forEach(card => {
     card.classList.toggle('active');
   });
 });
+
+function showBanScreen(ban) {
+    document.body.innerHTML = `
+        <div class="ban-screen">
+            <div class="ban-box">
+                <h2>Аккаунт заблокирован</h2>
+
+                <p><strong>Причина:</strong><br>${ban.reason || "Не указано"}</p>
+                <p><strong>До:</strong><br>${
+                    ban.until ? new Date(ban.until).toLocaleString("ru-RU") : "Навсегда"
+                }</p>
+                <p><strong>Выдал:</strong><br>${ban.by?.nickname || "Неизвестно"}</p>
+            </div>
+        </div>
+    `;
+}
