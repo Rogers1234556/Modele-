@@ -1274,7 +1274,14 @@ function showBanScreen(ban) {
   async function createPromo(userId, promoRaw) {
     try {
       const promo = (promoRaw || '').toString().trim().toUpperCase();
-      if (!promo) return { error: "Пустой промокод" };
+
+      if (!promo) {
+        return { error: "Пустой промокод" };
+      }
+
+      if (!/^[A-Z0-9]{4,}$/.test(promo)) {
+        return { error: "Промокод должен содержать минимум 4 символа (A-Z, 0-9)" };
+      }
 
       const db = await getPromos(); // массив
 
@@ -1316,9 +1323,14 @@ function showBanScreen(ban) {
   // --- активация промокода ---
   async function activatePromo(userId, promoRaw) {
     try {
-      const promo = String(promoRaw || "").trim().toUpperCase();
-      if (!promo) {
-        return { error: "Пустой промокод" };
+        const promo = String(promoRaw || "").trim().toUpperCase();
+
+        if (!promo) {
+          return { error: "Пустой промокод" };
+        }
+
+        if (!/^[A-Z0-9]{4,}$/.test(promo)) {
+          return { error: "Некорректный формат промокода" };
       }
 
       const uId = userId !== null && userId !== undefined ? String(userId) : null;
@@ -1380,6 +1392,14 @@ function showBanScreen(ban) {
     createPromoSubmit.addEventListener("click", async () => {
       const promo = createPromoInput.value.trim();
       const userId = window.currentUserId;
+
+      if (promo.length < 4) {
+        return showPopup({
+          title: "Ошибка",
+          message: "Минимальная длина промокода — 4 символа",
+          buttons: [{ text: "Ок", type: "default" }]
+        });
+      }
 
       if (!promo) {
         return showPopup({ title: "Ошибка", message: "Введите название промокода", buttons: [{ text: "Ок", type: "default" }] });
