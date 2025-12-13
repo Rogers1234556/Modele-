@@ -55,6 +55,7 @@
         </div>
   <div class="profile-actions">
     <button class="btn-support">Поддержка</button>
+    <button class="btn-support btn-promo" id="promoBtn">Активировать промокод</button>
     <a href="https://github.com/galebxkwn/Jdskvehv/raw/refs/heads/main/SR%20Launcher_setup.exe" 
        download 
        class="btn-support btn-launcher" 
@@ -72,6 +73,37 @@
       <div id="serversList" class="servers-list">
         <p>Загрузка...</p>
       </div>
+    </div>
+  </div>
+
+  <div id="promoModal" class="ios-modal">
+    <div class="ios-sheet">
+      <div class="ios-handle"></div>
+
+      <h3 class="ios-title">Промокоды</h3>
+
+      <input type="text" id="promoInput" class="ios-input" placeholder="Введите промокод">
+
+      <button id="activatePromoBtn" class="ios-btn">Активировать</button>
+
+      <button id="openCreatePromoBtn" class="ios-btn-secondary">Создать промокод</button>
+
+      <button class="ios-btn-secondary" id="closePromoBtn">Отмена</button>
+    </div>
+  </div>
+
+  <div id="createPromoModal" class="ios-modal">
+    <div class="ios-sheet">
+      <div class="ios-handle"></div>
+
+      <h3 class="ios-title">Создать промокод</h3>
+
+      <input type="text" id="createPromoInput" class="ios-input" placeholder="Название промокода">
+
+
+      <button id="createPromoSubmit" class="ios-btn">Создать</button>
+
+      <button class="ios-btn-secondary" id="closeCreatePromoBtn">Отмена</button>
     </div>
   </div>
   

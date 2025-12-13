@@ -5,7 +5,7 @@ buyBtn.addEventListener("click", () => {
         title: "GOV Helper — 30 дней",
         description: "Подписка",
         currency: "XTR",
-        prices: [{ label: "Подписка", amount: 250 }],
+        prices: [{ label: "Подписка", amount: 260 }],
         payload: "pass_30_days"
     });
 });
@@ -1137,3 +1137,281 @@ function showBanScreen(ban) {
         </div>
     `;
 }
+
+// ===================
+//  PROMO: улучшенная реализация
+// ===================
+(function () {
+  // безопасно получить элемент
+  const $ = id => document.getElementById(id);
+
+  // --- элементы (могут отсутствовать в DOM, проверяем) ---
+  const promoBtn = $('promoBtn');
+  const promoModal = $('promoModal');
+  const promoInput = $('promoInput');
+  const activatePromoBtn = $('activatePromoBtn');
+  const closePromoBtn = $('closePromoBtn');
+
+  const openCreatePromoBtn = $('openCreatePromoBtn');
+  const createPromoModal = $('createPromoModal');
+  const createPromoInput = $('createPromoInput');
+  const createPromoSubmit = $('createPromoSubmit');
+  const closeCreatePromoBtn = $('closeCreatePromoBtn');
+
+  // JSONBin ID и headers — предполагается, что API_KEY объявлен глобально в другом месте
+  const BIN_PROMO_ID = "68b474b443b1c97be9323d6c";
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Master-Key": (typeof API_KEY !== 'undefined' ? API_KEY : '')
+  };
+
+  // --- вспомогательные функции UI (Telegram.WebApp fallback) ---
+  function showPopup(opts) {
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.showPopup) {
+      try { Telegram.WebApp.showPopup(opts); }
+      catch (e) { console.warn('Telegram popup failed', e); fallbackAlert(opts.title, opts.message); }
+    } else {
+      fallbackAlert(opts.title, opts.message);
+    }
+  }
+  function fallbackAlert(title, message) {
+    alert((title ? title + ': ' : '') + (message || ''));
+  }
+
+  // --- фильтрация ввода промокода (только A-Z0-9) ---
+  function allowPromoInput(inputEl) {
+    if (!inputEl) return;
+    inputEl.addEventListener("input", () => {
+      inputEl.value = inputEl.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    });
+    // сразу привести текущее значение
+    inputEl.value = (inputEl.value || '').toString().replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  }
+
+  // применяем фильтр при загрузке (если элементы есть)
+  document.addEventListener("DOMContentLoaded", () => {
+    allowPromoInput($('promoInput'));
+    allowPromoInput($('createPromoInput'));
+  });
+
+  // --- модалки (проверяем, что элементы существуют) ---
+  if (promoBtn && promoModal) {
+    promoBtn.addEventListener("click", () => { promoModal.style.display = "flex"; });
+  }
+  if (closePromoBtn && promoModal) {
+    closePromoBtn.addEventListener("click", () => { promoModal.style.display = "none"; });
+    promoModal.addEventListener("click", (e) => { if (e.target === promoModal) promoModal.style.display = "none"; });
+  }
+
+  if (openCreatePromoBtn && createPromoModal && promoModal) {
+    openCreatePromoBtn.addEventListener("click", () => {
+      if (promoModal) promoModal.style.display = "none";
+      createPromoModal.style.display = "flex";
+    });
+  }
+  if (closeCreatePromoBtn && createPromoModal) {
+    closeCreatePromoBtn.addEventListener("click", () => { createPromoModal.style.display = "none"; });
+    createPromoModal.addEventListener("click", (e) => { if (e.target === createPromoModal) createPromoModal.style.display = "none"; });
+  }
+
+  // --- работа с JSONBin ---
+  async function safeFetchJson(url, opts = {}) {
+    try {
+      const res = await fetch(url, opts);
+      const text = await res.text();
+      let parsed;
+      try { parsed = text ? JSON.parse(text) : {}; } catch (e) { parsed = null; }
+      return { ok: res.ok, status: res.status, parsed, raw: text };
+    } catch (err) {
+      return { ok: false, error: err };
+    }
+  }
+
+  async function getPromos() {
+    const url = `https://api.jsonbin.io/v3/b/${BIN_PROMO_ID}`;
+    const { ok, parsed, error, status } = await safeFetchJson(url, { headers });
+    if (!ok) {
+      console.error("Ошибка загрузки промокодов:", error || status);
+      // вернуть пустой массив как fallback
+      return [];
+    }
+    // JSONBin: data.record может быть массивом или объектом
+    const record = parsed && parsed.record !== undefined ? parsed.record : parsed;
+    if (!record) return [];
+    // если record промокодов — массив
+    if (Array.isArray(record)) return record;
+    // если record — объект с ключом promos или data
+    if (Array.isArray(record.promos)) return record.promos;
+    // если record — объект, где ключи — промокоды
+    if (typeof record === 'object') {
+      // попытаться преобразовать в массив объектов
+      return Object.values(record).filter(Boolean);
+    }
+    return [];
+  }
+
+  async function savePromos(dataArr) {
+    // Ожидаем, что сервер хранит чистый массив в record
+    const url = `https://api.jsonbin.io/v3/b/${BIN_PROMO_ID}`;
+    try {
+      const res = await fetch(url, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(dataArr)
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(()=>null);
+        throw new Error(`Ошибка сохранения промокодов: ${res.status} ${txt || ''}`);
+      }
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  // --- создание промокода ---
+  async function createPromo(userId, promoRaw) {
+    try {
+      const promo = (promoRaw || '').toString().trim().toUpperCase();
+      if (!promo) return { error: "Пустой промокод" };
+
+      const db = await getPromos(); // массив
+
+      // защита типов userId (приводим к строке)
+      const uId = (userId === null || userId === undefined) ? null : String(userId);
+
+      if (uId === null) return { error: "Неизвестный пользователь" };
+
+      // уже есть промо у юзера (по owner)
+      if (db.find(p => String(p.owner) === uId)) {
+        return { error: "У вас уже есть созданный промокод" };
+      }
+
+      // уже существует такое имя
+      if (db.find(p => String(p.promo).toUpperCase() === promo)) {
+        return { error: "Такой промокод уже существует" };
+      }
+
+      // создаём запись (структура: { promo, active, act, owner })
+      const newRec = {
+        promo,
+        active: [],
+        act: -1, // -1 означает безлимит
+        owner: uId,
+        createdAt: new Date().toISOString()
+      };
+
+      db.push(newRec);
+      const saved = await savePromos(db);
+      if (!saved) return { error: "Ошибка сохранения промокода (сервер)" };
+
+      return { ok: true, promo: newRec };
+    } catch (err) {
+      console.error("createPromo error:", err);
+      return { error: "Внутренняя ошибка" };
+    }
+  }
+
+  // --- активация промокода ---
+  async function activatePromo(userId, promoRaw) {
+    try {
+      const promo = (promoRaw || '').toString().trim().toUpperCase();
+      if (!promo) return { error: "Пустой промокод" };
+
+      if (code.owner === userId) {
+          return { error: "Создатель не может активировать свой промокод" };
+      }
+
+      const db = await getPromos();
+      const code = db.find(p => String(p.promo).toUpperCase() === promo);
+      if (!code) return { error: "Промокод не найден" };
+
+      const uId = (userId === null || userId === undefined) ? null : String(userId);
+      if (uId === null) return { error: "Неизвестный пользователь" };
+
+      code.active = Array.isArray(code.active) ? code.active.map(String) : [];
+
+      if (code.active.includes(uId)) {
+        return { error: "Вы уже активировали этот промокод" };
+      }
+
+      // act: -1 = бесконечно, иначе количество оставшихся активаций
+      if (typeof code.act === 'number' && code.act !== -1 && code.act <= 0) {
+        return { error: "Лимит активаций исчерпан" };
+      }
+
+      // добавляем пользователя
+      code.active.push(uId);
+
+      // уменьшаем счётчик, если не бесконечный
+      if (typeof code.act === 'number' && code.act !== -1) {
+        code.act = code.act - 1;
+        if (code.act < 0) code.act = 0;
+      }
+
+      const saved = await savePromos(db);
+      if (!saved) return { error: "Ошибка сохранения активации (сервер)" };
+
+      return { ok: true, promo: code };
+    } catch (err) {
+      console.error("activatePromo error:", err);
+      return { error: "Создатель не может активировать свой промокод" };
+    }
+  }
+
+  // --- UI: обработчики кнопок ---
+  if (createPromoSubmit && createPromoInput) {
+    createPromoSubmit.addEventListener("click", async () => {
+      const promo = createPromoInput.value.trim();
+      const userId = window.currentUserId;
+
+      if (!promo) {
+        return showPopup({ title: "Ошибка", message: "Введите название промокода", buttons: [{ text: "Ок", type: "default" }] });
+      }
+
+      const result = await createPromo(userId, promo);
+
+      if (result.error) {
+        return showPopup({ title: "Ошибка", message: result.error, buttons: [{ text: "Ок", type: "default" }] });
+      }
+
+      showPopup({ title: "Успешно", message: "Промокод создан", buttons: [{ text: "Ок", type: "close" }] });
+
+      if (createPromoModal) createPromoModal.style.display = "none";
+      // очистим поле
+      createPromoInput.value = "";
+    });
+  }
+
+  if (activatePromoBtn && promoInput) {
+    activatePromoBtn.addEventListener("click", async () => {
+      const promo = promoInput.value.trim();
+      const userId = window.currentUserId;
+
+      if (!promo) {
+        return showPopup({ title: "Ошибка", message: "Введите промокод", buttons: [{ text: "Ок", type: "default" }] });
+      }
+
+      const result = await activatePromo(userId, promo);
+
+      if (result.error) {
+        return showPopup({ title: "Ошибка", message: result.error, buttons: [{ text: "Ок", type: "default" }] });
+      }
+
+      showPopup({ title: "Успешно", message: "Промокод активирован!", buttons: [{ text: "Ок", type: "close" }] });
+
+      if (promoModal) promoModal.style.display = "none";
+      // очистим поле
+      promoInput.value = "";
+    });
+  }
+
+  // --- экспорт опционален (для тестов в консоли) ---
+  window.__promoAPI = {
+    getPromos,
+    createPromo,
+    activatePromo,
+    savePromos
+  };
+})();
