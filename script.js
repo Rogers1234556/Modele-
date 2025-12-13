@@ -1316,28 +1316,41 @@ function showBanScreen(ban) {
   // --- активация промокода ---
   async function activatePromo(userId, promoRaw) {
     try {
-      const promo = (promoRaw || '').toString().trim().toUpperCase();
-      if (!promo) return { error: "Пустой промокод" };
+      const promo = String(promoRaw || "").trim().toUpperCase();
+      if (!promo) {
+        return { error: "Пустой промокод" };
+      }
 
-      if (code.owner === userId) {
-          return { error: "Создатель не может активировать свой промокод" };
+      const uId = userId !== null && userId !== undefined ? String(userId) : null;
+      if (!uId) {
+        return { error: "Неизвестный пользователь" };
       }
 
       const db = await getPromos();
       const code = db.find(p => String(p.promo).toUpperCase() === promo);
-      if (!code) return { error: "Промокод не найден" };
 
-      const uId = (userId === null || userId === undefined) ? null : String(userId);
-      if (uId === null) return { error: "Неизвестный пользователь" };
+      // ❗ сначала проверяем существование промокода
+      if (!code) {
+        return { error: "Промокод не найден" };
+      }
 
-      code.active = Array.isArray(code.active) ? code.active.map(String) : [];
+      // ❗ теперь можно проверять владельца
+      if (String(code.owner) === uId) {
+        return { error: "Создатель не может активировать свой промокод" };
+      }
 
+      // нормализуем active
+      code.active = Array.isArray(code.active)
+        ? code.active.map(String)
+        : [];
+
+      // уже активировал
       if (code.active.includes(uId)) {
         return { error: "Вы уже активировали этот промокод" };
       }
 
-      // act: -1 = бесконечно, иначе количество оставшихся активаций
-      if (typeof code.act === 'number' && code.act !== -1 && code.act <= 0) {
+      // проверка лимита
+      if (typeof code.act === "number" && code.act !== -1 && code.act <= 0) {
         return { error: "Лимит активаций исчерпан" };
       }
 
@@ -1345,18 +1358,20 @@ function showBanScreen(ban) {
       code.active.push(uId);
 
       // уменьшаем счётчик, если не бесконечный
-      if (typeof code.act === 'number' && code.act !== -1) {
-        code.act = code.act - 1;
-        if (code.act < 0) code.act = 0;
+      if (typeof code.act === "number" && code.act !== -1) {
+        code.act = Math.max(0, code.act - 1);
       }
 
       const saved = await savePromos(db);
-      if (!saved) return { error: "Ошибка сохранения активации (сервер)" };
+      if (!saved) {
+        return { error: "Ошибка сохранения активации" };
+      }
 
       return { ok: true, promo: code };
+
     } catch (err) {
       console.error("activatePromo error:", err);
-      return { error: "Промокод не найден" };
+      return { error: "Внутренняя ошибка сервера" };
     }
   }
 
