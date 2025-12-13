@@ -52,7 +52,6 @@ document.querySelectorAll(".info-tab").forEach(btn => {
 });
 
 const currentUserId = window.currentUserId;
-// const currentUserId = 7660364996;
 
 const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
 
@@ -133,6 +132,7 @@ fetch(BIN_URL_A, {
               <button class="admin-tab" data-tab="bans">Блокировки</button>
               <button class="admin-tab" data-tab="logs">Логи</button>
               <button class="admin-tab" data-tab="admins">Админы</button>
+              <button class="admin-tab" data-tab="promo">Промо</button>
             </div>
             <div id="adminContent" class="admin-content"></div>
           </div>
@@ -287,6 +287,14 @@ document.addEventListener("click", (e) => {
         );
         content.innerHTML = renderAdminsList(filtered);
         document.getElementById("searchInput").value = query;
+      });
+    }
+
+    else if (tab === "promo") {
+      content.innerHTML = "<h3>Загрузка промо...</h3>";
+
+      renderPromoAdmin().then(html => {
+        content.innerHTML = html;
       });
     }
   }
@@ -868,75 +876,6 @@ function renderAdminsList(admins) {
   return html;
 }
 
-const onlineBtn = document.getElementById('radmirOnlineBtn');
-const onlineModal = document.getElementById('onlineModal');
-const closeOnline = document.getElementById('closeOnlineModal');
-const serversList = document.getElementById('serversList');
-
-if (onlineBtn) {
-  
-
-  onlineBtn.addEventListener('click', async () => {
-    onlineModal.style.display = 'flex';
-    serversList.innerHTML = '<p> Загружаем данные...</p>';
-
-    try {
-      
-      const proxyUrl = 'https://api.allorigins.win/get?url=';
-      const targetUrl = 'http://launcher.hassle-games.com:3000/online.json';
-      const res = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-      if (!res.ok) throw new Error('Ошибка соединения с сервером');
-
-      const raw = await res.json();
-      const data = JSON.parse(raw.contents);
-      const crmp = data.crmp_new;
-
-      if (!crmp) {
-        serversList.innerHTML = `
-          <div class="error-message">Не удалось получить данные CRMP.</div>`;
-        return;
-      }
-
-      let html = `<div class="server-item total-online">Суммарный онлайн: `;
-      let total = 0;
-      let serversHtml = '';
-
-      for (const [id, srv] of Object.entries(crmp)) {
-        const players = srv.players || 0;
-        const max = srv.maxPlayers || 0;
-        const bonus = srv.bonus || 1;
-        total += players;
-
-        serversHtml += `
-          <div class="server-item">
-            <div class="server-name">Сервер ${id}</div>
-            <div class="server-online">${players} / ${max}</div>
-            <div class="server-bonus">Бонус: x${bonus}</div>
-          </div>`;
-      }
-
-      html += `<b>${total}</b></div>${serversHtml}`;
-      serversList.innerHTML = html;
-    } catch (e) {
-      console.error(e);
-      serversList.innerHTML = `
-        <div class="error-message">
-           Ошибка загрузки данных.<br>
-          Проверьте подключение к интернету или попробуйте позже.
-        </div>`;
-    }
-  });
-
-  closeOnline.addEventListener('click', () => {
-    onlineModal.style.display = 'none';
-  });
-
-  window.addEventListener('click', (e) => {
-    if (e.target === onlineModal) {
-      onlineModal.style.display = 'none';
-    }
-  });
-}
 
 function showAdminButtons() {
   const launcherBtn = document.querySelector(".btn-launcher");
@@ -1450,3 +1389,156 @@ function showBanScreen(ban) {
     savePromos
   };
 })();
+
+async function renderPromoAdmin() {
+  try {
+    const res = await fetch(
+      "https://api.jsonbin.io/v3/b/68b474b443b1c97be9323d6c",
+      {
+        headers: {
+          "X-Master-Key": API_KEY,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status}: ${txt || "Нет ответа от сервера"}`);
+    }
+
+    const data = await res.json();
+
+    let promos = [];
+    if (Array.isArray(data.record)) promos = data.record;
+    else if (Array.isArray(data.record?.promos)) promos = data.record.promos;
+    else if (Array.isArray(data)) promos = data;
+
+    if (!Array.isArray(promos) || promos.length === 0) {
+      return "<h3>Промокодов нет</h3>";
+    }
+
+    // =========================
+    // собираем только активных пользователей
+    // =========================
+    const usersMap = new Map();
+
+    promos.forEach(p => {
+      if (p.owner) usersMap.set(String(p.owner), true);
+      if (Array.isArray(p.active)) {
+        p.active.forEach(id => usersMap.set(String(id), true));
+      }
+    });
+
+    const rows = [];
+
+    usersMap.forEach((_, userId) => {
+      const user = (window.allUsers || []).find(
+        u => String(u.id) === userId
+      );
+
+      const username = user?.login ? `@${user.login}` : "—";
+
+      const createdPromo = promos.find(
+        p => String(p.owner) === userId
+      );
+
+      const createdPromoName = createdPromo?.promo || "—";
+      const createdCount = createdPromo?.active?.length || 0;
+
+      const activatedPromos = promos
+        .filter(p => Array.isArray(p.active) && p.active.includes(userId))
+        .map(p => p.promo);
+
+      rows.push({
+        userId,
+        username,
+        promo: createdPromoName,
+        count: createdCount,
+        activated: activatedPromos.join(", ") || "—"
+      });
+    });
+
+    // =========================
+    // HTML
+    // =========================
+    const html = `
+      <h3>Промо-активность</h3>
+
+      <div style="margin-bottom:10px;">
+        <input
+          id="promoSearchInput"
+          placeholder="Поиск..."
+          style="
+            width:40%;
+            padding:7px 10px;
+            border-radius:6px;
+            border:1px solid #444;
+            background:#2b2b2b;
+            color:#fff;
+            font-size:13px;
+          "
+        >
+      </div>
+
+      <div id="promoList">
+        ${renderPromoRows(rows)}
+      </div>
+    `;
+
+    // поиск
+    setTimeout(() => {
+      const input = document.getElementById("promoSearchInput");
+      if (!input) return;
+
+      input.addEventListener("input", () => {
+        const q = input.value.toLowerCase().trim();
+
+        const filtered = rows.filter(r =>
+          r.userId.includes(q) ||
+          r.username.toLowerCase().includes(q) ||
+          r.promo.toLowerCase().includes(q) ||
+          r.activated.toLowerCase().includes(q)
+        );
+
+        document.getElementById("promoList").innerHTML =
+          renderPromoRows(filtered);
+      });
+    }, 0);
+
+    return html;
+
+  } catch (err) {
+    console.error("Promo admin error:", err);
+    return `
+      <div style="
+        padding:12px;
+        background:#2b2b2b;
+        border-left:4px solid #ff5555;
+        color:#ffbaba;
+        font-size:13px;
+      ">
+        <strong>Ошибка загрузки промо</strong><br><br>
+        <code>${err.message || err}</code>
+      </div>
+    `;
+  }
+}
+
+function renderPromoRows(rows) {
+  if (!rows || rows.length === 0) return "<p>Нет данных для отображения</p>";
+
+  return rows
+    .map(r => `
+      <div class="user-card" style="border-left:4px solid #2196f3; margin-bottom:6px; padding:8px;">
+        <div class="user-header">
+          ${r.username} | ID: ${r.userId}
+        </div>
+        <div class="user-info">
+          <p><strong>Промокод:</strong> ${r.promo} | ${r.count} активаций</p>
+          <p><strong>Активировал:</strong> ${r.activated}</p>
+        </div>
+      </div>
+    `)
+    .join("");
+}
