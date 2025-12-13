@@ -1356,7 +1356,7 @@ function showBanScreen(ban) {
       return { ok: true, promo: code };
     } catch (err) {
       console.error("activatePromo error:", err);
-      return { error: "Создатель не может активировать свой промокод" };
+      return { error: "Промокод не найден" };
     }
   }
 
