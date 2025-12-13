@@ -51,7 +51,8 @@ document.querySelectorAll(".info-tab").forEach(btn => {
   });
 });
 
-const currentUserId = window.currentUserId;
+ const currentUserId = window.currentUserId;
+// const currentUserId = 6700728917;
 
 const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
 
