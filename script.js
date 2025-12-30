@@ -51,7 +51,7 @@ document.querySelectorAll(".info-tab").forEach(btn => {
   });
 });
 
- const currentUserId = window.currentUserId;
+const currentUserId = window.currentUserId;
 // const currentUserId = 6700728917;
 
 const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
@@ -221,23 +221,27 @@ document.addEventListener("click", (e) => {
         document.getElementById("searchInput").value = query;
       });
 
-    } else if (tab === "buyers") {
-      content.innerHTML = renderBuyersList(window.allUsers || []);
+  } else if (tab === "buyers") {
+    const buyers = (window.allUsers || []).filter(u => {
+      if (!u.buy1) return false;
+      const left = getDaysLeft(u.buy1.start, u.buy1.days);
+      return left > 0;
+    });
 
-      const search = document.getElementById("searchInput");
-      search.addEventListener("input", () => {
-        const query = search.value.trim().toLowerCase();
-        const filtered = (window.allUsers || []).filter(u => 
-          (u.buy1?.days > 0 || u.buy2?.days > 0) &&
-          (
-            u.id.toString().includes(query) || 
-            (u.login && u.login.toLowerCase().includes(query))
-          )
-        );
-        content.innerHTML = renderBuyersList(filtered);
-        document.getElementById("searchInput").value = query;
-      });
+    content.innerHTML = renderBuyersList(buyers);
 
+    const search = document.getElementById("searchInput");
+    search.addEventListener("input", () => {
+      const query = search.value.trim().toLowerCase();
+
+      const filtered = buyers.filter(u =>
+        u.id.toString().includes(query) ||
+        (u.login && u.login.toLowerCase().includes(query))
+      );
+
+      content.innerHTML = renderBuyersList(filtered);
+      document.getElementById("searchInput").value = query;
+    });
     } else if (tab === "bans") {
       content.innerHTML = renderBansList(window.allUsers || []);
 
@@ -399,24 +403,12 @@ window.addEventListener("click", (e) => {
   if (e.target === modal) modal.style.display = "none";
 });
 
-function renderBuyersList(users) {
-  let html = `<h3>Активные покупатели:</h3>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Поиск..."
-        style="width:40%; padding:5px 8px; font-size:13px; border-radius:4px;
-        border:1px solid #444; background:#2b2b2b; color:#fff; outline:none;">
-    </div>
-  `;
-
-  let buyers = users.filter(u => {
-    const buy1Left = getDaysLeft(u.buy1.start, u.buy1.days);
-    const buy2Left = getDaysLeft(u.buy2.start, u.buy2.days);
-    return buy1Left > 0 || buy2Left > 0;
-  });
-
-  if (buyers.length === 0) {
-    return "<p>Нет активных покупателей.</p>";
+function renderBuyersList(buyers) {
+  if (!buyers || buyers.length === 0) {
+    return "<h3>Активных покупателей нет</h3>";
   }
+
+  let html = `<h3>Активные покупатели</h3>`;
 
   buyers.forEach((u, index) => {
     const buy1Left = getDaysLeft(u.buy1.start, u.buy1.days);
@@ -425,18 +417,11 @@ function renderBuyersList(users) {
       <div class="user-card">
         <div class="user-header">
           ${index + 1} - @${u.login || "нет"}
-          <i class="fa-solid fa-cog user-settings" data-id="${u.id}" style="cursor:pointer;"></i>
+          <i class="fa-solid fa-cog user-settings" data-id="${u.id}"></i>
         </div>
         <div class="user-info">
           <p><strong>ID:</strong> ${u.id}</p>
-          <p><strong>Ключ:</strong> <span class="user-key">${u.key}</span>
-             </p>
-          <p><strong><span class="fa-solid fa-basket-shopping"></span> GOV Helper:</strong> ${buy1Left} дней</p>
-          <p>INFO: ${u.buy1.start || "-"} | ${u.buy1.issuedBy || "-"}</p>
-        
-          
-          <p><strong>HWID:</strong> ${u.hwid || "-"}</p>
-          
+          <p><strong>Осталось:</strong> ${buy1Left} дней</p>
         </div>
       </div>
     `;
