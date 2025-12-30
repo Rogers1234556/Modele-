@@ -422,6 +422,7 @@ function renderBuyersList(buyers) {
         <div class="user-info">
           <p><strong>ID:</strong> ${u.id}</p>
           <p><strong>Осталось:</strong> ${buy1Left} дней</p>
+          <p><strong>HWID:</strong> ${u.hwid || "-"}</p>
         </div>
       </div>
     `;
