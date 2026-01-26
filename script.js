@@ -27,13 +27,83 @@ const pricingData = {
 
 // Данные фракций
 const factionsData = [
-    { id: 'mvd', name: 'МВД', fullName: 'Министерство Внутренних Дел', icon: 'fas fa-shield-alt', color: '#3B82F6', features: ['в разработке'], status: 'available' },
-    { id: 'fsb', name: 'ФСБ', fullName: 'Федеральная Служба Безопасности', icon: 'fas fa-user-secret', color: '#EF4444', features: ['в разработке'], status: 'available' },
-    { id: 'mz', name: 'МЗ', fullName: 'Министерство Здравоохранения', icon: 'fas fa-heart-pulse', color: '#10B981', features: ['в разработке'], status: 'available' },
-    { id: 'mo', name: 'МО', fullName: 'Министерство Обороны', icon: 'fas fa-jet-fighter', color: '#8B5CF6', features: ['в разработке'], status: 'available' },
-    { id: 'fsin', name: 'ФСИН', fullName: 'Федеральная Служба Исполнения Наказаний', icon: 'fas fa-gavel', color: '#F59E0B', features: ['в разработке'], status: 'available' },
-    { id: 'government', name: 'Пра-во', fullName: 'Правительство', icon: 'fas fa-landmark', color: '#6366F1', features: ['в разработке'], status: 'available' },
-    { id: 'trk', name: 'ТРК', fullName: 'ТРК "Ритм"', icon: 'fas fa-tower-broadcast', color: '#EC4899', features: ['в разработке'], status: 'available' }
+    {
+        id: 'mvd',
+        name: 'МВД',
+        fullName: 'Министерство Внутренних Дел',
+        icon: 'fas fa-shield-alt',
+        color: '#3B82F6',
+        features: [
+            'в разработке'
+        ],
+        status: 'available'
+    },
+    {
+        id: 'fsb',
+        name: 'ФСБ',
+        fullName: 'Федеральная Служба Безопасности',
+        icon: 'fas fa-user-secret',
+        color: '#EF4444',
+        features: [
+            'в разработке'
+        ],
+        status: 'available'
+    },
+    {
+        id: 'mz',
+        name: 'МЗ',
+        fullName: 'Министерство Здравоохранения',
+        icon: 'fas fa-heart-pulse',
+        color: '#10B981',
+        features: [
+            'в разработке'
+        ],
+        status: 'available'
+    },
+    {
+        id: 'mo',
+        name: 'МО',
+        fullName: 'Министерство Обороны',
+        icon: 'fas fa-jet-fighter',
+        color: '#8B5CF6',
+        features: [
+            'в разработке'
+        ],
+        status: 'available'
+    },
+    {
+        id: 'fsin',
+        name: 'ФСИН',
+        fullName: 'Федеральная Служба Исполнения Наказаний',
+        icon: 'fas fa-gavel',
+        color: '#F59E0B',
+        features: [
+            'в разработке'
+        ],
+        status: 'available'
+    },
+    {
+        id: 'government',
+        name: 'Пра-во',
+        fullName: 'Правительство',
+        icon: 'fas fa-landmark',
+        color: '#6366F1',
+        features: [
+            'в разработке'
+        ],
+        status: 'available'
+    },
+    {
+        id: 'trk',
+        name: 'ТРК',
+        fullName: 'ТРК "Ритм"',
+        icon: 'fas fa-tower-broadcast',
+        color: '#EC4899',
+        features: [
+            'в разработке'
+        ],
+        status: 'available'
+    }
 ];
 
 // Утилитарные функции
@@ -325,5 +395,150 @@ async function initApp() {
     }
 }
 
+// Функция для обработки оплаты
+async function handlePayment(plan, isRenewal) {
+    // В реальном приложении здесь будет логика оплаты через Telegram Payments
+    // или интеграция с платежной системой
+
+    Utils.showToast(`Оплата ${plan} дней (${isRenewal ? 'продление' : 'новая подписка'})`, 'info');
+
+    // В демо-режиме просто показываем сообщение
+    setTimeout(() => {
+        Utils.showToast('Оплата прошла успешно! Подписка активирована.', 'success');
+
+        // Обновляем данные пользователя
+        if (userData) {
+            // Добавляем дни к подписке
+            const currentDate = userData.daysgow ? new Date(userData.daysgow) : new Date();
+            const newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() + plan);
+
+            userData.daysgow = newDate.toISOString().split('T')[0];
+
+            // Сохраняем в базу данных
+            saveUserData();
+
+            // Обновляем UI
+            UIManager.updateProfileUI();
+
+            // Переключаем на режим продления
+            pricingMode = 'renew';
+            UIManager.checkPricingMode();
+        }
+    }, 2000);
+}
+
+// Сохранение данных пользователя в Supabase
+async function saveUserData() {
+    if (!userData || !tg.initDataUnsafe?.user?.id) return;
+
+    try {
+        const { error } = await supabaseClient
+            .from('users')
+            .upsert({
+                idtg: tg.initDataUnsafe.user.id,
+                name: userData.name,
+                telegram: userData.telegram,
+                status: userData.status,
+                key: userData.key,
+                daysgow: userData.daysgow,
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) {
+            console.error('Error saving user data:', error);
+        }
+    } catch (error) {
+        console.error('Error in saveUserData:', error);
+    }
+}
+
+// Загрузка данных из Supabase
+async function initApp() {
+    try {
+        const user = tg.initDataUnsafe?.user;
+        if (!user || !user.id) {
+            Utils.showToast('Ошибка авторизации Telegram', 'error');
+            return;
+        }
+
+        // Поиск пользователя по idtg
+        let { data, error } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('idtg', user.id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('Supabase error:', error);
+            Utils.showToast('Ошибка загрузки данных', 'error');
+            return;
+        }
+
+        if (!data) {
+            // Создаем нового пользователя если не найден
+            const { data: newUser, error: createError } = await supabaseClient
+                .from('users')
+                .insert([{
+                    idtg: user.id,
+                    name: user.first_name || 'User',
+                    telegram: user.username || '',
+                    status: 'active',
+                    key: null,
+                    daysgow: null,
+                    created_at: new Date().toISOString()
+                }])
+                .select()
+                .single();
+
+            if (createError) {
+                console.error('Create error:', createError);
+                Utils.showToast('Ошибка создания пользователя', 'error');
+            } else {
+                userData = newUser;
+            }
+        } else {
+            userData = data;
+        }
+
+        // Инициализируем UI
+        UIManager.init();
+
+        // Обновляем профиль
+        await UIManager.updateProfileUI();
+
+        // Проверяем есть ли ключ, если нет - генерируем
+        if (!userData.key) {
+            // Генерируем уникальный ключ
+            const prefix = 'GOV';
+            const timestamp = Date.now().toString(36);
+            const random = Math.random().toString(36).substr(2, 5);
+            userData.key = `${prefix}-${timestamp}-${random}`.toUpperCase();
+
+            // Сохраняем в базу
+            await saveUserData();
+            UIManager.updateProfileUI();
+        }
+
+    } catch (e) {
+        console.error('Init error:', e);
+        Utils.showToast('Критическая ошибка инициализации', 'error');
+    }
+}
+
 // Запуск при загрузке страницы
 document.addEventListener('DOMContentLoaded', initApp);
+
+// Экспортируем объекты для отладки в консоли
+window.app = {
+    tg,
+    userData,
+    currentCurrency,
+    pricingMode,
+    UIManager,
+    Utils,
+    handlePayment,
+    factionsData
+};
+
+console.log('GOV Helper app loaded successfully!');
