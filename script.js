@@ -5,13 +5,52 @@ let userData = null;
 let currentCurrency = localStorage.getItem('gov_currency') || 'UAH';
 let pricingMode = 'new'; // 'new' | 'renew'
 
-// Конфигурация Supabase
-const SUPABASE_URL = 'https://wgxkflgdjzqyengrmlsb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneGtmbGdkanpxeWVuZ3JtbHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4OTA2MTUsImV4cCI6MjA4MzQ2NjYxNX0.fM7_sOJCZ9SEZt73sABCE4NsXjnfVcs2h3usaFoNpf0';
+// Временное хранилище пользователей
+const userStorage = {
+    users: {},
+    payments: {},
 
-// Инициализация Supabase клиента
-const supabase = window.supabase ?
-    window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+    getUser(userId) {
+        return this.users[userId] || null;
+    },
+
+    createUser(userData) {
+        this.users[userData.id] = userData;
+        return userData;
+    },
+
+    updateUser(userId, updates) {
+        if (this.users[userId]) {
+            this.users[userId] = { ...this.users[userId], ...updates };
+            return this.users[userId];
+        }
+        return null;
+    },
+
+    addPayment(userId, paymentData) {
+        if (!this.payments[userId]) {
+            this.payments[userId] = [];
+        }
+        paymentData.id = Date.now();
+        paymentData.date = new Date().toISOString();
+        this.payments[userId].unshift(paymentData);
+        return paymentData;
+    },
+
+    getPayments(userId) {
+        return this.payments[userId] || [];
+    },
+
+    getTotalUsers() {
+        return Object.keys(this.users).length;
+    },
+
+    getActiveSubscriptions() {
+        return Object.values(this.users).filter(user => 
+            user.daysgow && new Date(user.daysgow) > new Date()
+        ).length;
+    }
+};
 
 // Цены в разных валютах
 const pricingData = {
@@ -35,7 +74,9 @@ const factionsData = [
         fullName: 'Министерство Внутренних Дел',
         icon: 'fas fa-shield-alt',
         color: '#3B82F6',
-        features: ['в разработке'],
+        features: [
+            'в разработке'
+        ],
         status: 'available'
     },
     {
@@ -44,7 +85,9 @@ const factionsData = [
         fullName: 'Федеральная Служба Безопасности',
         icon: 'fas fa-user-secret',
         color: '#EF4444',
-        features: ['в разработке'],
+        features: [
+            'в разработке'
+        ],
         status: 'available'
     },
     {
@@ -53,7 +96,9 @@ const factionsData = [
         fullName: 'Министерство Здравоохранения',
         icon: 'fas fa-heart-pulse',
         color: '#10B981',
-        features: ['в разработке'],
+        features: [
+            'в разработке'
+        ],
         status: 'available'
     },
     {
@@ -62,7 +107,9 @@ const factionsData = [
         fullName: 'Министерство Обороны',
         icon: 'fas fa-jet-fighter',
         color: '#8B5CF6',
-        features: ['в разработке'],
+        features: [
+            'в разработке'
+        ],
         status: 'available'
     },
     {
@@ -71,7 +118,9 @@ const factionsData = [
         fullName: 'Федеральная Служба Исполнения Наказаний',
         icon: 'fas fa-gavel',
         color: '#F59E0B',
-        features: ['в разработке'],
+        features: [
+            'в разработке'
+        ],
         status: 'available'
     },
     {
@@ -80,7 +129,9 @@ const factionsData = [
         fullName: 'Правительство',
         icon: 'fas fa-landmark',
         color: '#6366F1',
-        features: ['в разработке'],
+        features: [
+            'в разработке'
+        ],
         status: 'available'
     },
     {
@@ -89,10 +140,20 @@ const factionsData = [
         fullName: 'ТРК "Ритм"',
         icon: 'fas fa-tower-broadcast',
         color: '#EC4899',
-        features: ['в разработке'],
+        features: [
+            'в разработке'
+        ],
         status: 'available'
     }
 ];
+
+// Промокоды
+const promoCodes = {
+    'WELCOME2024': { days: 7, used: false },
+    'GOVHELPER': { days: 15, used: false },
+    'TEST123': { days: 30, used: false },
+    'PREMIUM': { days: 365, used: false }
+};
 
 // Утилитарные функции
 class Utils {
@@ -180,6 +241,15 @@ class Utils {
         };
     }
 
+    static generateKey(length = 16) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let key = '';
+        for (let i = 0; i < length; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return key;
+    }
+
     static getDaysWord(days) {
         if (days % 10 === 1 && days % 100 !== 11) return 'день';
         if (days % 10 >= 2 && days % 10 <= 4 && (days % 100 < 10 || days % 100 >= 20)) return 'дня';
@@ -200,25 +270,32 @@ class Utils {
 // Класс управления UI
 class UIManager {
     static initTabNavigation() {
+        console.log('Инициализация навигации...');
+
         document.querySelectorAll('.tab-btn').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 e.preventDefault();
 
+                // Убираем активный класс у всех табов
                 document.querySelectorAll('.tab-btn').forEach(t => {
                     t.classList.remove('active');
                 });
 
+                // Убираем активный класс у всех страниц
                 document.querySelectorAll('.page').forEach(p => {
                     p.classList.remove('active');
                 });
 
+                // Добавляем активный класс текущему табу
                 tab.classList.add('active');
 
+                // Показываем соответствующую страницу
                 const pageId = tab.dataset.tab;
                 const page = document.getElementById(pageId);
                 if (page) {
                     page.classList.add('active');
 
+                    // Загружаем данные для страницы если нужно
                     if (pageId === 'factions') {
                         this.loadFactions();
                     } else if (pageId === 'contests') {
@@ -234,9 +311,15 @@ class UIManager {
     }
 
     static initCurrencySwitcher() {
-        const currencyTabs = document.querySelectorAll('.currency-tab');
+        console.log('Инициализация переключателя валюты...');
 
-        if (currencyTabs.length === 0) return;
+        const currencyTabs = document.querySelectorAll('.currency-tab');
+        console.log('Найдено кнопок валюты:', currencyTabs.length);
+
+        if (currencyTabs.length === 0) {
+            console.error('Кнопки валюты не найдены!');
+            return;
+        }
 
         // Восстанавливаем сохраненную валюту
         if (currentCurrency) {
@@ -252,31 +335,52 @@ class UIManager {
         currencyTabs.forEach(tab => {
             tab.addEventListener('click', function() {
                 const currency = this.dataset.currency;
+                console.log('Клик по валюте:', currency);
 
+                // Убираем активный класс у всех валют
                 currencyTabs.forEach(t => {
                     t.classList.remove('active');
                 });
 
+                // Добавляем активный класс текущей валюте
                 this.classList.add('active');
 
+                // Обновляем текущую валюту
                 currentCurrency = currency;
-                localStorage.setItem('gov_currency', currentCurrency);
 
-                this.updateCurrencyDisplay();
+                // Сохраняем выбор
+                localStorage.setItem('gov_currency', currentCurrency);
+                console.log('Текущая валюта установлена:', currentCurrency);
+
+                // Обновляем UI
+                UIManager.updateCurrencyDisplay();
+                UIManager.showAutoPaymentInfo();
             });
         });
 
+        // Инициализируем отображение
         this.updateCurrencyDisplay();
     }
 
     static updateCurrencyDisplay() {
+        console.log('Обновление отображения валюты:', currentCurrency);
+
+        // Обновляем информацию о валюте
         this.updateCurrencyInfo();
+
+        // Обновляем цены
         this.updatePrices();
     }
 
     static updateCurrencyInfo() {
         const el = document.getElementById('currentCurrencyInfo');
         if (!el) return;
+
+        const currencyNames = {
+            UAH: 'Украинская гривна (UAH)',
+            RUB: 'Российский рубль (RUB)',
+            USD: 'Доллар США (USD)'
+        };
 
         const isRenewal = pricingMode === 'renew';
         const pricingText = isRenewal
@@ -287,7 +391,7 @@ class UIManager {
     }
 
     static updatePrices() {
-        const pricingType = pricingMode;
+        const pricingType = pricingMode; // ← ВАЖНО
 
         document.querySelectorAll('.pricing-card').forEach(card => {
             const plan = parseInt(card.dataset.plan.replace('-renew', ''));
@@ -321,16 +425,22 @@ class UIManager {
 
     static async loadUserProfile() {
         if (!currentUser || !userData) {
+            console.log('Нет данных пользователя для загрузки профиля');
             return;
         }
 
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
         const userTelegram = document.getElementById('userTelegram');
+        
         const userStatusBadge = document.getElementById('userStatusBadge');
         const userKey = document.getElementById('userKey');
         const govDays = document.getElementById('govDays');
+        const launcherBtn = document.getElementById('launcherBtn');
         const pricingToggle = document.getElementById('pricingToggle');
+        const autoPaymentToggle = document.getElementById('autoPaymentToggle');
+        const autoPaymentStatus = document.getElementById('autoPaymentStatus');
+        const autoPaymentStatusText = document.getElementById('autoPaymentStatusText');
 
         // Обновляем аватар
         if (currentUser.photo_url) {
@@ -349,44 +459,126 @@ class UIManager {
         const telegram = currentUser.username ? `@${currentUser.username}` : `ID: ${currentUser.id}`;
         userTelegram.textContent = telegram;
 
+        // Обновляем статус в хедере
+        
+
         // Обновляем бейдж статуса
         const statusText = userData.status === 'banned' ? 'Заблокирован' : 
-                          userData.daysgov && Utils.calculateDaysLeft(userData.daysgov) > 0 ? 'Активный покупатель' : 'Пользователь';
+                          userData.daysgow && Utils.calculateDaysLeft(userData.daysgow) > 0 ? 'Активный покупатель' : 'Пользователь';
         const statusColor = userData.status === 'banned' ? '#EF4444' : 
-                           (userData.daysgov && Utils.calculateDaysLeft(userData.daysgov) > 0) ? '#10B981' : '#6B7280';
+                           (userData.daysgow && Utils.calculateDaysLeft(userData.daysgow) > 0) ? '#10B981' : '#6B7280';
 
-        if (userStatusBadge) {
-            userStatusBadge.innerHTML = `
-                <span class="status-dot" style="background: ${statusColor}"></span>
-                <span>${statusText}</span>
-            `;
-        }
+        userStatusBadge.innerHTML = `
+            <span class="status-dot" style="background: ${statusColor}"></span>
+            <span>${statusText}</span>
+        `;
 
         // Обновляем ключ
-        if (userKey) {
-            userKey.textContent = userData.key || 'Не назначен';
-        }
+        userKey.textContent = userData.key || 'Не назначен';
 
         // Обновляем дни подписки
-        if (govDays) {
-            if (userData.daysgov) {
-                const daysLeft = Utils.calculateDaysLeft(userData.daysgov);
-                if (daysLeft > 0) {
-                    govDays.textContent = `${daysLeft} ${Utils.getDaysWord(daysLeft)}`;
+        if (userData.daysgow) {
+            const daysLeft = Utils.calculateDaysLeft(userData.daysgow);
+            if (daysLeft > 0) {
+                govDays.textContent = `${daysLeft} ${Utils.getDaysWord(daysLeft)}`;
+                if (launcherBtn) {
+                    launcherBtn.style.display = 'flex';
+                    launcherBtn.href = userData.launcherUrl || '#';
+                }
 
-                    // Показываем тарифы для продления
-                    if (pricingToggle) {
-                        pricingToggle.checked = true;
-                        pricingMode = 'renew';
-                        this.togglePricing(true);
-                    }
-                } else {
-                    govDays.textContent = 'Истекла';
+                // Показываем тарифы для продления
+                if (pricingToggle) {
+                    pricingToggle.checked = true;
+                    pricingMode = 'renew';
+                    this.togglePricing(true);
                 }
             } else {
-                govDays.textContent = 'Нет подписки';
+                govDays.textContent = 'Истекла';
+                if (launcherBtn) launcherBtn.style.display = 'none';
+            }
+        } else {
+            govDays.textContent = 'Нет подписки';
+            if (launcherBtn) launcherBtn.style.display = 'none';
+        }
+
+        // Обновляем статус автоплатежа
+        if (userData.autoPayment) {
+            if (autoPaymentToggle) autoPaymentToggle.checked = true;
+            if (autoPaymentStatus) autoPaymentStatus.style.display = 'flex';
+            if (autoPaymentStatusText) {
+                autoPaymentStatusText.textContent = 'Активен';
+                autoPaymentStatusText.style.color = '#10B981';
+            }
+            this.showAutoPaymentInfo();
+        } else {
+            if (autoPaymentStatus) autoPaymentStatus.style.display = 'flex';
+            if (autoPaymentStatusText) {
+                autoPaymentStatusText.textContent = 'Не активен';
+                autoPaymentStatusText.style.color = '#6B7280';
             }
         }
+    }
+
+    static showAutoPaymentInfo() {
+        if (!userData || !userData.autoPayment) return;
+
+        const autoPaymentInfo = document.getElementById('autoPaymentInfo');
+        const nextPaymentDate = document.getElementById('nextPaymentDate');
+        const autoPaymentAmount = document.getElementById('autoPaymentAmount');
+
+        if (!autoPaymentInfo) return;
+
+        const nextDate = new Date();
+        nextDate.setDate(nextDate.getDate() + 30);
+
+        if (nextPaymentDate) {
+            nextPaymentDate.textContent = Utils.formatDate(nextDate);
+        }
+
+        if (autoPaymentAmount && pricingData.renew[30]) {
+            const amount = pricingData.renew[30][currentCurrency];
+            autoPaymentAmount.textContent = Utils.formatCurrency(amount, currentCurrency);
+        }
+
+        autoPaymentInfo.classList.remove('hidden');
+    }
+
+    static loadPaymentHistory() {
+        if (!currentUser) return;
+
+        const paymentHistoryList = document.getElementById('paymentHistoryList');
+        if (!paymentHistoryList) return;
+
+        const payments = userStorage.getPayments(currentUser.id);
+
+        if (payments.length === 0) {
+            paymentHistoryList.innerHTML = `
+                <div class="no-payments" style="text-align: center; padding: 40px 20px;">
+                    <i class="fas fa-receipt" style="font-size: 48px; color: var(--gray-500); margin-bottom: 16px;"></i>
+                    <p style="color: var(--gray-400);">Пока нет платежей</p>
+                </div>
+            `;
+            return;
+        }
+
+        paymentHistoryList.innerHTML = payments.map(payment => `
+            <div class="payment-item ${payment.status === 'failed' ? 'failed' : 'success'}">
+                <div class="payment-header">
+                    <div class="payment-title">${payment.description}</div>
+                    <div class="payment-amount">${Utils.formatCurrency(payment.amount, payment.currency)}</div>
+                </div>
+                <div class="payment-details">
+                    <div class="payment-detail">
+                        <i class="fas fa-calendar"></i>
+                        <span>${Utils.formatDateTime(payment.date)}</span>
+                    </div>
+                    <div class="payment-detail">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>${payment.status === 'success' ? 'Успешно' : 'Ошибка'}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
     }
 
     static async processPayment(plan, isRenewal) {
@@ -395,6 +587,7 @@ class UIManager {
         const currency = currentCurrency;
 
         if (tg && tg.payments) {
+            // Используем Telegram Payments
             tg.payments.openInvoice({
                 title: `GOV Helper — ${plan} дней`,
                 description: isRenewal ? 'Продление подписки' : 'Новая подписка',
@@ -406,46 +599,49 @@ class UIManager {
                 payload: `subscription_${plan}_${isRenewal ? 'renew' : 'new'}`
             });
         } else {
+            // В режиме разработки - имитируем платеж
             Utils.showToast('Режим разработки: имитация платежа', 'info');
 
-            // Обновляем подписку в Supabase
-            if (supabase && userData) {
-                try {
-                    const currentDate = userData.daysgov ? new Date(userData.daysgov) : new Date();
-                    const newDate = new Date(currentDate);
-                    newDate.setDate(newDate.getDate() + parseInt(plan));
+            // Добавляем запись о платеже
+            userStorage.addPayment(currentUser.id, {
+                amount: amount,
+                currency: currency,
+                description: `${isRenewal ? 'Продление' : 'Подписка'} на ${plan} дней`,
+                status: 'success',
+                plan: plan,
+                type: isRenewal ? 'renewal' : 'new'
+            });
 
-                    const { error } = await supabase
-                        .from('users')
-                        .update({
-                            daysgov: newDate.toISOString().split('T')[0],
-                            status: 'active',
-                            subscription_active: true
-                        })
-                        .eq('idtg', currentUser.id);
+            // Обновляем подписку пользователя
+            // После активации подписки
+            const pricingToggle = document.getElementById('pricingToggle');
+            if (pricingToggle) {
+                pricingToggle.checked = true;
+                pricingMode = 'renew';
+            }
 
-                    if (error) throw error;
+            UIManager.togglePricing(true);
+            UIManager.updateCurrencyDisplay();
+            const currentDate = userData.daysgow ? new Date(userData.daysgow) : new Date();
+            const newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() + parseInt(plan));
 
-                    // Обновляем локальные данные
-                    userData.daysgov = newDate.toISOString().split('T')[0];
-                    userData.status = 'active';
+            userData.daysgow = newDate.toISOString().split('T')[0];
+            userData.status = 'active';
+            userData.hasSubscription = true;
 
-                    // Обновляем UI
-                    const pricingToggle = document.getElementById('pricingToggle');
-                    if (pricingToggle) {
-                        pricingToggle.checked = true;
-                        pricingMode = 'renew';
-                    }
+            userStorage.updateUser(currentUser.id, userData);
 
-                    this.togglePricing(true);
-                    this.updateCurrencyDisplay();
-                    await this.loadUserProfile();
+            // Обновляем UI
+            await this.loadUserProfile();
+            Utils.showToast(`${isRenewal ? 'Подписка продлена' : 'Подписка активирована'} на ${plan} дней!`, 'success');
 
-                    Utils.showToast(`${isRenewal ? 'Подписка продлена' : 'Подписка активирована'} на ${plan} дней!`, 'success');
-                } catch (error) {
-                    console.error('Ошибка обновления подписки:', error);
-                    Utils.showToast('Ошибка обновления подписки', 'error');
-                }
+            // Если включен автоплатеж, устанавливаем следующий платеж
+            const autoPaymentToggle = document.getElementById('autoPaymentToggle');
+            if (autoPaymentToggle && autoPaymentToggle.checked && plan === 30) {
+                userData.autoPayment = true;
+                userStorage.updateUser(currentUser.id, userData);
+                this.showAutoPaymentInfo();
             }
         }
     }
@@ -470,10 +666,12 @@ class UIManager {
                 <h3 class="faction-title">${faction.name}</h3>
                 <p class="faction-subtitle">${faction.fullName}</p>
                 <div class="faction-status">
+                    
                 </div>
             </div>
         `).join('');
 
+        // Добавляем обработчики кликов
         document.querySelectorAll('.faction-card').forEach(card => {
             card.addEventListener('click', () => {
                 const factionId = card.dataset.faction;
@@ -484,7 +682,7 @@ class UIManager {
 
     static showFactionDetails(factionId) {
         const faction = factionsData.find(f => f.id === factionId);
-
+        
         if (!faction) return;
 
         const factionModal = document.getElementById('factionModal');
@@ -497,7 +695,9 @@ class UIManager {
         factionModalContent.innerHTML = `
             <div class="faction-header">
                 <div class="faction-icon-large" style="background: ${faction.color}20; color: ${faction.color}">
+                    
                 </div>
+                
             </div>
 
             <div class="faction-features">
@@ -508,6 +708,10 @@ class UIManager {
                         <span>${feature}</span>
                     </div>
                 `).join('')}
+            </div>
+
+            <div class="faction-requirements">
+                
             </div>
         `;
 
@@ -556,6 +760,7 @@ class UIManager {
     }
 
     static setupModalCloseHandlers() {
+        // Закрытие по кнопке
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', () => {
                 const modal = btn.closest('.modal');
@@ -563,6 +768,7 @@ class UIManager {
             });
         });
 
+        // Закрытие по клику на фон
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
@@ -571,6 +777,7 @@ class UIManager {
             });
         });
 
+        // Закрытие по Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal.active').forEach(modal => {
@@ -581,9 +788,11 @@ class UIManager {
     }
 
     static showSupportPaymentModal(plan, isRenewal) {
+        // Получаем цену в текущей валюте
         const pricingType = isRenewal ? 'renew' : 'new';
         const amount = pricingData[pricingType][plan][currentCurrency];
 
+        // Форматируем валюту
         const symbols = {
             UAH: 'грн',
             RUB: 'руб',
@@ -594,6 +803,7 @@ class UIManager {
             ? `$${amount.toFixed(2)}`
             : `${amount} ${symbols[currentCurrency]}`;
 
+        // Обновляем данные в модальном окне
         const productName = document.getElementById('supportProductName');
         const priceElement = document.getElementById('supportPrice');
         const userIdElement = document.getElementById('supportUserId');
@@ -620,16 +830,23 @@ class UIManager {
             isRenewalElement.value = isRenewal;
         }
 
+        // Показываем модальное окно
         const supportPaymentModal = document.getElementById('supportPaymentModal');
         if (supportPaymentModal) {
             this.showModal(supportPaymentModal);
 
+            // Добавляем обработчик для кнопки "Перейти в поддержку"
             const goToSupportBtn = document.getElementById('goToSupportBtn');
             if (goToSupportBtn) {
                 goToSupportBtn.href = `https://t.me/mr_helpers_bot`;
             }
         }
 
+        // Обновляем глобальные переменные для отслеживания
+        currentPaymentPlan = plan;
+        currentPaymentIsRenewal = isRenewal;
+
+        // Автоматически переключаем на тарифы для продления
         const pricingToggle = document.getElementById('pricingToggle');
         if (pricingToggle && !pricingToggle.checked) {
             pricingToggle.checked = true;
@@ -638,6 +855,8 @@ class UIManager {
     }
 
     static initEventListeners() {
+        console.log('Инициализация обработчиков событий...');
+
         // Инициализируем переключатель валюты
         this.initCurrencySwitcher();
 
@@ -658,7 +877,105 @@ class UIManager {
             });
         });
 
-        // Кнопка поддержки
+
+        // Кнопка промокода
+        const promoBtn = document.getElementById('promoBtn');
+        if (promoBtn) {
+            promoBtn.addEventListener('click', () => {
+                const promoModal = document.getElementById('promoModal');
+                const promoCode = document.getElementById('promoCode');
+                if (promoModal) {
+                    this.showModal(promoModal);
+                    if (promoCode) promoCode.focus();
+                }
+            });
+        }
+
+        // Активация промокода
+        const activatePromoBtn = document.getElementById('activatePromoBtn');
+        if (activatePromoBtn) {
+            activatePromoBtn.addEventListener('click', async () => {
+                const promoCodeInput = document.getElementById('promoCode');
+                const code = promoCodeInput ? promoCodeInput.value.trim().toUpperCase() : '';
+
+                if (!code) {
+                    Utils.showToast('Введите промокод', 'error');
+                    return;
+                }
+
+                // Показываем индикатор загрузки
+                activatePromoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверка...</span>';
+                activatePromoBtn.disabled = true;
+
+                try {
+                    // Проверяем промокод
+                    const promoData = promoCodes[code];
+
+                    if (!promoData) {
+                        Utils.showToast('Промокод не найден', 'error');
+                        return;
+                    }
+
+                    if (promoData.used) {
+                        Utils.showToast('Промокод уже использован', 'error');
+                        return;
+                    }
+
+                    // Используем промокод
+                    promoCodes[code].used = true;
+
+                    // Обновляем подписку пользователя
+                    if (userData) {
+                        const currentDate = userData.daysgow ? new Date(userData.daysgow) : new Date();
+                        const newDate = new Date(currentDate);
+                        newDate.setDate(newDate.getDate() + promoData.days);
+
+                        userData.daysgow = newDate.toISOString().split('T')[0];
+                        userData.status = 'active';
+
+                        // Сохраняем в хранилище
+                        userStorage.updateUser(currentUser.id, userData);
+
+                        // Добавляем запись о платеже
+                        userStorage.addPayment(currentUser.id, {
+                            amount: 0,
+                            currency: 'USD',
+                            description: `Промокод: ${code} (${promoData.days} дней)`,
+                            status: 'success',
+                            type: 'promo'
+                        });
+
+                        // Обновляем UI
+                        await this.loadUserProfile();
+                        Utils.showToast(`Промокод активирован! +${promoData.days} дней`, 'success');
+
+                        const promoModal = document.getElementById('promoModal');
+                        if (promoModal) this.hideModal(promoModal);
+                        if (promoCodeInput) promoCodeInput.value = '';
+                    }
+                } catch (error) {
+                    console.error('Ошибка активации промокода:', error);
+                    Utils.showToast('Ошибка активации промокода', 'error');
+                } finally {
+                    // Восстанавливаем кнопку
+                    activatePromoBtn.innerHTML = '<i class="fas fa-check"></i><span>Активировать</span>';
+                    activatePromoBtn.disabled = false;
+                }
+            });
+        }
+
+        // Кнопка уведомлений
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        if (notificationsBtn) {
+            notificationsBtn.addEventListener('click', () => {
+                const notificationsModal = document.getElementById('notificationsModal');
+                if (notificationsModal) {
+                    this.showModal(notificationsModal);
+                }
+            });
+        }
+
+        // Кнопка техподдержки
         const supportBtn = document.getElementById('supportBtn');
         if (supportBtn) {
             supportBtn.addEventListener('click', () => {
@@ -706,72 +1023,13 @@ class UIManager {
             tg.onEvent('invoiceClosed', (event) => {
                 if (event.status === 'paid') {
                     Utils.showToast('Платеж успешно обработан!', 'success');
+
+                    // Здесь можно добавить логику обработки реального платежа
                     setTimeout(() => {
                         Utils.showToast('Подписка активирована', 'success');
                     }, 1000);
                 }
             });
-        }
-    }
-}
-
-// Работа с Supabase
-class SupabaseManager {
-    static async getUserByIdtg(idtg) {
-        if (!supabase) return null;
-
-        try {
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('idtg', idtg)
-                .single();
-
-            if (error && error.code !== 'PGRST116') {
-                throw error;
-            }
-
-            return data;
-        } catch (error) {
-            console.error('Ошибка загрузки пользователя:', error);
-            return null;
-        }
-    }
-
-    static async createUser(userData) {
-        if (!supabase) return null;
-
-        try {
-            const { data, error } = await supabase
-                .from('users')
-                .insert([userData])
-                .select()
-                .single();
-
-            if (error) throw error;
-            return data;
-        } catch (error) {
-            console.error('Ошибка создания пользователя:', error);
-            return null;
-        }
-    }
-
-    static async updateUser(idtg, updates) {
-        if (!supabase) return null;
-
-        try {
-            const { data, error } = await supabase
-                .from('users')
-                .update(updates)
-                .eq('idtg', idtg)
-                .select()
-                .single();
-
-            if (error) throw error;
-            return data;
-        } catch (error) {
-            console.error('Ошибка обновления пользователя:', error);
-            return null;
         }
     }
 }
@@ -787,48 +1045,69 @@ async function initApp() {
             tg.enableClosingConfirmation();
             tg.setHeaderColor('#0F172A');
             tg.setBackgroundColor('#0F172A');
+
             console.log('Telegram Web App инициализирован');
         }
 
-        // Получаем данные пользователя из Telegram
+        // Получаем данные пользователя
         let tgUser = null;
         if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
             tgUser = tg.initDataUnsafe.user;
         } else {
-            // Только для разработки - показываем ошибку
-            console.error('Telegram пользователь не найден');
-            Utils.showToast('Приложение должно быть запущено через Telegram', 'error');
-            return;
+            // Тестовые данные
+            console.warn('Telegram пользователь не найден, используем тестовые данные');
+            tgUser = {
+                id: 0,
+                first_name: '.',
+                username: 'null',
+                photo_url: null
+            };
         }
 
         currentUser = tgUser;
         console.log('Текущий пользователь:', currentUser);
 
-        // Загружаем пользователя из Supabase
-        userData = await SupabaseManager.getUserByIdtg(currentUser.id);
+        // Загружаем или создаем пользователя
+        userData = userStorage.getUser(currentUser.id);
 
         if (!userData) {
-            console.log('Создание нового пользователя в Supabase...');
+            console.log('Создание нового пользователя...');
             const newUserData = {
-                idtg: currentUser.id,
+                id: currentUser.id,
                 name: currentUser.first_name || 'Пользователь',
                 telegram: currentUser.username || null,
+                idtg: currentUser.id,
                 status: 'active',
-                key: null, // Ключ будет сгенерирован администратором
-                daysgov: null,
-                subscription_active: false,
+                key: Utils.generateKey(),
+                daysgow: null,
+                hasSubscription: false,
+                autoPayment: false,
+                launcherUrl: 'https://github.com/galebxkwn/Jdskvehv/raw/refs/heads/main/SR%20Launcher_setup.exe',
                 registration_date: new Date().toISOString().split('T')[0]
             };
 
-            userData = await SupabaseManager.createUser(newUserData);
+            userData = userStorage.createUser(newUserData);
 
-            if (userData) {
-                Utils.showToast('Добро пожаловать в GOV Helper!', 'success', '🎉 Приветствие');
+            // Добавляем тестовые платежи
+            userStorage.addPayment(currentUser.id, {
+                amount: 249,
+                currency: 'UAH',
+                description: 'Подписка на 30 дней',
+                status: 'success',
+                plan: 30,
+                type: 'new'
+            });
+
+            setTimeout(() => {
+                // Utils.showToast('Добро пожаловать в GOV Helper!', 'success', '🎉 Приветствие');
+                // Utils.showToast('Используйте промокод WELCOME2024', 'info', '🎁 Бонус');
+            }, 500);
+        } else {
+            // Обновляем лаунчер ссылку если ее нет
+            if (!userData.launcherUrl) {
+                userData.launcherUrl = 'https://github.com/galebxkwn/Jdskvehv/raw/refs/heads/main/SR%20Launcher_setup.exe';
+                userStorage.updateUser(currentUser.id, userData);
             }
-        }
-
-        if (!userData) {
-            throw new Error('Не удалось загрузить или создать пользователя');
         }
 
         console.log('Данные пользователя:', userData);
@@ -847,7 +1126,7 @@ async function initApp() {
 
     } catch (error) {
         console.error('Ошибка инициализации приложения:', error);
-        Utils.showToast("Ошибка загрузки приложения", 'error');
+        Utils.showToast("Ошибка загрузки приложения");
     }
 }
 
@@ -862,10 +1141,11 @@ if (document.readyState === 'loading') {
 window.app = {
     currentUser,
     userData,
+    userStorage,
     Utils,
     UIManager,
-    SupabaseManager,
     pricingData,
     factionsData,
+    promoCodes,
     currentCurrency
 };
