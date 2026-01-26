@@ -1,1531 +1,871 @@
-const buyBtn = document.getElementById("buyBtn");
+// Инициализация Telegram Web App
+const tg = window.Telegram.WebApp;
+let currentUser = null;
+let userData = null;
+let currentCurrency = localStorage.getItem('gov_currency') || 'UAH';
+let pricingMode = 'new'; // 'new' | 'renew'
 
-buyBtn.addEventListener("click", () => {
-    tg.payments.openInvoice({
-        title: "GOV Helper — 30 дней",
-        description: "Подписка",
-        currency: "XTR",
-        prices: [{ label: "Подписка", amount: 260 }],
-        payload: "pass_30_days"
-    });
-});
+// Конфигурация Supabase
+const SUPABASE_URL = 'https://wgxkflgdjzqyengrmlsb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneGtmbGdkanpxeWVuZ3JtbHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4OTA2MTUsImV4cCI6MjA4MzQ2NjYxNX0.fM7_sOJCZ9SEZt73sABCE4NsXjnfVcs2h3usaFoNpf0';
 
-document.querySelector(".bottom-nav").addEventListener("click", (e) => {
-  const item = e.target.closest(".nav-item");
-  if (!item) return;
+// Инициализация Supabase клиента
+const supabase = window.supabase ?
+    window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-
-  item.classList.add("active");
-  document.getElementById(item.dataset.section).classList.add("active");
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const supportBtn = document.querySelector(".btn-support");
-  if (supportBtn) {
-    supportBtn.addEventListener("click", () => {
-      window.location.href = "https://t.me/SR_Helper_RadmirRP_Bot";
-    });
-  }
-
-});
-
-function getDaysLeft(startDate, totalDays) {
-  const start = new Date(startDate);
-  const end = new Date(start);
-  end.setDate(start.getDate() + totalDays); 
-  const today = new Date();
-
-  const diff = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
-  return diff > 0 ? diff : 0; 
-}
-
-document.querySelectorAll(".info-tab").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".info-tab").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".info-box").forEach(box => box.classList.remove("active"));
-
-    btn.classList.add("active");
-    document.getElementById(btn.dataset.target).classList.add("active");
-  });
-});
-
-const currentUserId = window.currentUserId;
-// const currentUserId = 6700728917;
-
-const BIN_URL_A = "https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest";
-
-const BIN_URL = "https://api.jsonbin.io/v3/b/68a9a92043b1c97be9266774/latest";
-const API_KEY = "$2a$10$Dz1aHgMBI1fp1vjHgzv4KuScT5dgtyLfpRCxBszMOg6Zv/xOdJ0K6"; 
-
-fetch(BIN_URL, {
-  headers: {
-    "X-Master-Key": API_KEY 
-  }
-})
-  .then(res => res.json())
-  .then(data => {
-    const users = data.record.users;
-    window.allUsers = users;
-    const user = users.find(u => u.id === currentUserId);
-
-      if (user) {
-
-      // 🔥 Проверка бана
-      if (user.ban && user.ban.status === true) {
-          showBanScreen(user.ban);
-          return; // полностью останавливаем работу приложения
-      }
-      
-      document.querySelector(".menu-item .fa-key").parentNode.innerHTML = `
-        <span class="fa-solid fa-key"></span> 
-        Ключ: <span id="userKey">${user.key}</span>
-        <i id="copyKeyBtn" class="fa-solid fa-copy" style="cursor:pointer; margin-left:8px;"></i>
-      `;
-
-      const buy1Left = getDaysLeft(user.buy1.start, user.buy1.days);
-
-      
-      document.querySelector(".fa-basket-shopping").parentNode.innerHTML =
-        `<span class="fa-solid fa-basket-shopping"></span> Доступные подписки:<br>
-         GOV Helper: ${buy1Left} дн`;
-    } else {
-      console.error("Пользователь не найден");
+// Цены в разных валютах
+const pricingData = {
+    new: {
+        15: { UAH: 99, RUB: 188, USD: 2.30 },
+        30: { UAH: 249, RUB: 475, USD: 5.90 },
+        365: { UAH: 1999, RUB: 3799, USD: 47.30 }
+    },
+    renew: {
+        15: { UAH: 149, RUB: 285, USD: 3.50 },
+        30: { UAH: 299, RUB: 570, USD: 7.00 },
+        365: { UAH: 2499, RUB: 4750, USD: 59.00 }
     }
-  })
-  .catch(err => console.error("Ошибка загрузки JSON:", err));
+};
 
+// Данные фракций
+const factionsData = [
+    {
+        id: 'mvd',
+        name: 'МВД',
+        fullName: 'Министерство Внутренних Дел',
+        icon: 'fas fa-shield-alt',
+        color: '#3B82F6',
+        features: ['в разработке'],
+        status: 'available'
+    },
+    {
+        id: 'fsb',
+        name: 'ФСБ',
+        fullName: 'Федеральная Служба Безопасности',
+        icon: 'fas fa-user-secret',
+        color: '#EF4444',
+        features: ['в разработке'],
+        status: 'available'
+    },
+    {
+        id: 'mz',
+        name: 'МЗ',
+        fullName: 'Министерство Здравоохранения',
+        icon: 'fas fa-heart-pulse',
+        color: '#10B981',
+        features: ['в разработке'],
+        status: 'available'
+    },
+    {
+        id: 'mo',
+        name: 'МО',
+        fullName: 'Министерство Обороны',
+        icon: 'fas fa-jet-fighter',
+        color: '#8B5CF6',
+        features: ['в разработке'],
+        status: 'available'
+    },
+    {
+        id: 'fsin',
+        name: 'ФСИН',
+        fullName: 'Федеральная Служба Исполнения Наказаний',
+        icon: 'fas fa-gavel',
+        color: '#F59E0B',
+        features: ['в разработке'],
+        status: 'available'
+    },
+    {
+        id: 'government',
+        name: 'Пра-во',
+        fullName: 'Правительство',
+        icon: 'fas fa-landmark',
+        color: '#6366F1',
+        features: ['в разработке'],
+        status: 'available'
+    },
+    {
+        id: 'trk',
+        name: 'ТРК',
+        fullName: 'ТРК "Ритм"',
+        icon: 'fas fa-tower-broadcast',
+        color: '#EC4899',
+        features: ['в разработке'],
+        status: 'available'
+    }
+];
 
-fetch(BIN_URL_A, {
-  headers: { "X-Master-Key": API_KEY }
-})
-  .then(res => res.json())
-  .then(data => {
-    const admins = data.record.admins;
-    window.currentAdminList = admins; 
-    const admin = admins.find(a => a.id === currentUserId);
-    window.currentAdmin = admin;
-    showAdminButtons();
-
-    if (admin && admin.level >= 3) {
-      const bottomNav = document.querySelector(".bottom-nav");
-
-      if (!document.querySelector(".nav-item[data-section='admin']")) {
-        const adminTab = document.createElement("div");
-        adminTab.className = "nav-item";
-        adminTab.dataset.section = "admin";
-        adminTab.innerHTML = `
-          <i class="fa-solid fa-lock nav-icon"></i>
-          <div class="nav-label">ADM</div>
-        `;
-        bottomNav.appendChild(adminTab);
-
-        const adminSection = document.createElement("div");
-        adminSection.id = "admin";
-        adminSection.className = "section";
-        adminSection.innerHTML = `
-          <div class="admin-panel">
-            <h2>Админ-панель</h2>
-            <div class="admin-menu">
-              <button class="admin-tab active" data-tab="users">Пользователи</button>
-              <button class="admin-tab" data-tab="buyers">Покупатели</button>
-              <button class="admin-tab" data-tab="bans">Блокировки</button>
-              <button class="admin-tab" data-tab="logs">Логи</button>
-              <button class="admin-tab" data-tab="admins">Админы</button>
-              <button class="admin-tab" data-tab="promo">Промо</button>
+// Утилитарные функции
+class Utils {
+    static showToast(message, type = 'info', title = '') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <div class="toast-icon">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
             </div>
-            <div id="adminContent" class="admin-content"></div>
-          </div>
-          
+            <div class="toast-content">
+                ${title ? `<div class="toast-title">${title}</div>` : ''}
+                <div class="toast-message">${message}</div>
+            </div>
         `;
-        bottomNav.insertAdjacentElement("beforebegin", adminSection);
-        bottomNav.insertAdjacentElement("beforebegin", adminSection);
-      }
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('hiding');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
     }
-  })
-  .catch(err => console.error("Ошибка загрузки ADMINS JSON:", err));
 
-
-
-document.addEventListener("click", (e) => {
-  if (e.target && e.target.id === "copyKeyBtn") {
-    const keyText = document.getElementById("userKey").textContent;
-    navigator.clipboard.writeText(keyText).then(() => {
-      e.target.classList.remove("fa-copy");
-      e.target.classList.add("fa-check");
-      setTimeout(() => {
-        e.target.classList.remove("fa-check");
-        e.target.classList.add("fa-copy");
-      }, 1500);
-    }).catch(err => console.error("Ошибка копирования:", err));
-  }
-});
-
-function renderUsersList(users) {
-  if (!users || users.length === 0) {
-    return "<h3>Список пользователей</h3><p>Пользователей пока нет.</p>";
-  }
-
-  let html = `<h3>Список пользователей</h3>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Поиск..." 
-        style="width:40%; padding:5px 8px; font-size:13px; border-radius:4px; 
-        border:1px solid #444; background:#2b2b2b; color:#fff; outline:none;">
-    </div>
-  `;
-
-  users.forEach((u, index) => {
-    const buy1Left = getDaysLeft(u.buy1.start, u.buy1.days);
-
-    html += `
-      <div class="user-card">
-        <div class="user-header">
-          ${index + 1} - @${u.login || "нет"}
-          <i class="fa-solid fa-cog user-settings" data-id="${u.id}" style="float:right; cursor:pointer;"></i>
-        </div>
-        <div class="user-info">
-          <p><strong>ID:</strong> ${u.id}</p>
-          <p><strong>Ключ:</strong> <span class="user-key">${u.key}</span>
-             </p>
-          <p><strong><span class="fa-solid fa-basket-shopping"></span> GOV Helper:</strong> ${buy1Left} дней</p>
-        </div>
-      </div>
-    `;
-  });
-
-  return html;
-}
-
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("admin-tab")) {
-    document.querySelectorAll(".admin-tab").forEach(btn => btn.classList.remove("active"));
-    e.target.classList.add("active");
-
-    const tab = e.target.dataset.tab;
-    const content = document.getElementById("adminContent");
-
-    
-
-    if (tab === "users") {
-      content.innerHTML = renderUsersList(window.allUsers || []);
-
-      const search = document.getElementById("searchInput");
-      search.addEventListener("input", () => {
-        const query = search.value.trim().toLowerCase();
-        const filtered = (window.allUsers || []).filter(u => 
-          u.id.toString().includes(query) || 
-          (u.login && u.login.toLowerCase().includes(query))
-        );
-        content.innerHTML = renderUsersList(filtered);
-        document.getElementById("searchInput").value = query;
-      });
-
-  } else if (tab === "buyers") {
-    const buyers = (window.allUsers || []).filter(u => {
-      if (!u.buy1) return false;
-      const left = getDaysLeft(u.buy1.start, u.buy1.days);
-      return left > 0;
-    });
-
-    content.innerHTML = renderBuyersList(buyers);
-
-    const search = document.getElementById("searchInput");
-    search.addEventListener("input", () => {
-      const query = search.value.trim().toLowerCase();
-
-      const filtered = buyers.filter(u =>
-        u.id.toString().includes(query) ||
-        (u.login && u.login.toLowerCase().includes(query))
-      );
-
-      content.innerHTML = renderBuyersList(filtered);
-      document.getElementById("searchInput").value = query;
-    });
-    } else if (tab === "bans") {
-      content.innerHTML = renderBansList(window.allUsers || []);
-
-      const search = document.getElementById("searchInput");
-      search.addEventListener("input", () => {
-        const query = search.value.trim().toLowerCase();
-        const filtered = (window.allUsers || []).filter(u => 
-          u.ban?.status === true &&
-          (
-            u.id.toString().includes(query) || 
-            (u.login && u.login.toLowerCase().includes(query))
-          )
-        );
-        content.innerHTML = renderBansList(filtered);
-        document.getElementById("searchInput").value = query;
-      });
-
-    } else if (tab === "logs") {
-      content.innerHTML = "<h3>Загрузка логов...</h3>";
-
-      loadLogsFromBin().then(logs => {
-        content.innerHTML = renderLogs(logs);
-
-        const search = document.getElementById("searchInput");
-        search.addEventListener("input", () => {
-          const query = search.value.trim().toLowerCase();
-          const filtered = (logs || []).filter(log => 
-            log.admin.toLowerCase().includes(query) ||
-            log.action.toLowerCase().includes(query) ||
-            log.time.toLowerCase().includes(query)
-          );
-          content.innerHTML = renderLogs(filtered);
-          document.getElementById("searchInput").value = query;
+    static formatDate(dateString) {
+        if (!dateString) return '--.--.----';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
         });
-      });
-
-    } else if (tab === "admins") {
-      content.innerHTML = renderAdminsList(window.currentAdminList || []);
-
-      const search = document.getElementById("searchInput");
-      search.addEventListener("input", () => {
-        const query = search.value.trim().toLowerCase();
-        const filtered = (window.currentAdminList || []).filter(a =>
-          a.id.toString().includes(query) ||
-          (a.username && a.username.toLowerCase().includes(query)) ||
-          (a.nickname && a.nickname.toLowerCase().includes(query)) ||
-          (a.level && a.level.toString().includes(query))
-        );
-        content.innerHTML = renderAdminsList(filtered);
-        document.getElementById("searchInput").value = query;
-      });
     }
 
-    else if (tab === "promo") {
-      content.innerHTML = "<h3>Загрузка промо...</h3>";
-
-      renderPromoAdmin().then(html => {
-        content.innerHTML = html;
-      });
-    }
-  }
-});
-
-let selectedUserId = null;
-let selectedSection = null;
-
-const modal = document.getElementById("modal");
-const modalTitle = document.getElementById("modalTitle");
-const modalBody = document.getElementById("modalBody");
-
-function renderModalButtons(section) {
-  modalBody.innerHTML = "";
-
-  if (section === "users") {
-    modalBody.innerHTML = `
-      <button class="modal-btn" id="giveDaysBtn"><span class="fa-solid fa-plus"></span> Выдать дни</button>
-      <button class="modal-btn" id="removeDaysBtn"><span class="fa-solid fa-minus"></span> Убрать дни</button>
-      <button class="modal-btn" id="copyIdBtn"><span class="fa-solid fa-clone"></span> Скопировать ID</button>
-      <button class="modal-btn danger" id="banUserBtn"><span class="fa-solid fa-user-lock"></span> Заблокировать</button>
-    `;
-  } else if (section === "buyers") {
-    modalBody.innerHTML = `
-      <button class="modal-btn" id="giveDaysBtn"><span class="fa-solid fa-plus"></span> Выдать дни</button>
-      <button class="modal-btn" id="removeDaysBtn"><span class="fa-solid fa-minus"></span> Убрать дни</button>
-      <button class="modal-btn" id="copyIdBtn"><span class="fa-solid fa-clone"></span> Скопировать ID</button>
-      <button class="modal-btn" id="resetHwidBtn"><span class="fa-solid fa-server"></span> Сбросить HWID</button>
-      <button class="modal-btn" id="giveAdminBtn"><span class="fa-solid fa-user-shield"></span> Выдать админку</button>
-      <button class="modal-btn danger" id="banUserBtn"><span class="fa-solid fa-user-lock"></span> Заблокировать</button>
-    `;
-  } else if (section === "bans") {
-    modalBody.innerHTML = `
-      <button class="modal-btn" id="removeDaysBtn"><span class="fa-solid fa-minus"></span> Убрать дни</button>
-      <button class="modal-btn" id="copyIdBtn"><span class="fa-solid fa-clone"></span> Скопировать ID</button>
-      <button class="modal-btn" id="unbanUserBtn"><span class="fa-solid fa-unlock"></span> Разблокировать</button>
-      <button class="modal-btn danger" id="deleteUserBtn"><span class="fa-solid fa-database"></span> Удалить с БД</button>
-    `;
-    } else if (section === "admins") {
-      modalBody.innerHTML = `
-        <button class="modal-btn" id="copyIdBtn"><span class="fa-solid fa-clone"></span> Скопировать ID</button>
-        <button class="modal-btn" id="editLevelBtn"><span class="fa-solid fa-arrow-up"></span> Изменить уровень</button>
-        <button class="modal-btn danger" id="removeAdminBtn"><span class="fa-solid fa-user-xmark"></span> Забрать админку</button>
-      `;
-  }
-
-  attachModalEvents();
-}
-
-function attachModalEvents() {
-  if (document.getElementById("giveDaysBtn")) {
-    document.getElementById("giveDaysBtn").onclick = () => openGiveDaysFlow(selectedUserId);
-  }
-  if (document.getElementById("removeDaysBtn")) {
-    document.getElementById("removeDaysBtn").onclick = () => openRemoveDaysFlow(selectedUserId);
-  }
-  if (document.getElementById("copyIdBtn")) {
-    document.getElementById("copyIdBtn").onclick = () => copyUserId(selectedUserId);
-  }
-  if (document.getElementById("giveAdminBtn")) {
-    document.getElementById("giveAdminBtn").onclick = () => startGiveAdminFlow(selectedUserId);
-  }
-  if (document.getElementById("removeAdminBtn")) {
-    document.getElementById("removeAdminBtn").onclick = () => removeAdmin(selectedUserId);
-  }
-  if (document.getElementById("editLevelBtn")) {
-    document.getElementById("editLevelBtn").onclick = () => changeAdminLevel(selectedUserId);
-  }
-  if (document.getElementById("resetHwidBtn")) {
-    document.getElementById("resetHwidBtn").onclick = () => resetUserHwid(selectedUserId);
-  }
-  if (document.getElementById("banUserBtn")) {
-    document.getElementById("banUserBtn").onclick = () => openBanFlow(selectedUserId);
-  }
-  if (document.getElementById("unbanUserBtn")) {
-    document.getElementById("unbanUserBtn").onclick = () => unbanUser(selectedUserId);
-  }
-  if (document.getElementById("deleteUserBtn")) {
-    document.getElementById("deleteUserBtn").onclick = () => alert(`Удалить из БД ID: ${selectedUserId}`);
-  }
-}
-
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("user-settings")) {
-    selectedUserId = e.target.dataset.id;
-
-    const activeTab = document.querySelector(".admin-tab.active");
-    selectedSection = activeTab ? activeTab.dataset.tab : "users";
-
-    modalTitle.textContent = `Управление пользователем ID: ${selectedUserId}`;
-    renderModalButtons(selectedSection);
-
-    modal.style.display = "flex";
-  }
-});
-
-document.querySelector(".modal .close").addEventListener("click", () => {
-  modal.style.display = "none";
-});
-window.addEventListener("click", (e) => {
-  if (e.target === modal) modal.style.display = "none";
-});
-
-function renderBuyersList(buyers) {
-  if (!buyers || buyers.length === 0) {
-    return "<h3>Активных покупателей нет</h3>";
-  }
-
-  let html = `<h3>Активные покупатели</h3>`;
-
-  buyers.forEach((u, index) => {
-    const buy1Left = getDaysLeft(u.buy1.start, u.buy1.days);
-
-    html += `
-      <div class="user-card">
-        <div class="user-header">
-          ${index + 1} - @${u.login || "нет"}
-          <i class="fa-solid fa-cog user-settings" data-id="${u.id}"></i>
-        </div>
-        <div class="user-info">
-          <p><strong>ID:</strong> ${u.id}</p>
-          <p><strong>Осталось:</strong> ${buy1Left} дней</p>
-          <p><strong>HWID:</strong> ${u.hwid || "-"}</p>
-        </div>
-      </div>
-    `;
-  });
-
-  return html;
-}
-
-function renderBansList(users) {
-  let html = `<h3>Заблокированные пользователи:</h3>
-  <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Поиск..."
-        style="width:40%; padding:5px 8px; font-size:13px; border-radius:4px;
-        border:1px solid #444; background:#2b2b2b; color:#fff; outline:none;">
-    </div>`;
-
-  const banned = users.filter(u => u.ban && u.ban.status === true);
-
-  if (banned.length === 0) {
-    return "<h3>Нет заблокированных пользователей.</h3>";
-  }
-
-  banned.forEach(u => {
-    let banDuration = "—";
-
-    if (u.ban.until === null) {
-      banDuration = "навсегда";
-    } else if (!isNaN(u.ban.until)) {
-      const endDate = new Date(Number(u.ban.until));
-      const today = new Date();
-      const diff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-      banDuration = diff > 0 ? `${diff} дн` : "срок истёк";
+    static formatDateTime(dateString) {
+        if (!dateString) return '--.--.---- --:--';
+        const date = new Date(dateString);
+        return date.toLocaleString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     }
 
-    let bannedBy = u.ban.by?.nickname 
-    ? u.ban.by.nickname 
-    : (u.ban.by?.login ? `@${u.ban.by.login}` : "неизвестно");
+    static formatCurrency(amount, currency) {
+        const symbols = {
+            UAH: 'грн',
+            RUB: 'руб',
+            USD: '$'
+        };
 
-    html += `
-      <div class="user-card" style="border-left: 4px solid #d9534f;">
-      <i class="fa-solid fa-cog user-settings" data-id="${u.id}" style="float:right; cursor:pointer;"></i>
-        <div class="user-header" style="color:#ff5555;">
-           @${u.username || u.login || "нет"}
-        </div>
-        <div class="user-info">
-          <p><strong>ID:</strong> ${u.id}</p>
-          <p><strong>Причина:</strong> ${u.ban.reason || "—"}</p>
-          <p><strong>Срок:</strong> ${banDuration}</p>
-          <p><strong>Забанил:</strong> ${bannedBy}</p>
-        </div>
-      </div>
-    `;
-  });
-
-  return html;
-}
-
-function openGiveDaysFlow(userId) {
-  modalBody.innerHTML = `
-    <h4>Выберите продукт:</h4>
-    <button class="modal-btn" id="product1Btn">GOV Helper</button>
-    <button class="modal-btn danger" id="cancelFlow">Отмена</button>
-  `;
-  document.getElementById("product1Btn").onclick = () => askDays(userId, "buy1", "GOV Helper");
-  document.getElementById("cancelFlow").onclick = () => renderModalButtons(selectedSection);
-}
-
-function askDays(userId, productKey, productName) {
-  modalBody.innerHTML = `
-    <h4>Введите количество дней для ${productName}:</h4>
-    <div class="promo-input" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-      <input type="number" id="daysInput" placeholder="Кол-во дней" style="flex:1; padding:6px; border-radius:6px; border:none;">
-      <span class="promo-icon confirm" id="confirmDays" style="cursor:pointer;">✔</span>
-      <span class="promo-icon cancel" id="cancelDays" style="cursor:pointer;">✖</span>
-    </div>
-  `;
-
-  document.getElementById("confirmDays").onclick = () => {
-    const days = parseInt(document.getElementById("daysInput").value);
-    if (isNaN(days) || days <= 0) {
-      alert("Введите корректное число дней");
-      return;
+        if (currency === 'USD') {
+            return `$${parseFloat(amount).toFixed(2)}`;
+        }
+        return `${amount} ${symbols[currency] || currency}`;
     }
 
-    const user = (window.allUsers || []).find(u => u.id == userId);
-    if (user) {
-      const daysLeft = getDaysLeft(user[productKey].start, user[productKey].days);
-      const newTotal = daysLeft + days;
-
-      user[productKey].days = newTotal;
-      user[productKey].start = new Date().toISOString().split("T")[0];
-      user[productKey].issuedBy = window.currentAdmin?.nickname || "unknown";
-
-      alert(`Пользователю ${user.login || user.id} выдано +${days} дней (${productName}). Теперь ${newTotal} дней осталось. Выдал: ${user[productKey].issuedBy}`);
-      addLog(`Выдал +${days} дней ${productName} пользователю ${user.login} | ${user.id}`);
-
-      saveUsersToBin(window.allUsers);
+    static async copyToClipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            this.showToast('Скопировано в буфер обмена', 'success');
+            return true;
+        } catch (err) {
+            this.showToast('Ошибка копирования', 'error');
+            return false;
+        }
     }
 
-  document.getElementById("cancelDays").onclick = () => renderModalButtons(selectedSection);
-}}
-
-async function saveUsersToBin(users) {
-  try {
-    const res = await fetch("https://api.jsonbin.io/v3/b/68a9a92043b1c97be9266774", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": API_KEY 
-      },
-      body: JSON.stringify({ users })
-    });
-
-    if (!res.ok) {
-      throw new Error("Ошибка сохранения: " + res.status);
+    static debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
-    const data = await res.json();
-    console.log("Данные сохранены:", data);
-  } catch (err) {
-    console.error("Ошибка сохранения:", err);
-  }
-}
-
-function openRemoveDaysFlow(userId) {
-  modalBody.innerHTML = `
-    <h4>Выберите продукт:</h4>
-    <button class="modal-btn" id="product1Btn">GOV Helper</button>
-    <button class="modal-btn danger" id="cancelFlow">Отмена</button>
-  `;
-
-  document.getElementById("product1Btn").onclick = () => askRemoveDays(userId, "buy1", "GOV Helper");
-  document.getElementById("cancelFlow").onclick = () => renderModalButtons(selectedSection);
-}
-
-function askRemoveDays(userId, productKey, productName) {
-  modalBody.innerHTML = `
-    <h4>Сколько дней убрать у ${productName}:</h4>
-    <div class="promo-input" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-      <input type="number" id="daysInput" placeholder="Кол-во дней" style="flex:1; padding:6px; border-radius:6px; border:none;">
-      <span class="promo-icon confirm" id="confirmDays" style="cursor:pointer;">✔</span>
-      <span class="promo-icon cancel" id="cancelDays" style="cursor:pointer;">✖</span>
-    </div>
-  `;
-
-  document.getElementById("confirmDays").onclick = () => {
-    const days = parseInt(document.getElementById("daysInput").value);
-    if (isNaN(days) || days <= 0) {
-      alert("Введите корректное число дней");
-      return;
+    static getDaysWord(days) {
+        if (days % 10 === 1 && days % 100 !== 11) return 'день';
+        if (days % 10 >= 2 && days % 10 <= 4 && (days % 100 < 10 || days % 100 >= 20)) return 'дня';
+        return 'дней';
     }
 
-    const user = (window.allUsers || []).find(u => u.id == userId);
-    if (user) {
-      
-      const daysLeft = getDaysLeft(user[productKey].start, user[productKey].days);
-
-      
-      let newTotal = daysLeft - days;
-      if (newTotal < 0) newTotal = 0;
-
-      
-      user[productKey].days = newTotal;
-      user[productKey].start = new Date().toISOString().split("T")[0];
-      user[productKey].issuedBy = window.currentAdmin?.nickname || "unknown";
-
-      alert(`У пользователя ${user.login || user.id} убрано ${days} дней (${productName}). Теперь осталось ${newTotal} дней.`);
-      addLog(`Убрал ${days} дней ${productName} у пользователя ${user.login} | ${user.id}`);
-
-      saveUsersToBin(window.allUsers);
+    static calculateDaysLeft(dateString) {
+        if (!dateString) return 0;
+        const targetDate = new Date(dateString);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const diffTime = targetDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays > 0 ? diffDays : 0;
     }
-    modal.style.display = "none";
-  };
-
-  document.getElementById("cancelDays").onclick = () => renderModalButtons(selectedSection);
 }
 
-function copyUserId(userId) {
-  navigator.clipboard.writeText(userId.toString())
-    .then(() => {
-      
-      alert(`ID ${userId} скопирован в буфер обмена`);
-    })
-    .catch(err => {
-      console.error("Ошибка копирования ID:", err);
-      alert("Не удалось скопировать ID ");
-    });
-}
+// Класс управления UI
+class UIManager {
+    static initTabNavigation() {
+        document.querySelectorAll('.tab-btn').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
 
-function resetUserHwid(userId) {
-  const user = (window.allUsers || []).find(u => u.id == userId);
-  if (!user) {
-    alert("Пользователь не найден ");
-    return;
-  }
+                document.querySelectorAll('.tab-btn').forEach(t => {
+                    t.classList.remove('active');
+                });
 
-  
-  user.hwid = null;
+                document.querySelectorAll('.page').forEach(p => {
+                    p.classList.remove('active');
+                });
 
-  
-  saveUsersToBin(window.allUsers);
+                tab.classList.add('active');
 
-  alert(`HWID у пользователя ${user.login || user.id} успешно сброшен`);
-  addLog(`Сбросил HWID у пользователя ${user.login} | ${user.id}`);
-}
+                const pageId = tab.dataset.tab;
+                const page = document.getElementById(pageId);
+                if (page) {
+                    page.classList.add('active');
 
-function openBanFlow(userId) {
-  modalBody.innerHTML = `
-    <h4>Введите срок наказания (в днях, -1 = навсегда):</h4>
-    <div class="promo-input" style="display:flex; gap:10px;">
-      <input type="number" id="banDaysInput" placeholder="Кол-во дней" style="flex:1; padding:6px; border-radius:6px; border:none;">
-      <span class="promo-icon confirm" id="confirmBanDays" style="cursor:pointer;">✔</span>
-      <span class="promo-icon cancel" id="cancelBanDays" style="cursor:pointer;">✖</span>
-    </div>
-  `;
-
-  document.getElementById("confirmBanDays").onclick = () => {
-    const days = parseInt(document.getElementById("banDaysInput").value);
-    if (isNaN(days)) {
-      alert("Введите корректный срок (-1 = навсегда)");
-      return;
-    }
-    askBanReason(userId, days);
-  };
-
-  document.getElementById("cancelBanDays").onclick = () => renderModalButtons(selectedSection);
-}
-
-function askBanReason(userId, days) {
-  modalBody.innerHTML = `
-    <h4>Укажите причину блокировки:</h4>
-    <div class="promo-input" style="display:flex; gap:10px;">
-      <input type="text" id="banReasonInput" placeholder="Причина" style="flex:1; padding:6px; border-radius:6px; border:none;">
-      <span class="promo-icon confirm" id="confirmBanReason" style="cursor:pointer;">✔</span>
-      <span class="promo-icon cancel" id="cancelBanReason" style="cursor:pointer;">✖</span>
-    </div>
-  `;
-
-  document.getElementById("confirmBanReason").onclick = () => {
-    const reason = document.getElementById("banReasonInput").value.trim();
-    if (!reason) {
-      alert("Укажите причину блокировки");
-      return;
-    }
-    confirmBan(userId, days, reason);
-  };
-
-  document.getElementById("cancelBanReason").onclick = () => renderModalButtons(selectedSection);
-}
-
-function confirmBan(userId, days, reason) {
-  modalBody.innerHTML = `
-    <h4>Подтверждение блокировки</h4>
-    <p><strong>ID:</strong> ${userId}</p>
-    <p><strong>Срок:</strong> ${days === -1 ? "навсегда" : days + " дн."}</p>
-    <p><strong>Причина:</strong> ${reason}</p>
-    <button class="modal-btn danger" id="applyBanBtn">Выдать наказание</button>
-    <button class="modal-btn" id="cancelFinalBan">Отмена</button>
-  `;
-
-  document.getElementById("applyBanBtn").onclick = () => {
-    const user = (window.allUsers || []).find(u => u.id == userId);
-    if (!user) {
-      alert("Пользователь не найден ");
-      return;
+                    if (pageId === 'factions') {
+                        this.loadFactions();
+                    } else if (pageId === 'contests') {
+                        this.updateContestTimer();
+                    } else if (pageId === 'profile') {
+                        this.loadUserProfile();
+                    } else if (pageId === 'main') {
+                        this.updateCurrencyDisplay();
+                    }
+                }
+            });
+        });
     }
 
-    
-    let until = null;
-    if (days > 0) {
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + days);
-      until = endDate.getTime();
-    }
-
-    user.ban = {
-      status: true,
-      reason: reason,
-      until: until, 
-      by: {
-        id: window.currentAdmin?.id || 0,
-        nickname: window.currentAdmin?.nickname || "Неизвестный админ"
-      }
-    };
-
-    saveUsersToBin(window.allUsers);
-
-    alert(`Пользователь ${user.login || user.id} заблокирован (${days === 0 ? "навсегда" : days + " дн."}).`);
-    addLog(`Заблокировал пользователя ${user.login} | ${user.id} на ${days === -1 ? "навсегда" : days + " дн."}. Причина: ${reason}`);
-
-    modal.style.display = "none";
-  };
-
-  document.getElementById("cancelFinalBan").onclick = () => renderModalButtons(selectedSection);
-}
-
-function unbanUser(userId) {
-  const user = (window.allUsers || []).find(u => u.id == userId);
-  if (!user) {
-    alert("Пользователь не найден");
-    return;
-  }
-
-  
-  if (!confirm(`Вы уверены, что хотите разблокировать ${user.login || user.id}?`)) {
-    return;
-  }
-
-  
-  delete user.ban;
-
-
-  saveUsersToBin(window.allUsers);
-
-  alert(` Пользователь ${user.login || user.id} успешно разблокирован`);
-  addLog(`Разблокировал пользователя ${user.login} | ${user.id}`);
-  modal.style.display = "none";
-}
-
-async function addLog(action) {
-  try {
-    // Загружаем актуальные логи
-    const latest = await loadLogsFromBin();
-
-    const now = new Date();
-    const logEntry = {
-      time: now.toLocaleString("ru-RU", { hour12: false }),
-      admin: window.currentAdmin?.nickname || "Неизвестный админ",
-      action
-    };
-
-    const logs = Array.isArray(latest) ? latest : [];
-    logs.unshift(logEntry);
-
-    await saveLogsToBin(logs);
-    console.log("✅ Лог добавлен:", logEntry);
-  } catch (err) {
-    console.error("Ошибка при добавлении лога:", err);
-  }
-}
-
-async function loadLogsFromBin() {
-  try {
-    const res = await fetch("https://api.jsonbin.io/v3/b/68821839ae596e708fbafe08/latest", {
-      method: "GET",
-      headers: { "X-Master-Key": API_KEY }
-    });
-
-    if (!res.ok) throw new Error("Ошибка загрузки: " + res.status);
-
-    const data = await res.json();
-    console.log("Ответ JSONBin:", data);
-
-    window.allLogs = data.record.logs || []; 
-    return window.allLogs;
-  } catch (err) {
-    console.error(" Ошибка загрузки логов:", err);
-    return [];
-  }
-}
-
-async function saveLogsToBin(logs) {
-  try {
-    const res = await fetch("https://api.jsonbin.io/v3/b/68821839ae596e708fbafe08", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": API_KEY
-      },
-      body: JSON.stringify({ logs })
-    });
-
-    if (!res.ok) throw new Error(`Ошибка сохранения: ${res.status}`);
-    console.log("✅ Логи успешно сохранены");
-  } catch (err) {
-    console.error("Ошибка сохранения логов:", err);
-  }
-}
-
-
-function renderLogs(logs) {
-  if (!Array.isArray(logs) || logs.length === 0) {
-    return "<h3>Логов пока нет.</h3>";
-  }
-
-  let html = `<h3>История действий:</h3>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Поиск..." 
-        style="width:40%; padding:5px 8px; font-size:13px; border-radius:4px; 
-        border:1px solid #444; background:#2b2b2b; color:#fff; outline:none;">
-    </div>
-  `;
-
-  logs.forEach(log => {
-    html += `
-      <div class="user-card" style="border-left:4px solid #2196f3;">
-        <div class="user-header" style="color:#4cafef;">${log.admin}</div>
-        <div class="user-info">
-          <p><strong>Время:</strong> ${log.time}</p>
-          <p><strong>Действие:</strong> ${log.action}</p>
-        </div>
-      </div>
-    `;
-  });
-  return html;
-}
-
-function renderAdminsList(admins) {
-  if (!admins || admins.length === 0) {
-    return "<p>Список админов пуст.</p>";
-  }
-
-  const sorted = admins.slice().sort((a, b) => b.level - a.level);
-
-  let html = `<h3>Администраторы:</h3>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Поиск..."
-        style="width:40%; padding:5px 8px; font-size:13px; border-radius:4px;
-        border:1px solid #444; background:#2b2b2b; color:#fff; outline:none;">
-    </div>
-  `;
-
-  sorted.forEach((a, index) => {
-    html += `
-      <div class="user-card">
-        <div class="user-header">
-          ${index + 1} - ${a.nickname || "Без имени"}
-          <i class="fa-solid fa-cog user-settings" data-id="${a.id}" style="cursor:pointer;"></i>
-        </div>
-        <div class="user-info">
-          <p><strong>ID:</strong> ${a.id}</p>
-          <p><strong>LEVEL:</strong> ${a.level}</p>
-        </div>
-      </div>
-    `;
-  });
-
-  return html;
-}
-
-
-function showAdminButtons() {
-  const launcherBtn = document.querySelector(".btn-launcher");
-  const onlineBtn = document.querySelector(".btn-online");
-
-  
-  if (launcherBtn) launcherBtn.style.display = "none";
-  if (onlineBtn) onlineBtn.style.display = "none";
-
-  
-  if (window.currentAdmin && window.currentAdmin.level >= 1) {
-    if (launcherBtn) launcherBtn.style.display = "block";
-    if (onlineBtn) onlineBtn.style.display = "block";
-  }
-}
-
-function startGiveAdminFlow(userId) {
-  modalBody.innerHTML = `
-    <h4>Укажите уровень админки (1–5):</h4>
-    <input type="number" id="adminLevelInput" min="1" max="5" placeholder="1-5" style="width:100%;padding:6px;border:none;border-radius:5px;margin-bottom:10px;">
-    <button class="modal-btn" id="nextStepAdmin">Далее</button>
-    <button class="modal-btn danger" id="cancelAdminFlow">Отмена</button>
-  `;
-  document.getElementById("nextStepAdmin").onclick = () => {
-    const level = parseInt(document.getElementById("adminLevelInput").value);
-    if (isNaN(level) || level < 1 || level > 5) {
-      alert("Введите корректный уровень (1–5)");
-      return;
-    }
-    askAdminNickname(userId, level);
-  };
-  document.getElementById("cancelAdminFlow").onclick = () => renderModalButtons(selectedSection);
-}
-
-function askAdminNickname(userId, level) {
-  modalBody.innerHTML = `
-    <h4>Введите ник для нового админа:</h4>
-    <input type="text" id="adminNickInput" placeholder="Никнейм" style="width:100%;padding:6px;border:none;border-radius:5px;margin-bottom:10px;">
-    <button class="modal-btn" id="confirmAdminBtn">Подтвердить</button>
-    <button class="modal-btn danger" id="cancelAdminFlow">Отмена</button>
-  `;
-
-  document.getElementById("confirmAdminBtn").onclick = () => {
-    const nickname = document.getElementById("adminNickInput").value.trim();
-    if (!nickname) {
-      alert("Введите никнейм");
-      return;
-    }
-    confirmGiveAdmin(userId, level, nickname);
-  };
-  document.getElementById("cancelAdminFlow").onclick = () => renderModalButtons(selectedSection);
-}
-
-function confirmGiveAdmin(userId, level, nickname) {
-  modalBody.innerHTML = `
-    <h4>Подтверждение</h4>
-    <p>ID: ${userId}</p>
-    <p>Уровень: ${level}</p>
-    <p>Ник: ${nickname}</p>
-    <button class="modal-btn" id="applyGiveAdmin">Выдать админку</button>
-    <button class="modal-btn danger" id="cancelAdminFlow">Отмена</button>
-  `;
-
-  document.getElementById("applyGiveAdmin").onclick = async () => {
-    const newAdmin = { id: Number(userId), level, nickname };
-    const admins = window.currentAdminList || [];
-    if (admins.some(a => a.id === newAdmin.id)) {
-      alert("Этот пользователь уже является админом.");
-      return;
-    }
-    admins.push(newAdmin);
-    await saveAdminsToBin(admins);
-    addLog(`Выдал админку (уровень ${level}) пользователю ${nickname} | ${userId}`);
-    alert("Админ успешно добавлен.");
-    modal.style.display = "none";
-  };
-  document.getElementById("cancelAdminFlow").onclick = () => renderModalButtons(selectedSection);
-}
-
-function changeAdminLevel(adminId) {
-  modalBody.innerHTML = `
-    <h4>Введите новый уровень (1–5):</h4>
-    <input type="number" id="newAdminLevel" min="1" max="5" placeholder="1-5" style="width:100%;padding:6px;border:none;border-radius:5px;margin-bottom:10px;">
-    <button class="modal-btn" id="applyLevelChange">Сохранить</button>
-    <button class="modal-btn danger" id="cancelLevelChange">Отмена</button>
-  `;
-  document.getElementById("applyLevelChange").onclick = async () => {
-    const newLevel = parseInt(document.getElementById("newAdminLevel").value);
-    if (isNaN(newLevel) || newLevel < 1 || newLevel > 5) {
-      alert("Укажите корректный уровень (1–5)");
-      return;
-    }
-    const admins = window.currentAdminList || [];
-    const admin = admins.find(a => a.id == adminId);
-    if (!admin) return alert("Админ не найден.");
-    admin.level = newLevel;
-    await saveAdminsToBin(admins);
-    addLog(`Изменил уровень админа ${admin.nickname} | ${adminId} на ${newLevel}`);
-    alert("Уровень успешно изменён.");
-    modal.style.display = "none";
-  };
-  document.getElementById("cancelLevelChange").onclick = () => renderModalButtons(selectedSection);
-}
-
-function removeAdmin(adminId) {
-  if (!confirm("Точно забрать админку?")) return;
-  const admins = window.currentAdminList || [];
-  const index = admins.findIndex(a => a.id == adminId);
-  if (index === -1) return alert("Админ не найден.");
-  const removed = admins.splice(index, 1)[0];
-  saveAdminsToBin(admins);
-  addLog(`Забрал админку у ${removed.nickname} | ${adminId}`);
-  alert("Админка успешно забрана.");
-  modal.style.display = "none";
-}
-
-async function saveAdminsToBin(admins) {
-  try {
-    const getRes = await fetch("https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199/latest", {
-      headers: {
-        "X-Master-Key": API_KEY
-      }
-    });
-    if (!getRes.ok) throw new Error("Ошибка загрузки bin: " + getRes.status);
-    const currentData = await getRes.json();
-
-    
-    const old = currentData.record || {};
-
-    const updated = {
-      ...old,
-      admins: admins
-    };
-
-    const putRes = await fetch("https://api.jsonbin.io/v3/b/68910385f7e7a370d1f3c199", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": API_KEY
-      },
-      body: JSON.stringify(updated)
-    });
-
-    if (!putRes.ok) throw new Error("Ошибка сохранения: " + putRes.status);
-
-    const data = await putRes.json();
-    console.log("Админы сохранены", data);
-    window.currentAdminList = admins;
-
-  } catch (err) {
-    console.error("Ошибка сохранения админов:", err);
-    alert("Ошибка при сохранении админов.");
-  }
-}
-
-function openBot() {
-  const botUrl = "https://t.me/SR_Helper_RadmirRP_Bot";
-
-  if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.openTelegramLink(botUrl);
-  } else {
-    window.open(botUrl, "_blank");
-  }
-}
-const navItems = document.querySelectorAll('.nav-item');
-const sections = document.querySelectorAll('.section');
-
-navItems.forEach(item => {
-  item.addEventListener('click', () => {
-    const target = item.getAttribute('data-section');
-
-    navItems.forEach(i => i.classList.remove('active'));
-    sections.forEach(s => s.classList.remove('active'));
-
-    item.classList.add('active');
-    document.getElementById(target).classList.add('active');
-  });
-});
-
-document.querySelectorAll('.faction-card').forEach(card => {
-  card.addEventListener('click', () => {
-    card.classList.toggle('active');
-  });
-});
-
-function showBanScreen(ban) {
-    document.body.innerHTML = `
-        <div class="ban-screen">
-            <div class="ban-box">
-                <h2>Аккаунт заблокирован</h2>
-
-                <p><strong>Причина:</strong><br>${ban.reason || "Не указано"}</p>
-                <p><strong>До:</strong><br>${
-                    ban.until ? new Date(ban.until).toLocaleString("ru-RU") : "Навсегда"
-                }</p>
-                <p><strong>Выдал:</strong><br>${ban.by?.nickname || "Неизвестно"}</p>
-            </div>
-        </div>
-    `;
-}
-
-// ===================
-//  PROMO: улучшенная реализация
-// ===================
-(function () {
-  // безопасно получить элемент
-  const $ = id => document.getElementById(id);
-
-  // --- элементы (могут отсутствовать в DOM, проверяем) ---
-  const promoBtn = $('promoBtn');
-  const promoModal = $('promoModal');
-  const promoInput = $('promoInput');
-  const activatePromoBtn = $('activatePromoBtn');
-  const closePromoBtn = $('closePromoBtn');
-
-  const openCreatePromoBtn = $('openCreatePromoBtn');
-  const createPromoModal = $('createPromoModal');
-  const createPromoInput = $('createPromoInput');
-  const createPromoSubmit = $('createPromoSubmit');
-  const closeCreatePromoBtn = $('closeCreatePromoBtn');
-
-  // JSONBin ID и headers — предполагается, что API_KEY объявлен глобально в другом месте
-  const BIN_PROMO_ID = "68b474b443b1c97be9323d6c";
-  const headers = {
-    "Content-Type": "application/json",
-    "X-Master-Key": (typeof API_KEY !== 'undefined' ? API_KEY : '')
-  };
-
-  // --- вспомогательные функции UI (Telegram.WebApp fallback) ---
-  function showPopup(opts) {
-    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.showPopup) {
-      try { Telegram.WebApp.showPopup(opts); }
-      catch (e) { console.warn('Telegram popup failed', e); fallbackAlert(opts.title, opts.message); }
-    } else {
-      fallbackAlert(opts.title, opts.message);
-    }
-  }
-  function fallbackAlert(title, message) {
-    alert((title ? title + ': ' : '') + (message || ''));
-  }
-
-  // --- фильтрация ввода промокода (только A-Z0-9) ---
-  function allowPromoInput(inputEl) {
-    if (!inputEl) return;
-    inputEl.addEventListener("input", () => {
-      inputEl.value = inputEl.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-    });
-    // сразу привести текущее значение
-    inputEl.value = (inputEl.value || '').toString().replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-  }
-
-  // применяем фильтр при загрузке (если элементы есть)
-  document.addEventListener("DOMContentLoaded", () => {
-    allowPromoInput($('promoInput'));
-    allowPromoInput($('createPromoInput'));
-  });
-
-  // --- модалки (проверяем, что элементы существуют) ---
-  if (promoBtn && promoModal) {
-    promoBtn.addEventListener("click", () => { promoModal.style.display = "flex"; });
-  }
-  if (closePromoBtn && promoModal) {
-    closePromoBtn.addEventListener("click", () => { promoModal.style.display = "none"; });
-    promoModal.addEventListener("click", (e) => { if (e.target === promoModal) promoModal.style.display = "none"; });
-  }
-
-  if (openCreatePromoBtn && createPromoModal && promoModal) {
-    openCreatePromoBtn.addEventListener("click", () => {
-      if (promoModal) promoModal.style.display = "none";
-      createPromoModal.style.display = "flex";
-    });
-  }
-  if (closeCreatePromoBtn && createPromoModal) {
-    closeCreatePromoBtn.addEventListener("click", () => { createPromoModal.style.display = "none"; });
-    createPromoModal.addEventListener("click", (e) => { if (e.target === createPromoModal) createPromoModal.style.display = "none"; });
-  }
-
-  // --- работа с JSONBin ---
-  async function safeFetchJson(url, opts = {}) {
-    try {
-      const res = await fetch(url, opts);
-      const text = await res.text();
-      let parsed;
-      try { parsed = text ? JSON.parse(text) : {}; } catch (e) { parsed = null; }
-      return { ok: res.ok, status: res.status, parsed, raw: text };
-    } catch (err) {
-      return { ok: false, error: err };
-    }
-  }
-
-  async function getPromos() {
-    const url = `https://api.jsonbin.io/v3/b/${BIN_PROMO_ID}`;
-    const { ok, parsed, error, status } = await safeFetchJson(url, { headers });
-    if (!ok) {
-      console.error("Ошибка загрузки промокодов:", error || status);
-      // вернуть пустой массив как fallback
-      return [];
-    }
-    // JSONBin: data.record может быть массивом или объектом
-    const record = parsed && parsed.record !== undefined ? parsed.record : parsed;
-    if (!record) return [];
-    // если record промокодов — массив
-    if (Array.isArray(record)) return record;
-    // если record — объект с ключом promos или data
-    if (Array.isArray(record.promos)) return record.promos;
-    // если record — объект, где ключи — промокоды
-    if (typeof record === 'object') {
-      // попытаться преобразовать в массив объектов
-      return Object.values(record).filter(Boolean);
-    }
-    return [];
-  }
-
-  async function savePromos(dataArr) {
-    // Ожидаем, что сервер хранит чистый массив в record
-    const url = `https://api.jsonbin.io/v3/b/${BIN_PROMO_ID}`;
-    try {
-      const res = await fetch(url, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(dataArr)
-      });
-      if (!res.ok) {
-        const txt = await res.text().catch(()=>null);
-        throw new Error(`Ошибка сохранения промокодов: ${res.status} ${txt || ''}`);
-      }
-      return true;
-    } catch (err) {
-      console.error(err);
-      return false;
-    }
-  }
-
-  // --- создание промокода ---
-  async function createPromo(userId, promoRaw) {
-    try {
-      const promo = (promoRaw || '').toString().trim().toUpperCase();
-
-      if (!promo) {
-        return { error: "Пустой промокод" };
-      }
-
-      if (!/^[A-Z0-9]{4,}$/.test(promo)) {
-        return { error: "Промокод должен содержать минимум 4 символа (A-Z, 0-9)" };
-      }
-
-      const db = await getPromos(); // массив
-
-      // защита типов userId (приводим к строке)
-      const uId = (userId === null || userId === undefined) ? null : String(userId);
-
-      if (uId === null) return { error: "Неизвестный пользователь" };
-
-      // уже есть промо у юзера (по owner)
-      if (db.find(p => String(p.owner) === uId)) {
-        return { error: "У вас уже есть созданный промокод" };
-      }
-
-      // уже существует такое имя
-      if (db.find(p => String(p.promo).toUpperCase() === promo)) {
-        return { error: "Такой промокод уже существует" };
-      }
-
-      // создаём запись (структура: { promo, active, act, owner })
-      const newRec = {
-        promo,
-        active: [],
-        act: -1, // -1 означает безлимит
-        owner: uId,
-        createdAt: new Date().toISOString()
-      };
-
-      db.push(newRec);
-      const saved = await savePromos(db);
-      if (!saved) return { error: "Ошибка сохранения промокода (сервер)" };
-
-      return { ok: true, promo: newRec };
-    } catch (err) {
-      console.error("createPromo error:", err);
-      return { error: "Внутренняя ошибка" };
-    }
-  }
-
-  // --- активация промокода ---
-  async function activatePromo(userId, promoRaw) {
-    try {
-        const promo = String(promoRaw || "").trim().toUpperCase();
-
-        if (!promo) {
-          return { error: "Пустой промокод" };
+    static initCurrencySwitcher() {
+        const currencyTabs = document.querySelectorAll('.currency-tab');
+
+        if (currencyTabs.length === 0) return;
+
+        // Восстанавливаем сохраненную валюту
+        if (currentCurrency) {
+            currencyTabs.forEach(tab => {
+                if (tab.dataset.currency === currentCurrency) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
         }
 
-        if (!/^[A-Z0-9]{4,}$/.test(promo)) {
-          return { error: "Некорректный формат промокода" };
-      }
+        currencyTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const currency = this.dataset.currency;
 
-      const uId = userId !== null && userId !== undefined ? String(userId) : null;
-      if (!uId) {
-        return { error: "Неизвестный пользователь" };
-      }
+                currencyTabs.forEach(t => {
+                    t.classList.remove('active');
+                });
 
-      const db = await getPromos();
-      const code = db.find(p => String(p.promo).toUpperCase() === promo);
+                this.classList.add('active');
 
-      // ❗ сначала проверяем существование промокода
-      if (!code) {
-        return { error: "Промокод не найден" };
-      }
+                currentCurrency = currency;
+                localStorage.setItem('gov_currency', currentCurrency);
 
-      // ❗ теперь можно проверять владельца
-      if (String(code.owner) === uId) {
-        return { error: "Создатель не может активировать свой промокод" };
-      }
-
-      // нормализуем active
-      code.active = Array.isArray(code.active)
-        ? code.active.map(String)
-        : [];
-
-      // уже активировал
-      if (code.active.includes(uId)) {
-        return { error: "Вы уже активировали этот промокод" };
-      }
-
-      // проверка лимита
-      if (typeof code.act === "number" && code.act !== -1 && code.act <= 0) {
-        return { error: "Лимит активаций исчерпан" };
-      }
-
-      // добавляем пользователя
-      code.active.push(uId);
-
-      // уменьшаем счётчик, если не бесконечный
-      if (typeof code.act === "number" && code.act !== -1) {
-        code.act = Math.max(0, code.act - 1);
-      }
-
-      const saved = await savePromos(db);
-      if (!saved) {
-        return { error: "Ошибка сохранения активации" };
-      }
-
-      return { ok: true, promo: code };
-
-    } catch (err) {
-      console.error("activatePromo error:", err);
-      return { error: "Внутренняя ошибка сервера" };
-    }
-  }
-
-  // --- UI: обработчики кнопок ---
-  if (createPromoSubmit && createPromoInput) {
-    createPromoSubmit.addEventListener("click", async () => {
-      const promo = createPromoInput.value.trim();
-      const userId = window.currentUserId;
-
-      if (promo.length < 4) {
-        return showPopup({
-          title: "Ошибка",
-          message: "Минимальная длина промокода — 4 символа",
-          buttons: [{ text: "Ок", type: "default" }]
+                this.updateCurrencyDisplay();
+            });
         });
-      }
 
-      if (!promo) {
-        return showPopup({ title: "Ошибка", message: "Введите название промокода", buttons: [{ text: "Ок", type: "default" }] });
-      }
+        this.updateCurrencyDisplay();
+    }
 
-      const result = await createPromo(userId, promo);
+    static updateCurrencyDisplay() {
+        this.updateCurrencyInfo();
+        this.updatePrices();
+    }
 
-      if (result.error) {
-        return showPopup({ title: "Ошибка", message: result.error, buttons: [{ text: "Ок", type: "default" }] });
-      }
+    static updateCurrencyInfo() {
+        const el = document.getElementById('currentCurrencyInfo');
+        if (!el) return;
 
-      showPopup({ title: "Успешно", message: "Промокод создан", buttons: [{ text: "Ок", type: "close" }] });
+        const isRenewal = pricingMode === 'renew';
+        const pricingText = isRenewal
+            ? 'Для продления подписки'
+            : 'Указанные цены действительны только для первого заказа (стартовый пакет) - при последующем продлении стоимость будет выше.';
 
-      if (createPromoModal) createPromoModal.style.display = "none";
-      // очистим поле
-      createPromoInput.value = "";
-    });
-  }
+        el.textContent = `${pricingText}`;
+    }
 
-  if (activatePromoBtn && promoInput) {
-    activatePromoBtn.addEventListener("click", async () => {
-      const promo = promoInput.value.trim();
-      const userId = window.currentUserId;
+    static updatePrices() {
+        const pricingType = pricingMode;
 
-      if (!promo) {
-        return showPopup({ title: "Ошибка", message: "Введите промокод", buttons: [{ text: "Ок", type: "default" }] });
-      }
+        document.querySelectorAll('.pricing-card').forEach(card => {
+            const plan = parseInt(card.dataset.plan.replace('-renew', ''));
 
-      const result = await activatePromo(userId, promo);
+            if (pricingData[pricingType]?.[plan]) {
+                const priceEl = card.querySelector('.price');
+                const currencyEl = card.querySelector('.currency');
 
-      if (result.error) {
-        return showPopup({ title: "Ошибка", message: result.error, buttons: [{ text: "Ок", type: "default" }] });
-      }
+                const amount = pricingData[pricingType][plan][currentCurrency];
 
-      showPopup({ title: "Успешно", message: "Промокод активирован!", buttons: [{ text: "Ок", type: "close" }] });
+                priceEl.textContent =
+                    currentCurrency === 'USD' ? amount.toFixed(2) : amount;
 
-      if (promoModal) promoModal.style.display = "none";
-      // очистим поле
-      promoInput.value = "";
-    });
-  }
+                currencyEl.textContent = {
+                    UAH: 'грн',
+                    RUB: 'руб',
+                    USD: '$'
+                }[currentCurrency];
+            }
+        });
+    }
 
-  // --- экспорт опционален (для тестов в консоли) ---
-  window.__promoAPI = {
-    getPromos,
-    createPromo,
-    activatePromo,
-    savePromos
-  };
-})();
+    static togglePricing(isRenewal) {
+        pricingMode = isRenewal ? 'renew' : 'new';
 
-async function renderPromoAdmin() {
-  try {
-    const res = await fetch(
-      "https://api.jsonbin.io/v3/b/68b474b443b1c97be9323d6c",
-      {
-        headers: {
-          "X-Master-Key": API_KEY,
-          "Content-Type": "application/json"
+        document.getElementById('newUserPricing')?.classList.toggle('hidden', isRenewal);
+        document.getElementById('renewalPricing')?.classList.toggle('hidden', !isRenewal);
+
+        this.updateCurrencyDisplay();
+    }
+
+    static async loadUserProfile() {
+        if (!currentUser || !userData) {
+            return;
         }
-      }
-    );
 
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new Error(`HTTP ${res.status}: ${txt || "Нет ответа от сервера"}`);
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userTelegram = document.getElementById('userTelegram');
+        const userStatusBadge = document.getElementById('userStatusBadge');
+        const userKey = document.getElementById('userKey');
+        const govDays = document.getElementById('govDays');
+        const pricingToggle = document.getElementById('pricingToggle');
+
+        // Обновляем аватар
+        if (currentUser.photo_url) {
+            userAvatar.style.backgroundImage = `url(${currentUser.photo_url})`;
+            userAvatar.innerHTML = '';
+        } else {
+            const initials = currentUser.first_name ? currentUser.first_name[0] : 'U';
+            userAvatar.innerHTML = `<span style="font-size: 24px;">${initials}</span>`;
+        }
+
+        // Обновляем имя
+        const name = userData.name || currentUser.first_name || 'Пользователь';
+        userName.textContent = name;
+
+        // Обновляем Telegram
+        const telegram = currentUser.username ? `@${currentUser.username}` : `ID: ${currentUser.id}`;
+        userTelegram.textContent = telegram;
+
+        // Обновляем бейдж статуса
+        const statusText = userData.status === 'banned' ? 'Заблокирован' : 
+                          userData.daysgov && Utils.calculateDaysLeft(userData.daysgov) > 0 ? 'Активный покупатель' : 'Пользователь';
+        const statusColor = userData.status === 'banned' ? '#EF4444' : 
+                           (userData.daysgov && Utils.calculateDaysLeft(userData.daysgov) > 0) ? '#10B981' : '#6B7280';
+
+        if (userStatusBadge) {
+            userStatusBadge.innerHTML = `
+                <span class="status-dot" style="background: ${statusColor}"></span>
+                <span>${statusText}</span>
+            `;
+        }
+
+        // Обновляем ключ
+        if (userKey) {
+            userKey.textContent = userData.key || 'Не назначен';
+        }
+
+        // Обновляем дни подписки
+        if (govDays) {
+            if (userData.daysgov) {
+                const daysLeft = Utils.calculateDaysLeft(userData.daysgov);
+                if (daysLeft > 0) {
+                    govDays.textContent = `${daysLeft} ${Utils.getDaysWord(daysLeft)}`;
+
+                    // Показываем тарифы для продления
+                    if (pricingToggle) {
+                        pricingToggle.checked = true;
+                        pricingMode = 'renew';
+                        this.togglePricing(true);
+                    }
+                } else {
+                    govDays.textContent = 'Истекла';
+                }
+            } else {
+                govDays.textContent = 'Нет подписки';
+            }
+        }
     }
 
-    const data = await res.json();
+    static async processPayment(plan, isRenewal) {
+        const pricingType = isRenewal ? 'renew' : 'new';
+        const amount = pricingData[pricingType][plan][currentCurrency];
+        const currency = currentCurrency;
 
-    let promos = [];
-    if (Array.isArray(data.record)) promos = data.record;
-    else if (Array.isArray(data.record?.promos)) promos = data.record.promos;
-    else if (Array.isArray(data)) promos = data;
+        if (tg && tg.payments) {
+            tg.payments.openInvoice({
+                title: `GOV Helper — ${plan} дней`,
+                description: isRenewal ? 'Продление подписки' : 'Новая подписка',
+                currency: currency,
+                prices: [{ 
+                    label: `${plan} дней`, 
+                    amount: currency === 'USD' ? Math.round(amount * 100) : amount
+                }],
+                payload: `subscription_${plan}_${isRenewal ? 'renew' : 'new'}`
+            });
+        } else {
+            Utils.showToast('Режим разработки: имитация платежа', 'info');
 
-    if (!Array.isArray(promos) || promos.length === 0) {
-      return "<h3>Промокодов нет</h3>";
+            // Обновляем подписку в Supabase
+            if (supabase && userData) {
+                try {
+                    const currentDate = userData.daysgov ? new Date(userData.daysgov) : new Date();
+                    const newDate = new Date(currentDate);
+                    newDate.setDate(newDate.getDate() + parseInt(plan));
+
+                    const { error } = await supabase
+                        .from('users')
+                        .update({
+                            daysgov: newDate.toISOString().split('T')[0],
+                            status: 'active',
+                            subscription_active: true
+                        })
+                        .eq('idtg', currentUser.id);
+
+                    if (error) throw error;
+
+                    // Обновляем локальные данные
+                    userData.daysgov = newDate.toISOString().split('T')[0];
+                    userData.status = 'active';
+
+                    // Обновляем UI
+                    const pricingToggle = document.getElementById('pricingToggle');
+                    if (pricingToggle) {
+                        pricingToggle.checked = true;
+                        pricingMode = 'renew';
+                    }
+
+                    this.togglePricing(true);
+                    this.updateCurrencyDisplay();
+                    await this.loadUserProfile();
+
+                    Utils.showToast(`${isRenewal ? 'Подписка продлена' : 'Подписка активирована'} на ${plan} дней!`, 'success');
+                } catch (error) {
+                    console.error('Ошибка обновления подписки:', error);
+                    Utils.showToast('Ошибка обновления подписки', 'error');
+                }
+            }
+        }
     }
 
-    // =========================
-    // собираем только активных пользователей
-    // =========================
-    const usersMap = new Map();
+    static loadFactions() {
+        const factionSearch = document.getElementById('factionSearch');
+        const factionsList = document.getElementById('factionsList');
 
-    promos.forEach(p => {
-      if (p.owner) usersMap.set(String(p.owner), true);
-      if (Array.isArray(p.active)) {
-        p.active.forEach(id => usersMap.set(String(id), true));
-      }
-    });
+        if (!factionsList) return;
 
-    const rows = [];
-
-    usersMap.forEach((_, userId) => {
-      const user = (window.allUsers || []).find(
-        u => String(u.id) === userId
-      );
-
-      const username = user?.login ? `@${user.login}` : "—";
-
-      const createdPromo = promos.find(
-        p => String(p.owner) === userId
-      );
-
-      const createdPromoName = createdPromo?.promo || "—";
-      const createdCount = createdPromo?.active?.length || 0;
-
-      const activatedPromos = promos
-        .filter(p => Array.isArray(p.active) && p.active.includes(userId))
-        .map(p => p.promo);
-
-      rows.push({
-        userId,
-        username,
-        promo: createdPromoName,
-        count: createdCount,
-        activated: activatedPromos.join(", ") || "—"
-      });
-    });
-
-    // =========================
-    // HTML
-    // =========================
-    const html = `
-      <h3>Промо-активность</h3>
-
-      <div style="margin-bottom:10px;">
-        <input
-          id="promoSearchInput"
-          placeholder="Поиск..."
-          style="
-            width:40%;
-            padding:7px 10px;
-            border-radius:6px;
-            border:1px solid #444;
-            background:#2b2b2b;
-            color:#fff;
-            font-size:13px;
-          "
-        >
-      </div>
-
-      <div id="promoList">
-        ${renderPromoRows(rows)}
-      </div>
-    `;
-
-    // поиск
-    setTimeout(() => {
-      const input = document.getElementById("promoSearchInput");
-      if (!input) return;
-
-      input.addEventListener("input", () => {
-        const q = input.value.toLowerCase().trim();
-
-        const filtered = rows.filter(r =>
-          r.userId.includes(q) ||
-          r.username.toLowerCase().includes(q) ||
-          r.promo.toLowerCase().includes(q) ||
-          r.activated.toLowerCase().includes(q)
+        const searchTerm = factionSearch ? factionSearch.value.toLowerCase() : '';
+        const filteredFactions = factionsData.filter(faction =>
+            faction.name.toLowerCase().includes(searchTerm) ||
+            faction.fullName.toLowerCase().includes(searchTerm)
         );
 
-        document.getElementById("promoList").innerHTML =
-          renderPromoRows(filtered);
-      });
-    }, 0);
+        factionsList.innerHTML = filteredFactions.map(faction => `
+            <div class="faction-card" data-faction="${faction.id}">
+                <div class="faction-icon" style="background: ${faction.color}20; color: ${faction.color}">
+                    <i class="${faction.icon}"></i>
+                </div>
+                <h3 class="faction-title">${faction.name}</h3>
+                <p class="faction-subtitle">${faction.fullName}</p>
+                <div class="faction-status">
+                </div>
+            </div>
+        `).join('');
 
-    return html;
+        document.querySelectorAll('.faction-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const factionId = card.dataset.faction;
+                this.showFactionDetails(factionId);
+            });
+        });
+    }
 
-  } catch (err) {
-    console.error("Promo admin error:", err);
-    return `
-      <div style="
-        padding:12px;
-        background:#2b2b2b;
-        border-left:4px solid #ff5555;
-        color:#ffbaba;
-        font-size:13px;
-      ">
-        <strong>Ошибка загрузки промо</strong><br><br>
-        <code>${err.message || err}</code>
-      </div>
-    `;
-  }
+    static showFactionDetails(factionId) {
+        const faction = factionsData.find(f => f.id === factionId);
+
+        if (!faction) return;
+
+        const factionModal = document.getElementById('factionModal');
+        const factionModalTitle = document.getElementById('factionModalTitle');
+        const factionModalContent = document.getElementById('factionModalContent');
+
+        if (!factionModal || !factionModalTitle || !factionModalContent) return;
+
+        factionModalTitle.textContent = faction.fullName;
+        factionModalContent.innerHTML = `
+            <div class="faction-header">
+                <div class="faction-icon-large" style="background: ${faction.color}20; color: ${faction.color}">
+                </div>
+            </div>
+
+            <div class="faction-features">
+                <h4>Доступные функции:</h4>
+                ${faction.features.map(feature => `
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${feature}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        this.showModal(factionModal);
+    }
+
+    static updateContestTimer() {
+        const contestTimer = document.getElementById('contestTimer');
+        if (!contestTimer) return;
+
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 7);
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = endDate - now;
+
+            if (diff <= 0) {
+                contestTimer.textContent = '00:00:00';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            contestTimer.textContent = 
+                `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    }
+
+    static showModal(modal) {
+        if (!modal) return;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    static hideModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    static setupModalCloseHandlers() {
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = btn.closest('.modal');
+                this.hideModal(modal);
+            });
+        });
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.hideModal(modal);
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    this.hideModal(modal);
+                });
+            }
+        });
+    }
+
+    static showSupportPaymentModal(plan, isRenewal) {
+        const pricingType = isRenewal ? 'renew' : 'new';
+        const amount = pricingData[pricingType][plan][currentCurrency];
+
+        const symbols = {
+            UAH: 'грн',
+            RUB: 'руб',
+            USD: '$'
+        };
+
+        const formattedPrice = currentCurrency === 'USD' 
+            ? `$${amount.toFixed(2)}`
+            : `${amount} ${symbols[currentCurrency]}`;
+
+        const productName = document.getElementById('supportProductName');
+        const priceElement = document.getElementById('supportPrice');
+        const userIdElement = document.getElementById('supportUserId');
+        const planDaysElement = document.getElementById('supportPlanDays');
+        const isRenewalElement = document.getElementById('supportIsRenewal');
+
+        if (productName) {
+            productName.textContent = `${isRenewal ? 'Продление' : 'Подписка'} на ${plan} дней`;
+        }
+
+        if (priceElement) {
+            priceElement.textContent = formattedPrice;
+        }
+
+        if (userIdElement && currentUser) {
+            userIdElement.textContent = currentUser.id;
+        }
+
+        if (planDaysElement) {
+            planDaysElement.value = plan;
+        }
+
+        if (isRenewalElement) {
+            isRenewalElement.value = isRenewal;
+        }
+
+        const supportPaymentModal = document.getElementById('supportPaymentModal');
+        if (supportPaymentModal) {
+            this.showModal(supportPaymentModal);
+
+            const goToSupportBtn = document.getElementById('goToSupportBtn');
+            if (goToSupportBtn) {
+                goToSupportBtn.href = `https://t.me/mr_helpers_bot`;
+            }
+        }
+
+        const pricingToggle = document.getElementById('pricingToggle');
+        if (pricingToggle && !pricingToggle.checked) {
+            pricingToggle.checked = true;
+            this.togglePricing(true);
+        }
+    }
+
+    static initEventListeners() {
+        // Инициализируем переключатель валюты
+        this.initCurrencySwitcher();
+
+        // Переключение тарифов (новый/продление)
+        const pricingToggle = document.getElementById('pricingToggle');
+        if (pricingToggle) {
+            pricingToggle.addEventListener('change', (e) => {
+                this.togglePricing(e.target.checked);
+            });
+        }
+
+        // Кнопки покупки
+        document.querySelectorAll('.btn-buy').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const plan = parseInt(btn.dataset.plan);
+                const isRenewal = btn.dataset.for === 'renew';
+                this.showSupportPaymentModal(plan, isRenewal);
+            });
+        });
+
+        // Кнопка поддержки
+        const supportBtn = document.getElementById('supportBtn');
+        if (supportBtn) {
+            supportBtn.addEventListener('click', () => {
+                if (tg && tg.openTelegramLink) {
+                    tg.openTelegramLink('https://t.me/mr_helpers_bot');
+                } else {
+                    window.open('https://t.me/mr_helpers_bot', '_blank');
+                }
+            });
+        }
+
+        // Кнопка выхода
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (tg && tg.close) {
+                    tg.close();
+                } else {
+                    Utils.showToast('Для выхода закройте приложение', 'info');
+                }
+            });
+        }
+
+        // Поиск фракций
+        const factionSearch = document.getElementById('factionSearch');
+        if (factionSearch) {
+            factionSearch.addEventListener('input', 
+                Utils.debounce(() => this.loadFactions(), 300)
+            );
+        }
+
+        // Копирование ключа
+        const copyBtn = document.querySelector('.copy-btn[data-copy="key"]');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                const userKey = document.getElementById('userKey');
+                if (userKey) {
+                    Utils.copyToClipboard(userKey.textContent);
+                }
+            });
+        }
+
+        // Обработка реальных платежей Telegram
+        if (tg && tg.onEvent) {
+            tg.onEvent('invoiceClosed', (event) => {
+                if (event.status === 'paid') {
+                    Utils.showToast('Платеж успешно обработан!', 'success');
+                    setTimeout(() => {
+                        Utils.showToast('Подписка активирована', 'success');
+                    }, 1000);
+                }
+            });
+        }
+    }
 }
 
-function renderPromoRows(rows) {
-  if (!rows || rows.length === 0) return "<p>Нет данных для отображения</p>";
+// Работа с Supabase
+class SupabaseManager {
+    static async getUserByIdtg(idtg) {
+        if (!supabase) return null;
 
-  return rows
-    .map(r => `
-      <div class="user-card" style="border-left:4px solid #2196f3; margin-bottom:6px; padding:8px;">
-        <div class="user-header">
-          ${r.username} | ID: ${r.userId}
-        </div>
-        <div class="user-info">
-          <p><strong>Промокод:</strong> ${r.promo} | ${r.count} активаций</p>
-          <p><strong>Активировал:</strong> ${r.activated}</p>
-        </div>
-      </div>
-    `)
-    .join("");
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('idtg', idtg)
+                .single();
+
+            if (error && error.code !== 'PGRST116') {
+                throw error;
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Ошибка загрузки пользователя:', error);
+            return null;
+        }
+    }
+
+    static async createUser(userData) {
+        if (!supabase) return null;
+
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .insert([userData])
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Ошибка создания пользователя:', error);
+            return null;
+        }
+    }
+
+    static async updateUser(idtg, updates) {
+        if (!supabase) return null;
+
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .update(updates)
+                .eq('idtg', idtg)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Ошибка обновления пользователя:', error);
+            return null;
+        }
+    }
 }
+
+// Основная функция инициализации
+async function initApp() {
+    try {
+        console.log('Инициализация приложения...');
+
+        // Инициализируем Telegram Web App если доступен
+        if (tg) {
+            tg.expand();
+            tg.enableClosingConfirmation();
+            tg.setHeaderColor('#0F172A');
+            tg.setBackgroundColor('#0F172A');
+            console.log('Telegram Web App инициализирован');
+        }
+
+        // Получаем данные пользователя из Telegram
+        let tgUser = null;
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            tgUser = tg.initDataUnsafe.user;
+        } else {
+            // Только для разработки - показываем ошибку
+            console.error('Telegram пользователь не найден');
+            Utils.showToast('Приложение должно быть запущено через Telegram', 'error');
+            return;
+        }
+
+        currentUser = tgUser;
+        console.log('Текущий пользователь:', currentUser);
+
+        // Загружаем пользователя из Supabase
+        userData = await SupabaseManager.getUserByIdtg(currentUser.id);
+
+        if (!userData) {
+            console.log('Создание нового пользователя в Supabase...');
+            const newUserData = {
+                idtg: currentUser.id,
+                name: currentUser.first_name || 'Пользователь',
+                telegram: currentUser.username || null,
+                status: 'active',
+                key: null, // Ключ будет сгенерирован администратором
+                daysgov: null,
+                subscription_active: false,
+                registration_date: new Date().toISOString().split('T')[0]
+            };
+
+            userData = await SupabaseManager.createUser(newUserData);
+
+            if (userData) {
+                Utils.showToast('Добро пожаловать в GOV Helper!', 'success', '🎉 Приветствие');
+            }
+        }
+
+        if (!userData) {
+            throw new Error('Не удалось загрузить или создать пользователя');
+        }
+
+        console.log('Данные пользователя:', userData);
+
+        // Инициализируем UI
+        UIManager.initTabNavigation();
+        UIManager.setupModalCloseHandlers();
+        UIManager.initEventListeners();
+
+        // Загружаем данные
+        await UIManager.loadUserProfile();
+        UIManager.loadFactions();
+        UIManager.updateContestTimer();
+
+        console.log('Приложение успешно инициализировано!');
+
+    } catch (error) {
+        console.error('Ошибка инициализации приложения:', error);
+        Utils.showToast("Ошибка загрузки приложения", 'error');
+    }
+}
+
+// Запускаем приложение
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+
+// Экспортируем объекты для отладки
+window.app = {
+    currentUser,
+    userData,
+    Utils,
+    UIManager,
+    SupabaseManager,
+    pricingData,
+    factionsData,
+    currentCurrency
+};

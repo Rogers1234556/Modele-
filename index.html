@@ -1,289 +1,467 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>MR</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <title>GOV Helper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="top-bar">
-    <div class="avatar"></div>
-    <div class="stats"><div class="stat"><span><i class="fa-solid fa-ticket"></i> 0</span></div></div>
-  </div>
-  
-  <main id="main-slides" class="section wrap active">
-    <section class="product-modern">
-      <div class="product-card">
-        <div class="product-bg">
-          <div class="glow"></div>
-          <img src="img/logo.jpeg" alt="Premium Pass" class="product-cover">
-        </div>
+    <!-- Главный контейнер -->
+    <div class="app-container">
+        <!-- Хедер -->
+        <header class="app-header">
 
-        <div class="product-body">
-          <h2 class="product-title">GOV Helper</h2>
-          <p class="product-desc">
-           GOV Helper — помощник, который делает работу в государственных структурах проще, быстрее и удобнее.
-          </p>
+        </header>
 
-          <div class="product-features">
-            <div><i class="fa-solid fa-crown"></i>Широкий функционал</div>
-            <div><i class="fa-solid fa-bolt"></i> Поддержка 24/7</div>
-            <div><i class="fa-solid fa-user-shield"></i>Безопасность и защита данных</div>
-          </div>
+        <!-- Основной контент -->
+        <main class="app-main">
+            <!-- Главная страница -->
+            <section id="main" class="page active">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            <span class="gradient-text">GOV Helper</span>
+                        </h1>
+                        <p class="hero-subtitle">Ваш помощник в работе государственных структур</p>
 
-          <div class="product-footer">
-            <span class="product-price">250 ★ / 30 дней</span>
-            <button class="btn-buy" id="buyBtn">Купить</button>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+                        <div class="currency-selector">
+                            <div class="currency-tabs">
+                                
+                                
+                                <button class="currency-tab" data-currency="USD">
+                                    <span class="flag">🇺🇸</span>
+                                    <span>USD</span>
+                                </button>
+                                <button class="currency-tab" data-currency="RUB">
+                                    <span class="flag">🇷🇺</span>
+                                    <span>RUB</span>
+                                </button>
+                                <button class="currency-tab active" data-currency="UAH">
+                                    <span class="flag">🇺🇦</span>
+                                    <span>UAH</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-  <div id="profile" class="section">
-    <div class="profile">
-      <div class="profile-header">
-        <div class="avatar big"></div>
-        <div class="user-id">ID: </div>
-      </div>
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Выберите тариф</h2>
+                        <p id="currentCurrencyInfo">Для новых пользователей</p>
+                    </div>
 
-        <div class="profile-menu">
-          <div class="menu-item"><span class="fa-solid fa-key"></span> Ключ: </div>
-          <div class="menu-item"><span class="fa-solid fa-basket-shopping"></span> Доступные подписки:</div>
-        </div>
-  <div class="profile-actions">
-    <button class="btn-support">Поддержка</button>
-    <button class="btn-support btn-promo" id="promoBtn">Активировать промокод</button>
-    <a href="https://github.com/galebxkwn/Jdskvehv/raw/refs/heads/main/SR%20Launcher_setup.exe" 
-       download 
-       class="btn-support btn-launcher" 
-       style="display:none;">
-      Скачать лаунчер
-    </a>
-  </div>    
+                    <!-- Тарифы для новых пользователей -->
+                    <div class="pricing-section" id="newUserPricing">
+                        <div class="pricing-cards">
+                            <!-- Карточка 15 дней -->
+                            <div class="pricing-card" data-plan="15">
+                                <div class="pricing-badge">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>ПОПРОБОВАТЬ</span>
+                                </div>
+                                <div class="pricing-header">
+                                    <h3>15 дней</h3>
+                                    <div class="pricing-price">
+                                        <span class="price" data-uah="99" data-rub="188" data-usd="2.30">99</span>
+                                        <span class="currency">грн</span>
+                                    </div>
+                                </div>
+                                <ul class="pricing-features">
+                                    <li><i class="fas fa-check"></i> Полный доступ ко всем функциям</li>
+                                    <li><i class="fas fa-check"></i> Техподдержка</li>
+                                    
+                                </ul>
+                                <button class="btn-primary btn-buy" data-plan="15" data-for="new">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Купить</span>
+                                </button>
+                            </div>
+
+                            <!-- Карточка 30 дней -->
+                            <div class="pricing-card popular" data-plan="30">
+                                <div class="pricing-badge popular-badge">
+                                    <i class="fas fa-crown"></i>
+                                    <span>ПОПУЛЯРНЫЙ</span>
+                                </div>
+                                <div class="pricing-header">
+                                    <h3>30 дней</h3>
+                                    <div class="pricing-price">
+                                        <span class="price" data-uah="249" data-rub="475" data-usd="5.90">249</span>
+                                        <span class="currency">грн</span>
+                                    </div>
+                                </div>
+                                <ul class="pricing-features">
+                                    <li><i class="fas fa-check"></i> Полный доступ ко всем функциям</li>
+                                    <li><i class="fas fa-check"></i> Приоритетная поддержка</li>
+                                
+                                    <li><i class="fas fa-check"></i> Раный доступ к обновлению</li>
+                                </ul>
+                                <button class="btn-primary btn-buy" data-plan="30" data-for="new">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Купить</span>
+                                </button>
+                            </div>
+
+                            <!-- Карточка 365 дней -->
+                            <div class="pricing-card" data-plan="365">
+                                <div class="pricing-badge">
+                                    <i class="fas fa-gem"></i>
+                                    <span>ВЫГОДНО</span>
+                                </div>
+                                <div class="pricing-header">
+                                    <h3>365 дней</h3>
+                                    <div class="pricing-price">
+                                        <span class="price" data-uah="1999" data-rub="3799" data-usd="47.30">1999</span>
+                                        <span class="currency">грн</span>
+                                    </div>
+                                    <div class="pricing-savings">
+                                        <i class="fas fa-percentage"></i>
+                                        <span>Экономия 33%</span>
+                                    </div>
+                                </div>
+                                <ul class="pricing-features">
+                                    <li><i class="fas fa-check"></i> Полный доступ ко всем функциям</li>
+                                    <li><i class="fas fa-check"></i> VIP поддержка 24/7</li>
+                                    <li><i class="fas fa-check"></i> Ранный доступ + бета-тест</li>
+                                    
+                                </ul>
+                                <button class="btn-primary btn-buy" data-plan="365" data-for="new">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Купить</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Тарифы для продления (скрыты по умолчанию) -->
+                    <div class="pricing-section hidden" id="renewalPricing">
+                        <div class="pricing-cards">
+                            <!-- Карточка 15 дней -->
+                            <div class="pricing-card" data-plan="15-renew">
+                                <div class="pricing-badge">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>ПРОДЛЕНИЕ</span>
+                                </div>
+                                <div class="pricing-header">
+                                    <h3>15 дней</h3>
+                                    <div class="pricing-price">
+                                        <span class="price" data-uah="149" data-rub="285" data-usd="3.50">149</span>
+                                        <span class="currency">грн</span>
+                                    </div>
+                                </div>
+                                <ul class="pricing-features">
+                                    <li><i class="fas fa-check"></i> Продление подписки</li>
+                                    <li><i class="fas fa-check"></i> Техподдержка</li>
+                                    <li><i class="fas fa-check"></i> Базовые функции</li>
+                                </ul>
+                                <button class="btn-primary btn-buy" data-plan="15" data-for="renew">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Продлить</span>
+                                </button>
+                            </div>
+
+                            <!-- Карточка 30 дней -->
+                            <div class="pricing-card popular" data-plan="30-renew">
+                                <div class="pricing-badge popular-badge">
+                                    <i class="fas fa-crown"></i>
+                                    <span>ВЫГОДНО</span>
+                                </div>
+                                <div class="pricing-header">
+                                    <h3>30 дней</h3>
+                                    <div class="pricing-price">
+                                        <span class="price" data-uah="299" data-rub="570" data-usd="7.00">299</span>
+                                        <span class="currency">грн</span>
+                                    </div>
+                                </div>
+                                <ul class="pricing-features">
+                                    <li><i class="fas fa-check"></i> Продление подписки</li>
+                                    <li><i class="fas fa-check"></i> Приоритетная поддержка</li>
+                                    <li><i class="fas fa-check"></i> Все функции</li>
+                                    <li><i class="fas fa-check"></i> Обновления</li>
+                                </ul>
+                                <button class="btn-primary btn-buy" data-plan="30" data-for="renew">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Продлить</span>
+                                </button>
+                            </div>
+
+                            <!-- Карточка 365 дней -->
+                            <div class="pricing-card" data-plan="365-renew">
+                                <div class="pricing-badge">
+                                    <i class="fas fa-gem"></i>
+                                    <span>МАКСИМУМ</span>
+                                </div>
+                                <div class="pricing-header">
+                                    <h3>365 дней</h3>
+                                    <div class="pricing-price">
+                                        <span class="price" data-uah="2499" data-rub="4750" data-usd="59.00">2499</span>
+                                        <span class="currency">грн</span>
+                                    </div>
+                                    <div class="pricing-savings">
+                                        <i class="fas fa-percentage"></i>
+                                        <span>Экономия 30%</span>
+                                    </div>
+                                </div>
+                                <ul class="pricing-features">
+                                    <li><i class="fas fa-check"></i> Продление на год</li>
+                                    <li><i class="fas fa-check"></i> VIP поддержка 24/7</li>
+                                    <li><i class="fas fa-check"></i> Все функции + бета-тест</li>
+                                    <li><i class="fas fa-check"></i> Автообновления</li>
+                                    <li><i class="fas fa-check"></i> Высший приоритет</li>
+                                </ul>
+                                <button class="btn-primary btn-buy" data-plan="365" data-for="renew">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Продлить</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+            </section>
+
+            <!-- Профиль -->
+            <section id="profile" class="page">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="userAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="userName">Загрузка...</h2>
+                            <p class="user-id" id="userTelegram"></p>
+                            <div class="user-status" id="userStatusBadge">
+                                <span class="status-dot"></span>
+                                <span>Загрузка...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-title">Подписка GOV</span>
+                                <span class="stat-value" id="govDays">0 дней</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-title">Ключ активации</span>
+                                <span class="stat-value key-value" id="userKey">Загрузка...</span>
+                                <button class="copy-btn" data-copy="key">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="profile-actions">
+                        <button class="action-btn" id="supportBtn">
+                            <i class="fas fa-headset"></i>
+                            <span>Техподдержка</span>
+                        </button>
+                        <button class="action-btn" id="promoBtn">
+                            <i class="fas fa-gift"></i>
+                            <span>Активировать промокод</span>
+                        </button>
+                        <a href="#" class="action-btn" id="launcherBtn" style="display: none;">
+                            <i class="fas fa-download"></i>
+                            <span>Скачать лаунчер</span>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+            </section>
+
+            <!-- Фракции -->
+            <section id="factions" class="page">
+                <!-- Оставляем без изменений -->
+                <div class="factions-section">
+                    <div class="section-header">
+                        <h2>Доступные фракции</h2>
+                        <p>Выберите фракцию для просмотра функций</p>
+                    </div>
+
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="factionSearch" placeholder="Поиск фракции...">
+                    </div>
+
+                    <div class="factions-grid" id="factionsList">
+                        <!-- Фракции будут загружены через JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Конкурсы -->
+            <section id="contests" class="page">
+                <!-- Оставляем без изменений -->
+                <div class="contests-section">
+                    <div class="section-header">
+                        <h2>Текущие конкурсы</h2>
+                        <p>Участвуйте и получайте призы</p>
+                    </div>
+
+                    <div class="contests-list">
+                        <div class="contest-card">
+                            <div class="contest-header">
+                                <div class="contest-badge">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="contest-info">
+                                    <h3>GOV Helper Giveaway</h3>
+                                    <p class="contest-subtitle">Получи подписку на 30 дней</p>
+                                </div>
+                            </div>
+
+                            <div class="contest-details">
+                                <div class="detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>До: <strong id="contestTimer">--:--:--</strong></span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-users"></i>
+                                    <span>Участников: <strong id="contestParticipants">0</strong></span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fab fa-telegram"></i>
+                                    <span>Канал: <strong>@mr</strong></span>
+                                </div>
+                            </div>
+
+                            <button class="btn-secondary btn-disabled" disabled>
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Конкурс завершен</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
-  </div>
-  
 
-  <div id="promoModal" class="ios-modal">
-    <div class="ios-sheet">
-      <div class="ios-handle"></div>
-
-      <h3 class="ios-title">Промокоды</h3>
-
-      <input type="text" id="promoInput" class="ios-input" placeholder="Введите промокод">
-
-      <button id="activatePromoBtn" class="ios-btn">Активировать</button>
-
-      <button id="openCreatePromoBtn" class="ios-btn-secondary">Создать промокод</button>
-
-      <button class="ios-btn-secondary" id="closePromoBtn">Отмена</button>
-    </div>
-  </div>
-
-  <div id="createPromoModal" class="ios-modal">
-    <div class="ios-sheet">
-      <div class="ios-handle"></div>
-
-      <h3 class="ios-title">Создать промокод</h3>
-
-      <input type="text" id="createPromoInput" class="ios-input" placeholder="Название промокода">
-
-
-      <button id="createPromoSubmit" class="ios-btn">Создать</button>
-
-      <button class="ios-btn-secondary" id="closeCreatePromoBtn">Отмена</button>
-    </div>
-  </div>
-  
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h3 id="modalTitle">Управление пользователем</h3>
-      <div id="modalBody"></div>
-    </div>
-  </div>
-
-  <div id="info" class="section compact-info">
-    <div class="info">
-      <h2 class="info-main-title">Информация о GOV Helper</h2>
-      <p class="info-intro">Выберите фракцию, чтобы узнать о функционале:</p>
-
-      <div class="factions-grid">
-        <div class="faction-card">
-          <div class="faction-header">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span class="faction-title">МВД</span>
-          </div>
-          <div class="faction-short">Министерство Внутренних Дел</div>
-
-          <div class="faction-hidden">
-            <ul class="faction-list">
-              <li>В разработке</li>
-            </ul>
-          </div>
+    <!-- Модальные окна -->
+    <!-- Оставляем без изменений -->
+    <div id="promoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Активация промокода</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <i class="fas fa-gift"></i>
+                    <input type="text" id="promoCode" placeholder="Введите промокод" maxlength="20">
+                </div>
+                <button class="btn-primary" id="activatePromoBtn">
+                    <i class="fas fa-check"></i>
+                    <span>Активировать</span>
+                </button>
+            </div>
         </div>
-
-        <div class="faction-card">
-          <div class="faction-header">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span class="faction-title">ФСБ</span>
-          </div>
-          <div class="faction-short">Федеральная Служба Безопасности</div>
-
-          <div class="faction-hidden">
-            <ul class="faction-list">
-              <li>В разработке</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="faction-card">
-          <div class="faction-header">
-            <i class="fa-solid fa-briefcase-medical"></i>
-            <span class="faction-title">МЗ</span>
-          </div>
-          <div class="faction-short">Министерство Здравоохранения</div>
-
-          <div class="faction-hidden">
-            <ul class="faction-list">
-              <li>В разработке</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="faction-card">
-          <div class="faction-header">
-            <i class="fa-solid fa-briefcase-medical"></i>
-            <span class="faction-title">МО</span>
-          </div>
-          <div class="faction-short">Министерство Обороны</div>
-
-          <div class="faction-hidden">
-            <ul class="faction-list">
-              <li>В разработке</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="faction-card">
-          <div class="faction-header">
-            <i class="fa-solid fa-briefcase-medical"></i>
-            <span class="faction-title">ФСИН</span>
-          </div>
-          <div class="faction-short">Федеральная Служба Исполнения Наказаний</div>
-
-          <div class="faction-hidden">
-            <ul class="faction-list">
-              <li>В разработке</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="faction-card">
-          <div class="faction-header">
-            <i class="fa-solid fa-briefcase-medical"></i>
-            <span class="faction-title">Пра-во</span>
-          </div>
-          <div class="faction-short">Правительство</div>
-
-          <div class="faction-hidden">
-            <ul class="faction-list">
-              <li>В разработке</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="faction-card">
-          <div class="faction-header">
-            <i class="fa-solid fa-briefcase-medical"></i>
-            <span class="faction-title">ТРК</span>
-          </div>
-          <div class="faction-short">ТРК "Ритм"</div>
-
-          <div class="faction-hidden">
-            <ul class="faction-list">
-              <li>В разработке</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="contests" class="section contests">
-    <section class="contest-section">
-      <div class="contest-card">
-        <div class="contest-header">
-          <i class="fa-solid fa-trophy contest-icon"></i>
-          <h3 class="contest-title">Конкурс на GOV Helper</h3>
-        </div>
-
-        <p class="contest-desc">
-          Участвуй в конкурсе и получи доступ к GOV Helper на 30 дней!
-        </p>
-
-        <div class="contest-details">
-          <div class="detail-item"><span><i class="fa-solid fa-clock"></i></span>00:00:00</div>
-          <div class="detail-item"><span><i class="fa-solid fa-users"></i></span> Участников: 0 </div>
-          <div class="detail-item"><span><i class="fa-brands fa-telegram"></i></span> Подпишись: @mr</div>
-        </div>
-        <button class="contest-btn disabled">Конкурс завершён</button>
-      </div>
-    </section>
-  </div>
-
-  <div id="banScreen" class="ban-screen hidden">
-    <div class="ban-box">
-      <h2>Ваш аккаунт заблокирован</h2>
-      <p><strong>Причина:</strong> <span id="banReason"></span></p>
-      <p><strong>До:</strong> <span id="banUntil"></span></p>
-      <p><strong>Выдал:</strong> <span id="banAdmin"></span></p>
-    </div>
-  </div>
-
-  <div class="bottom-nav">
-    <div class="nav-item" data-section="contests">
-      <i class="fa-solid fa-trophy nav-icon"></i>
-      <div class="nav-label">Конкурсы</div>
     </div>
 
-    <div class="nav-item" data-section="info">
-      <i class="fa-solid fa-circle-info nav-icon"></i>
-      <div class="nav-label">Информация</div>
+
+    <div id="factionModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="factionModalTitle"></h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="factionModalContent"></div>
+        </div>
     </div>
 
-    <div class="nav-item active" data-section="main-slides">
-      <i class="fa-solid fa-box nav-icon"></i>
-      <div class="nav-label">Товар</div>
+    <!-- Удалите этот блок из header -->
+    <!-- <div class="header-tabs"> ... </div> -->
+
+    <!-- И добавьте после main -->
+    <footer class="app-footer">
+        <div class="header-tabs">
+            <button class="tab-btn active" data-tab="main">
+                <i class="fas fa-home"></i>
+                <span>Главная</span>
+            </button>
+            <button class="tab-btn" data-tab="profile">
+                <i class="fas fa-user"></i>
+                <span>Профиль</span>
+            </button>
+            <button class="tab-btn" data-tab="factions">
+                <i class="fas fa-building"></i>
+                <span>Фракции</span>
+            </button>
+            <button class="tab-btn" data-tab="contests">
+                <i class="fas fa-trophy"></i>
+                <span>Конкурсы</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- Модальное окно оплаты через поддержку -->
+    <div id="supportPaymentModal" class="modal">
+        <div class="modal-content medium">
+            <div class="modal-header">
+                <h3>Оплата через поддержку</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="support-payment-info">
+                    
+
+                    <div class="payment-instruction">
+                        <h5>Инструкция по оплате:</h5>
+                        <ol>
+                            <li>Нажмите кнопку "Перейти в поддержку"</li>
+                            <li>Напишите боту /start</li>
+                            <li>Нажмите на кнопки: Написать в поддержку -> Оплата товара</li>
+                            <li>После чего свободный администратор возьмет ваше обращения</li>
+                        </ol>
+                    </div>
+                    
+
+                    <div class="payment-actions">
+                        <a href="https://t.me/mr_helpers_bot" target="_blank" class="btn-primary support-action-btn">
+                            <i class="fab fa-telegram-plane"></i>
+                            <span>Перейти в поддержку</span>
+                        </a>
+                        <button class="btn-secondary modal-close support-close-btn">
+                            
+                            <span>Закрыть</span>
+                        </button>
+                        
+                    </div>
+
+                    <!-- Скрытые поля для данных -->
+                    <input type="hidden" id="supportPlanDays">
+                    <input type="hidden" id="supportIsRenewal">
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="nav-item" data-section="profile">
-      <i class="fa-solid fa-circle-user nav-icon"></i>
-      <div class="nav-label">Профиль</div>
-    </div>
-  </div>
-  </div>
+    <!-- Остальные модалки оставляем без изменений -->
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+    <!-- Уведомления в стиле Toast -->
+    <div id="toastContainer"></div>
 
-    const user = tg.initDataUnsafe.user;
-
-    if (user) {
-      const currentUserId = user.id;
-      const login = user.username;
-      const name = user.first_name;
-
-      document.querySelector(".user-id").textContent = `ID: ${currentUserId}`;
-      window.currentUserId = currentUserId;
-    }
-  </script>
-
-  <script src="script.js"></script>
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
