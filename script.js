@@ -5,7 +5,7 @@ tg.expand(); // Расширяем приложение на весь экран
 // Supabase configuration
 const SUPABASE_URL = 'https://wgxkflgdjzqyengrmlsb.supabase.co/';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneGtmbGdkanpxeWVuZ3JtbHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4OTA2MTUsImV4cCI6MjA4MzQ2NjYxNX0.fM7_sOJCZ9SEZt73sABCE4NsXjnfVcs2h3usaFoNpf0';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let userData = null;
 let currentCurrency = localStorage.getItem('gov_currency') || 'USD';
@@ -282,7 +282,7 @@ async function initApp() {
         }
 
         // Поиск пользователя по idtg
-        let { data, error } = await supabase
+        let { data, error } = await supabaseClient
             .from('users')
             .select('*')
             .eq('idtg', user.id)
@@ -296,7 +296,7 @@ async function initApp() {
 
         if (!data) {
             // Создаем нового пользователя если не найден
-            const { data: newUser, error: createError } = await supabase
+            const { data: newUser, error: createError } = await supabaseClient
                 .from('users')
                 .insert([{
                     idtg: user.id,
