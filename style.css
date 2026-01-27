@@ -1,5 +1,6 @@
 /* ========== ПЕРЕМЕННЫЕ И БАЗОВЫЕ СТИЛИ ========== */
 :root {
+    --tg-safe-top: 0px;
     /* Цветовая палитра */
     --primary: #2563EB;
     --primary-dark: #1D4ED8;
@@ -2179,6 +2180,10 @@ input:checked + .slider:before {
     transform: translateY(0);
 }
 
+:root {
+    --tg-safe-top: 0px;
+}
+
 .app-container {
-    padding-top: 56px;
+    padding-top: calc(var(--tg-safe-top) + 12px);
 }

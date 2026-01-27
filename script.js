@@ -1,6 +1,16 @@
 // Инициализация Telegram Web App
 const tg = window.Telegram.WebApp;
 
+function applySafeArea() {
+    document.documentElement.style.setProperty(
+        '--tg-safe-top',
+        `${tg.safeAreaInset?.top || 0}px`
+    );
+}
+
+applySafeArea();
+tg.onEvent('viewportChanged', applySafeArea);
+
 // Настройка темы и кнопок
 tg.expand();
 tg.setHeaderColor('bg_color'); // Устанавливаем цвет заголовка в цвет фона приложения
