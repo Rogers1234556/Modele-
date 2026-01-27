@@ -147,18 +147,25 @@ class UIManager {
 
     static initCurrencySwitcher() {
         const currencyTabs = document.querySelectorAll('.currency-tab');
+
         currencyTabs.forEach(tab => {
-            if (tab.dataset.currency === currentCurrency) tab.classList.add('active');
-            else tab.classList.remove('active');
-            
+            tab.classList.remove('active');
+
+            if (tab.dataset.currency === currentCurrency) {
+                tab.classList.add('active');
+            }
+
             tab.addEventListener('click', () => {
                 currentCurrency = tab.dataset.currency;
                 localStorage.setItem('gov_currency', currentCurrency);
+
                 currencyTabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
+
                 this.updatePrices();
             });
         });
+
         this.updatePrices();
     }
 
