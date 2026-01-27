@@ -12,7 +12,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let userData = null;
-let currentCurrency = localStorage.getItem('gov_currency') || 'UAH';
+let currentCurrency = localStorage.getItem('gov_currency') || 'USD';
 let pricingMode = 'new'; // 'new' | 'renew'
 
 // Цены в разных валютах
@@ -283,15 +283,7 @@ class UIManager {
         title.textContent = faction.fullName;
         content.innerHTML = `
             <div class="faction-modal-details">
-                <div class="faction-header-large" style="background: ${faction.color}15; border: 1px solid ${faction.color}30;">
-                    <div class="faction-icon-large" style="background: ${faction.color}; color: white;">
-                        <i class="${faction.icon}"></i>
-                    </div>
-                    <div class="faction-info-large">
-                        <h4>${faction.name}</h4>
-                        <p>${faction.status === 'available' ? 'Полный доступ ко всем функциям' : 'Скоро появится'}</p>
-                    </div>
-                </div>
+                
                 <div class="faction-features-list">
                     <h5>Функционал фракции:</h5>
                     <ul>

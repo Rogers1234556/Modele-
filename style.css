@@ -2178,3 +2178,7 @@ input:checked + .slider:before {
 .payment-actions a:active {
     transform: translateY(0);
 }
+
+.app-container {
+    padding-top: 56px;
+}
