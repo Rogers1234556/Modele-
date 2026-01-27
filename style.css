@@ -2169,5 +2169,5 @@ input:checked + .slider:before {
 }
 
 .app-container {
-    padding-top: calc(var(--tg-safe-top) + 12px);
+    padding-top: calc(var(--tg-safe-top) + 25px);
 }
