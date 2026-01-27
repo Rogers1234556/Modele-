@@ -312,12 +312,7 @@ class UIManager {
                         `).join('')}
                     </ul>
                 </div>
-                <div class="faction-action">
-                    <button class="btn-primary" onclick="UIManager.closeModals(); document.querySelector('[data-tab=main]').click();" style="background: ${faction.color}">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>Приобрести доступ</span>
-                    </button>
-                </div>
+                
             </div>
         `;
         modal.classList.add('active');
