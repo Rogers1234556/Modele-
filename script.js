@@ -1,6 +1,10 @@
 // Инициализация Telegram Web App
 const tg = window.Telegram.WebApp;
-tg.expand(); // Расширяем приложение на весь экран
+
+// Настройка темы и кнопок
+tg.expand();
+tg.setHeaderColor('bg_color'); // Устанавливаем цвет заголовка в цвет фона приложения
+tg.setBackgroundColor('bg_color'); // Устанавливаем цвет фона
 
 // Supabase configuration
 const SUPABASE_URL = 'https://wgxkflgdjzqyengrmlsb.supabase.co/';
