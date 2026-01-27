@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let userData = null;
-let currentCurrency = localStorage.getItem('gov_currency') || 'USD';
+let currentCurrency = localStorage.getItem('gov_currency') || 'UAH';
 let pricingMode = 'new'; // 'new' | 'renew'
 
 // Цены в разных валютах
@@ -27,83 +27,13 @@ const pricingData = {
 
 // Данные фракций
 const factionsData = [
-    {
-        id: 'mvd',
-        name: 'МВД',
-        fullName: 'Министерство Внутренних Дел',
-        icon: 'fas fa-shield-alt',
-        color: '#3B82F6',
-        features: [
-            'в разработке'
-        ],
-        status: 'available'
-    },
-    {
-        id: 'fsb',
-        name: 'ФСБ',
-        fullName: 'Федеральная Служба Безопасности',
-        icon: 'fas fa-user-secret',
-        color: '#EF4444',
-        features: [
-            'в разработке'
-        ],
-        status: 'available'
-    },
-    {
-        id: 'mz',
-        name: 'МЗ',
-        fullName: 'Министерство Здравоохранения',
-        icon: 'fas fa-heart-pulse',
-        color: '#10B981',
-        features: [
-            'в разработке'
-        ],
-        status: 'available'
-    },
-    {
-        id: 'mo',
-        name: 'МО',
-        fullName: 'Министерство Обороны',
-        icon: 'fas fa-jet-fighter',
-        color: '#8B5CF6',
-        features: [
-            'в разработке'
-        ],
-        status: 'available'
-    },
-    {
-        id: 'fsin',
-        name: 'ФСИН',
-        fullName: 'Федеральная Служба Исполнения Наказаний',
-        icon: 'fas fa-gavel',
-        color: '#F59E0B',
-        features: [
-            'в разработке'
-        ],
-        status: 'available'
-    },
-    {
-        id: 'government',
-        name: 'Пра-во',
-        fullName: 'Правительство',
-        icon: 'fas fa-landmark',
-        color: '#6366F1',
-        features: [
-            'в разработке'
-        ],
-        status: 'available'
-    },
-    {
-        id: 'trk',
-        name: 'ТРК',
-        fullName: 'ТРК "Ритм"',
-        icon: 'fas fa-tower-broadcast',
-        color: '#EC4899',
-        features: [
-            'в разработке'
-        ],
-        status: 'available'
-    }
+    { id: 'mvd', name: 'МВД', fullName: 'Министерство Внутренних Дел', icon: 'fas fa-shield-alt', color: '#3B82F6', features: ['в разработке'], status: 'available' },
+    { id: 'fsb', name: 'ФСБ', fullName: 'Федеральная Служба Безопасности', icon: 'fas fa-user-secret', color: '#EF4444', features: ['в разработке'], status: 'available' },
+    { id: 'mz', name: 'МЗ', fullName: 'Министерство Здравоохранения', icon: 'fas fa-heart-pulse', color: '#10B981', features: ['в разработке'], status: 'available' },
+    { id: 'mo', name: 'МО', fullName: 'Министерство Обороны', icon: 'fas fa-jet-fighter', color: '#8B5CF6', features: ['в разработке'], status: 'available' },
+    { id: 'fsin', name: 'ФСИН', fullName: 'Федеральная Служба Исполнения Наказаний', icon: 'fas fa-gavel', color: '#F59E0B', features: ['в разработке'], status: 'available' },
+    { id: 'government', name: 'Пра-во', fullName: 'Правительство', icon: 'fas fa-landmark', color: '#6366F1', features: ['в разработке'], status: 'available' },
+    { id: 'trk', name: 'ТРК', fullName: 'ТРК "Ритм"', icon: 'fas fa-tower-broadcast', color: '#EC4899', features: ['в разработке'], status: 'available' }
 ];
 
 // Утилитарные функции
@@ -247,6 +177,32 @@ class UIManager {
                 this.loadFactions(e.target.value);
             });
         }
+
+        // Обработка покупки
+        document.querySelectorAll('.btn-buy').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const plan = parseInt(btn.dataset.plan);
+                const isRenewal = btn.dataset.for === 'renew';
+                this.showSupportPayment(plan, isRenewal);
+            });
+        });
+
+        // Кнопка техподдержки
+        const supportBtn = document.getElementById('supportBtn');
+        if (supportBtn) {
+            supportBtn.addEventListener('click', () => {
+                window.open('https://t.me/mr_helpers_bot', '_blank');
+            });
+        }
+    }
+
+    static showSupportPayment(plan, isRenewal) {
+        const modal = document.getElementById('supportPaymentModal');
+        if (modal) {
+            document.getElementById('supportPlanDays').value = plan;
+            document.getElementById('supportIsRenewal').value = isRenewal;
+            modal.classList.add('active');
+        }
     }
 
     static updatePrices() {
@@ -322,116 +278,52 @@ class UIManager {
 
         title.textContent = faction.fullName;
         content.innerHTML = `
-            <div class="faction-details">
-                <div class="faction-status-badge" style="background: ${faction.color}20; color: ${faction.color}; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 600;">
-                    ${faction.status === 'available' ? 'Доступно' : 'В разработке'}
+            <div class="faction-modal-details">
+                <div class="faction-header-large" style="background: ${faction.color}15; border: 1px solid ${faction.color}30;">
+                    <div class="faction-icon-large" style="background: ${faction.color}; color: white;">
+                        <i class="${faction.icon}"></i>
+                    </div>
+                    <div class="faction-info-large">
+                        <h4>${faction.name}</h4>
+                        <p>${faction.status === 'available' ? 'Полный доступ ко всем функциям' : 'Скоро появится'}</p>
+                    </div>
                 </div>
-                <ul class="pricing-features">
-                    ${faction.features.map(feat => `<li><i class="fas fa-check"></i> ${feat}</li>`).join('')}
-                </ul>
+                <div class="faction-features-list">
+                    <h5>Функционал фракции:</h5>
+                    <ul>
+                        ${faction.features.map(feat => `
+                            <li>
+                                <i class="fas fa-check-circle" style="color: ${faction.color}"></i>
+                                <span>${feat}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                <div class="faction-action">
+                    <button class="btn-primary" onclick="UIManager.closeModals(); document.querySelector('[data-tab=main]').click();" style="background: ${faction.color}">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Приобрести доступ</span>
+                    </button>
+                </div>
             </div>
         `;
         modal.classList.add('active');
     }
 
+    static closeModals() {
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    }
+
     static updateContestTimer() {
         const timerEl = document.getElementById('contestTimer');
         if (!timerEl) return;
-        // Заглушка таймера
         timerEl.textContent = 'Завершено';
     }
-}
-
-// Загрузка данных из Supabase
-async function initApp() {
-    try {
-        const user = tg.initDataUnsafe?.user;
-        if (!user || !user.id) {
-            Utils.showToast('Ошибка авторизации Telegram', 'error');
-            return;
-        }
-
-        // Поиск пользователя по idtg
-        let { data, error } = await supabaseClient
-            .from('users')
-            .select('*')
-            .eq('idtg', user.id)
-            .single();
-
-        if (error && error.code !== 'PGRST116') {
-            console.error('Supabase error:', error);
-            Utils.showToast('Ошибка загрузки данных', 'error');
-            return;
-        }
-
-        if (!data) {
-            // Создаем нового пользователя если не найден
-            const { data: newUser, error: createError } = await supabaseClient
-                .from('users')
-                .insert([{
-                    idtg: user.id,
-                    name: user.first_name || 'User',
-                    telegram: user.username || '',
-                    status: 'active'
-                }])
-                .select()
-                .single();
-
-            if (createError) {
-                console.error('Create error:', createError);
-            } else {
-                userData = newUser;
-            }
-        } else {
-            userData = data;
-        }
-
-        UIManager.init();
-        UIManager.updateProfileUI();
-
-    } catch (e) {
-        console.error('Init error:', e);
-        Utils.showToast('Критическая ошибка инициализации', 'error');
-    }
-}
-
-// Функция для обработки оплаты
-async function handlePayment(plan, isRenewal) {
-    // В реальном приложении здесь будет логика оплаты через Telegram Payments
-    // или интеграция с платежной системой
-
-    Utils.showToast(`Оплата ${plan} дней (${isRenewal ? 'продление' : 'новая подписка'})`, 'info');
-
-    // В демо-режиме просто показываем сообщение
-    setTimeout(() => {
-        Utils.showToast('Оплата прошла успешно! Подписка активирована.', 'success');
-
-        // Обновляем данные пользователя
-        if (userData) {
-            // Добавляем дни к подписке
-            const currentDate = userData.daysgow ? new Date(userData.daysgow) : new Date();
-            const newDate = new Date(currentDate);
-            newDate.setDate(newDate.getDate() + plan);
-
-            userData.daysgow = newDate.toISOString().split('T')[0];
-
-            // Сохраняем в базу данных
-            saveUserData();
-
-            // Обновляем UI
-            UIManager.updateProfileUI();
-
-            // Переключаем на режим продления
-            pricingMode = 'renew';
-            UIManager.checkPricingMode();
-        }
-    }, 2000);
 }
 
 // Сохранение данных пользователя в Supabase
 async function saveUserData() {
     if (!userData || !tg.initDataUnsafe?.user?.id) return;
-
     try {
         const { error } = await supabaseClient
             .from('users')
@@ -444,10 +336,7 @@ async function saveUserData() {
                 daysgow: userData.daysgow,
                 updated_at: new Date().toISOString()
             });
-
-        if (error) {
-            console.error('Error saving user data:', error);
-        }
+        if (error) console.error('Error saving user data:', error);
     } catch (error) {
         console.error('Error in saveUserData:', error);
     }
@@ -462,7 +351,6 @@ async function initApp() {
             return;
         }
 
-        // Поиск пользователя по idtg
         let { data, error } = await supabaseClient
             .from('users')
             .select('*')
@@ -476,7 +364,6 @@ async function initApp() {
         }
 
         if (!data) {
-            // Создаем нового пользователя если не найден
             const { data: newUser, error: createError } = await supabaseClient
                 .from('users')
                 .insert([{
@@ -493,7 +380,6 @@ async function initApp() {
 
             if (createError) {
                 console.error('Create error:', createError);
-                Utils.showToast('Ошибка создания пользователя', 'error');
             } else {
                 userData = newUser;
             }
@@ -501,21 +387,14 @@ async function initApp() {
             userData = data;
         }
 
-        // Инициализируем UI
         UIManager.init();
-
-        // Обновляем профиль
         await UIManager.updateProfileUI();
 
-        // Проверяем есть ли ключ, если нет - генерируем
-        if (!userData.key) {
-            // Генерируем уникальный ключ
+        if (userData && !userData.key) {
             const prefix = 'GOV';
             const timestamp = Date.now().toString(36);
             const random = Math.random().toString(36).substr(2, 5);
             userData.key = `${prefix}-${timestamp}-${random}`.toUpperCase();
-
-            // Сохраняем в базу
             await saveUserData();
             UIManager.updateProfileUI();
         }
@@ -526,19 +405,4 @@ async function initApp() {
     }
 }
 
-// Запуск при загрузке страницы
 document.addEventListener('DOMContentLoaded', initApp);
-
-// Экспортируем объекты для отладки в консоли
-window.app = {
-    tg,
-    userData,
-    currentCurrency,
-    pricingMode,
-    UIManager,
-    Utils,
-    handlePayment,
-    factionsData
-};
-
-console.log('GOV Helper app loaded successfully!');
