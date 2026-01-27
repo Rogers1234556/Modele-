@@ -77,15 +77,6 @@ body {
 }
 
 /* ========== ХЕДЕР ========== */
-.app-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
 
 .header-content {
     padding: 16px 20px;
@@ -167,13 +158,6 @@ body {
 
 .icon-btn .badge.hidden {
     display: none;
-}
-
-/* Табы навигации */
-.header-tabs {
-    display: flex;
-    padding: 0 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .tab-btn {
@@ -2185,5 +2169,5 @@ input:checked + .slider:before {
 }
 
 .app-container {
-    padding-top: calc(var(--tg-safe-top) + 20px);
+    padding-top: calc(var(--tg-safe-top) + 12px);
 }
