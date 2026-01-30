@@ -140,6 +140,7 @@ class UIManager {
                 if (page) {
                     page.classList.add('active');
                     if (pageId === 'profile') this.updateProfileUI();
+                    if (pageId === 'contests') this.loadContests();
                 }
             });
         });
@@ -208,12 +209,184 @@ class UIManager {
             });
         });
 
+        // Активация промокода
+        const activatePromoBtn = document.getElementById('activatePromoBtn');
+        if (activatePromoBtn) {
+            activatePromoBtn.addEventListener('click', () => {
+                const code = document.getElementById('promoCode').value.trim();
+                if (code) {
+                    this.activatePromoCode(code);
+                } else {
+                    Utils.showToast('Введите промокод', 'error');
+                }
+            });
+        }
+
         // Кнопка техподдержки
         const supportBtn = document.getElementById('supportBtn');
         if (supportBtn) {
             supportBtn.addEventListener('click', () => {
                 window.open('https://t.me/mr_helpers_bot', '_blank');
             });
+        }
+    }
+
+    static async activatePromoCode(code) {
+        try {
+            // Ищем промокод в базе
+            const { data: promo, error } = await supabaseClient
+                .from('promocodes')
+                .select('*')
+                .eq('code', code.toUpperCase())
+                .eq('is_active', true)
+                .single();
+
+            if (error || !promo) {
+                Utils.showToast('Промокод не найден или неактивен', 'error');
+                return;
+            }
+
+            // Проверяем срок действия
+            if (promo.expires_at && new Date(promo.expires_at) < new Date()) {
+                Utils.showToast('Срок действия промокода истек', 'error');
+                return;
+            }
+
+            // Проверяем лимит использований
+            if (promo.max_uses && promo.used_count >= promo.max_uses) {
+                Utils.showToast('Промокод больше недействителен', 'error');
+                return;
+            }
+
+            // Проверяем, не использовал ли пользователь его уже
+            const { data: usage } = await supabaseClient
+                .from('promo_usages')
+                .select('*')
+                .eq('user_idtg', tg.initDataUnsafe?.user?.id)
+                .eq('promo_id', promo.id)
+                .single();
+
+            if (usage) {
+                Utils.showToast('Вы уже использовали этот промокод', 'error');
+                return;
+            }
+
+            // Активируем: добавляем дни пользователю
+            const daysToAdd = promo.days;
+            const currentDate = userData.daysgow ? new Date(userData.daysgow) : new Date();
+            if (currentDate < new Date()) {
+                currentDate.setTime(new Date().getTime());
+            }
+            const newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() + daysToAdd);
+
+            userData.daysgow = newDate.toISOString().split('T')[0];
+
+            // Сохраняем изменения (транзакция имитируется последовательными запросами)
+            const { error: updateError } = await supabaseClient
+                .from('users')
+                .update({ daysgow: userData.daysgow })
+                .eq('idtg', tg.initDataUnsafe?.user?.id);
+
+            if (updateError) throw updateError;
+
+            // Записываем использование
+            await supabaseClient.from('promo_usages').insert([{
+                user_idtg: tg.initDataUnsafe?.user?.id,
+                promo_id: promo.id
+            }]);
+
+            // Обновляем счетчик использований
+            await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
+
+            Utils.showToast(`Промокод активирован! Добавлено ${daysToAdd} ${Utils.getDaysWord(daysToAdd)}`, 'success');
+            this.updateProfileUI();
+            this.closeModals();
+            document.getElementById('promoCode').value = '';
+
+        } catch (e) {
+            console.error('Promo activation error:', e);
+            Utils.showToast('Ошибка при активации', 'error');
+        }
+    }
+
+    static async loadContests() {
+        try {
+            const { data: contest, error } = await supabaseClient
+                .from('contests')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (error || !contest) return;
+
+            const timerEl = document.getElementById('contestTimer');
+            const participantsEl = document.getElementById('contestParticipants');
+            const contestBtn = document.querySelector('.contests-section .btn-secondary');
+
+            if (timerEl) {
+                const end = new Date(contest.ends_at);
+                const now = new Date();
+                if (end > now) {
+                    timerEl.textContent = Utils.formatDate(contest.ends_at);
+                } else {
+                    timerEl.textContent = 'Завершено';
+                }
+            }
+
+            // Считаем участников
+            const { count } = await supabaseClient
+                .from('contest_participants')
+                .select('*', { count: 'exact', head: true })
+                .eq('contest_id', contest.id);
+
+            if (participantsEl) participantsEl.textContent = count || 0;
+
+            if (contestBtn) {
+                // Проверяем участие текущего пользователя
+                const { data: participation } = await supabaseClient
+                    .from('contest_participants')
+                    .select('*')
+                    .eq('contest_id', contest.id)
+                    .eq('user_idtg', tg.initDataUnsafe?.user?.id)
+                    .single();
+
+                if (participation) {
+                    contestBtn.innerHTML = '<i class="fas fa-check"></i><span>Вы участвуете</span>';
+                    contestBtn.classList.add('btn-disabled');
+                    contestBtn.disabled = true;
+                } else if (new Date(contest.ends_at) > new Date()) {
+                    contestBtn.innerHTML = '<i class="fas fa-plus"></i><span>Участвовать</span>';
+                    contestBtn.classList.remove('btn-disabled');
+                    contestBtn.disabled = false;
+                    contestBtn.onclick = () => this.joinContest(contest.id);
+                }
+            }
+
+        } catch (e) {
+            console.error('Contest load error:', e);
+        }
+    }
+
+    static async joinContest(contestId) {
+        try {
+            const { error } = await supabaseClient
+                .from('contest_participants')
+                .insert([{
+                    contest_id: contestId,
+                    user_idtg: tg.initDataUnsafe?.user?.id
+                }]);
+
+            if (error) throw error;
+
+            Utils.showToast('Вы успешно зарегистрированы в конкурсе!', 'success');
+            this.loadContests();
+
+        } catch (e) {
+            console.error('Join contest error:', e);
+            Utils.showToast('Ошибка при регистрации', 'error');
         }
     }
 
