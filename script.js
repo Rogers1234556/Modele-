@@ -106,9 +106,17 @@ class Utils {
         const targetDate = new Date(dateString);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const diffTime = targetDate - today;
+        
+        // Устанавливаем целевую дату тоже на начало дня для чистого сравнения
+        const target = new Date(targetDate);
+        target.setHours(0, 0, 0, 0);
+
+        const diffTime = target - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays > 0 ? diffDays : 0;
+        
+        // Если дата сегодня, это считается как 1 день (день истечения)
+        // Но для отображения "Активный" нам нужно чтобы дней было > 0
+        return diffDays >= 0 ? diffDays : 0;
     }
 
     static getDaysWord(days) {
@@ -272,15 +280,23 @@ class UIManager {
             }
 
             // Активируем: добавляем дни пользователю
-            const daysToAdd = promo.days;
-            const currentDate = userData.daysgow ? new Date(userData.daysgow) : new Date();
-            if (currentDate < new Date()) {
-                currentDate.setTime(new Date().getTime());
+            const daysToAdd = parseInt(promo.days);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let startDate = today;
+            if (userData.daysgow) {
+                const currentExpiry = new Date(userData.daysgow);
+                if (currentExpiry > today) {
+                    startDate = currentExpiry;
+                }
             }
-            const newDate = new Date(currentDate);
+
+            const newDate = new Date(startDate);
             newDate.setDate(newDate.getDate() + daysToAdd);
 
-            userData.daysgow = newDate.toISOString().split('T')[0];
+            const newExpiryString = newDate.toISOString().split('T')[0];
+            userData.daysgow = newExpiryString;
 
             // Сохраняем изменения (транзакция имитируется последовательными запросами)
             const { error: updateError } = await supabaseClient
@@ -300,13 +316,14 @@ class UIManager {
             await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
 
             Utils.showToast(`Промокод активирован! Добавлено ${daysToAdd} ${Utils.getDaysWord(daysToAdd)}`, 'success');
-            this.updateProfileUI();
+            await this.updateProfileUI();
             this.closeModals();
             document.getElementById('promoCode').value = '';
 
         } catch (e) {
             console.error('Promo activation error:', e);
-            Utils.showToast(e);
+            const errorMsg = e.message || 'Ошибка при активации';
+            Utils.showToast(errorMsg, 'error');
         }
     }
 
