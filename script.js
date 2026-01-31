@@ -285,8 +285,8 @@ class UIManager {
             today.setHours(0, 0, 0, 0);
 
             let startDate = today;
-            if (userData.daysgow) {
-                const currentExpiry = new Date(userData.daysgow);
+            if (userData.daysgov) {
+                const currentExpiry = new Date(userData.daysgov);
                 if (currentExpiry > today) {
                     startDate = currentExpiry;
                 }
@@ -296,12 +296,12 @@ class UIManager {
             newDate.setDate(newDate.getDate() + daysToAdd);
 
             const newExpiryString = newDate.toISOString().split('T')[0];
-            userData.daysgow = newExpiryString;
+            userData.daysgov = newExpiryString;
 
             // Сохраняем изменения (транзакция имитируется последовательными запросами)
             const { error: updateError } = await supabaseClient
                 .from('users')
-                .update({ daysgow: userData.daysgow })
+                .update({ daysgov: userData.daysgov })
                 .eq('idtg', tg.initDataUnsafe?.user?.id);
 
             if (updateError) throw updateError;
@@ -444,13 +444,13 @@ class UIManager {
         userName.textContent = userData.name || tg.initDataUnsafe?.user?.first_name || 'Пользователь';
         userTelegram.textContent = userData.telegram || (tg.initDataUnsafe?.user?.username ? `@${tg.initDataUnsafe?.user?.username}` : `ID: ${tg.initDataUnsafe?.user?.id}`);
         
-        const daysLeft = Utils.calculateDaysLeft(userData.daysgow);
+        const daysLeft = Utils.calculateDaysLeft(userData.daysgov);
         const statusText = userData.status === 'banned' ? 'Заблокирован' : (daysLeft > 0 ? 'Активный' : 'Пользователь');
         const statusColor = userData.status === 'banned' ? '#EF4444' : (daysLeft > 0 ? '#10B981' : '#6B7280');
 
         userStatusBadge.innerHTML = `<span class="status-dot" style="background: ${statusColor}"></span><span>${statusText}</span>`;
         userKey.textContent = userData.key || 'Не назначен';
-        govDays.textContent = daysLeft > 0 ? `${daysLeft} ${Utils.getDaysWord(daysLeft)}` : (userData.daysgow ? 'Истекла' : 'Нет подписки');
+        govDays.textContent = daysLeft > 0 ? `${daysLeft} ${Utils.getDaysWord(daysLeft)}` : (userData.daysgov ? 'Истекла' : 'Нет подписки');
 
         if (tg.initDataUnsafe?.user?.photo_url) {
             userAvatar.style.backgroundImage = `url(${tg.initDataUnsafe?.user?.photo_url})`;
@@ -531,7 +531,7 @@ async function saveUserData() {
                 telegram: userData.telegram,
                 status: userData.status,
                 key: userData.key,
-                daysgow: userData.daysgow,
+                daysgov: userData.daysgov,
                 updated_at: new Date().toISOString()
             });
         if (error) console.error('Error saving user data:', error);
@@ -570,7 +570,7 @@ async function initApp() {
                     telegram: user.username || '',
                     status: 'active',
                     key: null,
-                    daysgow: null,
+                    daysgov: null,
                     created_at: new Date().toISOString()
                 }])
                 .select()
