@@ -306,7 +306,7 @@ class UIManager {
 
         } catch (e) {
             console.error('Promo activation error:', e);
-            Utils.showToast('Ошибка при активации', 'error');
+            Utils.showToast(e);
         }
     }
 
