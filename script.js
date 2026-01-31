@@ -561,30 +561,6 @@ async function initApp() {
             return;
         }
 
-        if (!data) {
-            const { data: newUser, error: createError } = await supabaseClient
-                .from('users')
-                .insert([{
-                    idtg: user.id,
-                    name: user.first_name || 'User',
-                    telegram: user.username || '',
-                    status: 'active',
-                    key: null,
-                    daysgov: null,
-                    created_at: new Date().toISOString()
-                }])
-                .select()
-                .single();
-
-            if (createError) {
-                console.error('Create error:', createError);
-            } else {
-                userData = newUser;
-            }
-        } else {
-            userData = data;
-        }
-
         UIManager.init();
         await UIManager.updateProfileUI();
 
