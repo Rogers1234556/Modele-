@@ -213,9 +213,67 @@ class UIManager {
             btn.addEventListener('click', () => {
                 const plan = parseInt(btn.dataset.plan);
                 const isRenewal = btn.dataset.for === 'renew';
-                this.showSupportPayment(plan, isRenewal);
+                this.showPaymentMethodSelection(plan, isRenewal);
             });
         });
+
+        // Обработка выбора способа оплаты
+        document.querySelectorAll('.payment-method-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const method = btn.dataset.method;
+                const plan = parseInt(document.getElementById('paymentPlanDays').value);
+                const isRenewal = document.getElementById('paymentIsRenewal').value === 'true';
+                
+                document.getElementById('paymentMethodModal').classList.remove('active');
+                
+                switch(method) {
+                    case 'stars':
+                        this.showStarsPayment(plan, isRenewal);
+                        break;
+                    case 'cryptobot':
+                        window.open('https://t.me/CryptoBot', '_blank');
+                        Utils.showToast('Для оплаты через Crypto Bot напишите в поддержку', 'info');
+                        break;
+                    case 'funpay':
+                        window.open('https://funpay.com', '_blank');
+                        Utils.showToast('Для оплаты через FunPay найдите нас на площадке', 'info');
+                        break;
+                    case 'other':
+                        this.showSupportPayment(plan, isRenewal);
+                        break;
+                }
+            });
+        });
+
+        // Кнопка оплаты звездами
+        const payWithStarsBtn = document.getElementById('payWithStarsBtn');
+        if (payWithStarsBtn) {
+            payWithStarsBtn.addEventListener('click', () => {
+                this.processStarsPayment();
+            });
+        }
+
+        // Кнопка назад к способам оплаты (из звезд)
+        const backToMethodsBtn = document.getElementById('backToMethodsBtn');
+        if (backToMethodsBtn) {
+            backToMethodsBtn.addEventListener('click', () => {
+                document.getElementById('starsPaymentModal').classList.remove('active');
+                const plan = parseInt(document.getElementById('starsPlanDays').value);
+                const isRenewal = document.getElementById('starsIsRenewal').value === 'true';
+                this.showPaymentMethodSelection(plan, isRenewal);
+            });
+        }
+
+        // Кнопка назад к способам оплаты (из поддержки)
+        const backToMethodsFromSupport = document.getElementById('backToMethodsFromSupport');
+        if (backToMethodsFromSupport) {
+            backToMethodsFromSupport.addEventListener('click', () => {
+                document.getElementById('supportPaymentModal').classList.remove('active');
+                const plan = parseInt(document.getElementById('supportPlanDays').value);
+                const isRenewal = document.getElementById('supportIsRenewal').value === 'true';
+                this.showPaymentMethodSelection(plan, isRenewal);
+            });
+        }
 
         // Активация промокода
         const activatePromoBtn = document.getElementById('activatePromoBtn');
@@ -404,6 +462,147 @@ class UIManager {
         } catch (e) {
             console.error('Join contest error:', e);
             Utils.showToast('Ошибка при регистрации', 'error');
+        }
+    }
+
+    static showPaymentMethodSelection(plan, isRenewal) {
+        const modal = document.getElementById('paymentMethodModal');
+        if (modal) {
+            document.getElementById('paymentPlanDays').value = plan;
+            document.getElementById('paymentIsRenewal').value = isRenewal;
+            
+            const planNames = { 15: '15 дней', 30: '30 дней', 365: '365 дней' };
+            document.getElementById('selectedPlanInfo').textContent = `Тариф: ${planNames[plan] || plan + ' дней'}`;
+            
+            const priceType = isRenewal ? 'renew' : 'new';
+            const price = pricingData[priceType]?.[plan]?.[currentCurrency];
+            if (price) {
+                const currencySymbols = { UAH: 'грн', RUB: 'руб', USD: '$' };
+                const priceText = currentCurrency === 'USD' ? `$${price.toFixed(2)}` : `${price} ${currencySymbols[currentCurrency]}`;
+                document.getElementById('selectedPlanPrice').textContent = priceText;
+            }
+            
+            modal.classList.add('active');
+        }
+    }
+
+    static showStarsPayment(plan, isRenewal) {
+        const modal = document.getElementById('starsPaymentModal');
+        if (modal) {
+            document.getElementById('starsPlanDays').value = plan;
+            document.getElementById('starsIsRenewal').value = isRenewal;
+            
+            const planNames = { 15: '15 дней', 30: '30 дней', 365: '365 дней' };
+            document.getElementById('starsPaymentTitle').textContent = `Подписка на ${planNames[plan] || plan + ' дней'}`;
+            
+            const starsPrice = this.getStarsPrice(plan, isRenewal);
+            document.getElementById('starsAmount').textContent = starsPrice;
+            
+            modal.classList.add('active');
+        }
+    }
+
+    static getStarsPrice(plan, isRenewal) {
+        const starsPrices = {
+            new: { 15: 50, 30: 120, 365: 950 },
+            renew: { 15: 70, 30: 140, 365: 1180 }
+        };
+        const priceType = isRenewal ? 'renew' : 'new';
+        return starsPrices[priceType]?.[plan] || 100;
+    }
+
+    static async processStarsPayment() {
+        const plan = parseInt(document.getElementById('starsPlanDays').value);
+        const isRenewal = document.getElementById('starsIsRenewal').value === 'true';
+        
+        const payBtn = document.getElementById('payWithStarsBtn');
+        if (payBtn) {
+            payBtn.disabled = true;
+            payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Создание платежа...</span>';
+        }
+
+        try {
+            const userId = tg.initDataUnsafe?.user?.id;
+            
+            const response = await fetch('/api/create-stars-invoice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plan, isRenewal, userId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.invoiceUrl) {
+                if (typeof tg !== 'undefined' && tg.openInvoice) {
+                    tg.openInvoice(data.invoiceUrl, async (status) => {
+                        if (status === 'paid') {
+                            await this.activateSubscription(plan, isRenewal);
+                            Utils.showToast('Оплата прошла успешно! Подписка активирована.', 'success');
+                            this.closeModals();
+                            this.updateProfileUI();
+                        } else if (status === 'cancelled') {
+                            Utils.showToast('Оплата отменена', 'info');
+                        } else if (status === 'failed') {
+                            Utils.showToast('Ошибка оплаты. Попробуйте снова.', 'error');
+                        }
+                        this.resetPayButton();
+                    });
+                } else {
+                    window.open(data.invoiceUrl, '_blank');
+                    Utils.showToast('Откройте ссылку для оплаты', 'info');
+                    this.resetPayButton();
+                }
+            } else {
+                throw new Error(data.message || 'Не удалось создать платеж');
+            }
+        } catch (error) {
+            console.error('Stars payment error:', error);
+            Utils.showToast('Ошибка создания платежа. Обратитесь в поддержку.', 'error');
+            this.resetPayButton();
+        }
+    }
+
+    static resetPayButton() {
+        const payBtn = document.getElementById('payWithStarsBtn');
+        if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<i class="fas fa-star"></i> <span>Оплатить звездами</span>';
+        }
+    }
+
+    static async activateSubscription(plan, isRenewal) {
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let startDate = today;
+            if (userData?.daysgov) {
+                const currentExpiry = new Date(userData.daysgov);
+                if (currentExpiry > today) {
+                    startDate = currentExpiry;
+                }
+            }
+
+            const newDate = new Date(startDate);
+            newDate.setDate(newDate.getDate() + plan);
+
+            const newExpiryString = newDate.toISOString().split('T')[0];
+            
+            if (userData) {
+                userData.daysgov = newExpiryString;
+            }
+
+            const { error } = await supabaseClient
+                .from('users')
+                .update({ daysgov: newExpiryString })
+                .eq('idtg', tg.initDataUnsafe?.user?.id);
+
+            if (error) throw error;
+            
+            return true;
+        } catch (error) {
+            console.error('Subscription activation error:', error);
+            throw error;
         }
     }
 

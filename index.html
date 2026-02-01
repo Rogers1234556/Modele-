@@ -442,6 +442,114 @@
         </div>
     </footer>
 
+    <!-- Модальное окно выбора способа оплаты -->
+    <div id="paymentMethodModal" class="modal">
+        <div class="modal-content medium">
+            <div class="modal-header">
+                <h3>Выберите способ оплаты</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-selected-plan">
+                    <span id="selectedPlanInfo">Выбранный тариф: 30 дней</span>
+                    <span id="selectedPlanPrice" class="plan-price-badge"></span>
+                </div>
+                <div class="payment-methods-list">
+                    <button class="payment-method-btn" data-method="stars">
+                        <div class="payment-method-icon stars-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <span class="payment-method-title">Telegram Stars</span>
+                            <span class="payment-method-desc">Оплата звездами Telegram</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="payment-method-btn" data-method="cryptobot">
+                        <div class="payment-method-icon crypto-icon">
+                            <i class="fab fa-bitcoin"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <span class="payment-method-title">Crypto Bot</span>
+                            <span class="payment-method-desc">Оплата криптовалютой</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="payment-method-btn" data-method="funpay">
+                        <div class="payment-method-icon funpay-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <span class="payment-method-title">FunPay</span>
+                            <span class="payment-method-desc">Оплата через FunPay</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="payment-method-btn" data-method="other">
+                        <div class="payment-method-icon other-icon">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <span class="payment-method-title">Другое</span>
+                            <span class="payment-method-desc">Связаться с поддержкой</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <input type="hidden" id="paymentPlanDays">
+                <input type="hidden" id="paymentIsRenewal">
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно оплаты звездами -->
+    <div id="starsPaymentModal" class="modal">
+        <div class="modal-content medium">
+            <div class="modal-header">
+                <h3>Оплата Telegram Stars</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stars-payment-container">
+                    <div class="stars-info-box">
+                        <div class="stars-big-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h4 id="starsPaymentTitle">Подписка на 30 дней</h4>
+                        <div class="stars-price">
+                            <span class="stars-amount" id="starsAmount">150</span>
+                            <span class="stars-label">Stars</span>
+                        </div>
+                    </div>
+                    <div class="stars-benefits">
+                        <div class="benefit-item">
+                            <i class="fas fa-bolt"></i>
+                            <span>Моментальная активация</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Безопасная оплата через Telegram</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-undo"></i>
+                            <span>Возможность возврата</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary stars-pay-btn" id="payWithStarsBtn">
+                        <i class="fas fa-star"></i>
+                        <span>Оплатить звездами</span>
+                    </button>
+                    <button class="btn-secondary" id="backToMethodsBtn">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Назад к способам оплаты</span>
+                    </button>
+                </div>
+                <input type="hidden" id="starsPlanDays">
+                <input type="hidden" id="starsIsRenewal">
+            </div>
+        </div>
+    </div>
+
     <!-- Модальное окно оплаты через поддержку -->
     <div id="supportPaymentModal" class="modal">
         <div class="modal-content medium">
@@ -451,8 +559,6 @@
             </div>
             <div class="modal-body">
                 <div class="support-payment-info">
-                    
-
                     <div class="payment-instruction">
                         <h5>Инструкция по оплате:</h5>
                         <ol>
@@ -462,21 +568,18 @@
                             <li>После чего свободный администратор возьмет ваше обращения</li>
                         </ol>
                     </div>
-                    
 
                     <div class="payment-actions">
                         <a href="https://t.me/mr_helpers_bot" target="_blank" class="btn-primary support-action-btn">
                             <i class="fab fa-telegram-plane"></i>
                             <span>Перейти в поддержку</span>
                         </a>
-                        <button class="btn-secondary modal-close support-close-btn">
-                            
-                            <span>Закрыть</span>
+                        <button class="btn-secondary" id="backToMethodsFromSupport">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Назад к способам оплаты</span>
                         </button>
-                        
                     </div>
 
-                    <!-- Скрытые поля для данных -->
                     <input type="hidden" id="supportPlanDays">
                     <input type="hidden" id="supportIsRenewal">
                 </div>
