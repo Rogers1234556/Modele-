@@ -381,16 +381,17 @@ class UIManager {
                 this.updatePrices();
                 
             } else {
-                // Промокод с днями подписки (старая логика)
+                // Промокод с днями подписки
                 const daysToAdd = parseInt(promo.days) || 0;
+                const promoType = promo.type; // YouTuber, Promotion, Gift, FanPay
                 
                 if (daysToAdd > 0) {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
 
                     let startDate = today;
-                    if (userData.daysgov) {
-                        const currentExpiry = new Date(userData.daysgov);
+                    if (userData.daysgow) {
+                        const currentExpiry = new Date(userData.daysgow);
                         if (currentExpiry > today) {
                             startDate = currentExpiry;
                         }
@@ -400,12 +401,15 @@ class UIManager {
                     newDate.setDate(newDate.getDate() + daysToAdd);
 
                     const newExpiryString = newDate.toISOString().split('T')[0];
-                    userData.daysgov = newExpiryString;
+                    userData.daysgow = newExpiryString;
 
                     // Сохраняем изменения
                     const { error: updateError } = await supabaseClient
                         .from('users')
-                        .update({ daysgov: userData.daysgov })
+                        .update({ 
+                            daysgow: userData.daysgow,
+                            notes: `Промо: ${promoType || 'Days'} (${code})`
+                        })
                         .eq('idtg', userId);
 
                     if (updateError) throw updateError;
