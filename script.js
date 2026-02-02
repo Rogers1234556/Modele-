@@ -712,7 +712,7 @@ class UIManager {
 
     static updatePrices() {
         // Автоматически определяем режим цен на основе подписки пользователя
-        if (userData && userData.daysgov[) {
+        if (userData && userData.daysgov) {
             const daysLeft = Utils.calculateDaysLeft(userData.daysgov);
             pricingMode = daysLeft > 0 ? 'renew' : 'new';
             
