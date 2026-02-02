@@ -534,12 +534,31 @@ class UIManager {
             const planNames = { 15: '15 дней', 30: '30 дней', 365: '365 дней' };
             document.getElementById('selectedPlanInfo').textContent = `Тариф: ${planNames[plan] || plan + ' дней'}`;
             
+            // Добавляем уведомление об активной подписке
+            let subNotice = modal.querySelector('.active-sub-notice');
+            if (!subNotice) {
+                subNotice = document.createElement('div');
+                subNotice.className = 'active-sub-notice';
+                modal.querySelector('.modal-body').prepend(subNotice);
+            }
+
+            if (isRenewal) {
+                subNotice.style.display = 'block';
+                subNotice.style.color = '#10B981';
+                subNotice.style.fontSize = '0.9rem';
+                subNotice.style.marginBottom = '10px';
+                subNotice.style.textAlign = 'center';
+                subNotice.innerHTML = '<i class="fas fa-check-circle"></i> У вас есть активная подписка (Продление)';
+            } else {
+                subNotice.style.display = 'none';
+            }
+
             const priceType = isRenewal ? 'renew' : 'new';
             const price = pricingData[priceType]?.[plan]?.[currentCurrency];
             if (price) {
                 const currencySymbols = { UAH: 'грн', RUB: 'руб', USD: '$' };
                 const priceText = currentCurrency === 'USD' ? `$${price.toFixed(2)}` : `${price} ${currencySymbols[currentCurrency]}`;
-                document.getElementById('selectedPlanPrice').textContent = priceText;
+                document.getElementById('selectedPlanPrice').textContent = `К оплате: ${priceText}`;
             }
             
             modal.classList.add('active');
@@ -692,6 +711,12 @@ class UIManager {
     }
 
     static updatePrices() {
+        // Автоматически определяем режим цен на основе подписки пользователя
+        if (userData && userData.daysgow) {
+            const daysLeft = Utils.calculateDaysLeft(userData.daysgow);
+            pricingMode = daysLeft > 0 ? 'renew' : 'new';
+        }
+
         const pricingType = pricingMode;
         document.querySelectorAll('.pricing-card').forEach(card => {
             const planStr = card.dataset.plan.replace('-renew', '');
@@ -702,6 +727,12 @@ class UIManager {
                 const originalAmount = pricingData[pricingType][plan][currentCurrency];
                 const currencySymbols = { UAH: 'грн', RUB: 'руб', USD: '$' };
                 
+                // Обновляем атрибут data-for у кнопок покупки
+                const buyBtn = card.querySelector('.btn-buy');
+                if (buyBtn) {
+                    buyBtn.dataset.for = pricingType;
+                }
+
                 // Применяем скидку если есть
                 if (activeDiscount && activeDiscount.percent > 0) {
                     const discountedAmount = applyDiscount(originalAmount);
