@@ -583,8 +583,8 @@ class UIManager {
 
     static getStarsPrice(plan, isRenewal) {
         const starsPrices = {
-            new: { 15: 50, 30: 120, 365: 950 },
-            renew: { 15: 70, 30: 140, 365: 1180 }
+            new: { 15: 150, 30: 355, 365: 2820 },
+            renew: { 15: 220, 30: 425, 365: 3525 }
         };
         const priceType = isRenewal ? 'renew' : 'new';
         return starsPrices[priceType]?.[plan] || 100;
