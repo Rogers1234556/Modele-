@@ -638,7 +638,7 @@ class UIManager {
             }
         } catch (error) {
             console.error('Stars payment error:', error);
-            Utils.showToast('Ошибка создания платежа. Обратитесь в поддержку.', 'error');
+            Utils.showToast(error);
             this.resetPayButton();
         }
     }
