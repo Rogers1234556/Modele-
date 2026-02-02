@@ -603,7 +603,9 @@ class UIManager {
         try {
             const userId = tg.initDataUnsafe?.user?.id;
             
-            const response = await fetch('/api/create-stars-invoice', {
+            const SERVER_URL = 'https://railway.com'; 
+
+            const response = await fetch(`${SERVER_URL}/api/create-stars-invoice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ plan, isRenewal, userId })
