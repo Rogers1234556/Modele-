@@ -24,6 +24,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 let userData = null;
 let currentCurrency = localStorage.getItem('gov_currency') || 'USD';
 let pricingMode = 'new'; // 'new' | 'renew'
+let activeDiscount = null; // { percent: number, promoId: number } - активная скидка до первой оплаты
 
 // Цены в разных валютах
 const pricingData = {
@@ -299,6 +300,8 @@ class UIManager {
 
     static async activatePromoCode(code) {
         try {
+            const userId = tg.initDataUnsafe?.user?.id;
+            
             // Ищем промокод в базе
             const { data: promo, error } = await supabaseClient
                 .from('promocodes')
@@ -328,7 +331,7 @@ class UIManager {
             const { data: usage } = await supabaseClient
                 .from('promo_usages')
                 .select('*')
-                .eq('user_idtg', tg.initDataUnsafe?.user?.id)
+                .eq('user_idtg', userId)
                 .eq('promo_id', promo.id)
                 .single();
 
@@ -337,44 +340,97 @@ class UIManager {
                 return;
             }
 
-            // Активируем: добавляем дни пользователю
-            const daysToAdd = parseInt(promo.days);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            let startDate = today;
-            if (userData.daysgov) {
-                const currentExpiry = new Date(userData.daysgov);
-                if (currentExpiry > today) {
-                    startDate = currentExpiry;
+            // Обработка в зависимости от типа промокода
+            if (promo.type === 'discount' && promo.discount_percent > 0) {
+                // Промокод со скидкой - сохраняем до первой оплаты
+                // Проверяем нет ли уже активной скидки
+                if (activeDiscount) {
+                    Utils.showToast('У вас уже есть активная скидка', 'error');
+                    return;
                 }
+
+                // Создаем запись о скидке пользователя
+                const { error: discountError } = await supabaseClient
+                    .from('user_discounts')
+                    .insert([{
+                        user_idtg: userId,
+                        promo_id: promo.id,
+                        discount_percent: promo.discount_percent,
+                        is_used: false
+                    }]);
+
+                if (discountError) throw discountError;
+
+                // Записываем использование промокода
+                await supabaseClient.from('promo_usages').insert([{
+                    user_idtg: userId,
+                    promo_id: promo.id
+                }]);
+
+                // Обновляем счетчик использований
+                await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
+
+                // Обновляем локальное состояние
+                activeDiscount = {
+                    percent: promo.discount_percent,
+                    promoId: promo.id,
+                    code: promo.code
+                };
+
+                Utils.showToast(`Скидка ${promo.discount_percent}% активирована! Действует до первой оплаты`, 'success');
+                this.updatePrices();
+                
+            } else {
+                // Промокод с днями подписки (старая логика)
+                const daysToAdd = parseInt(promo.days) || 0;
+                
+                if (daysToAdd > 0) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    let startDate = today;
+                    if (userData.daysgov) {
+                        const currentExpiry = new Date(userData.daysgov);
+                        if (currentExpiry > today) {
+                            startDate = currentExpiry;
+                        }
+                    }
+
+                    const newDate = new Date(startDate);
+                    newDate.setDate(newDate.getDate() + daysToAdd);
+
+                    const newExpiryString = newDate.toISOString().split('T')[0];
+                    userData.daysgov = newExpiryString;
+
+                    // Сохраняем изменения
+                    const { error: updateError } = await supabaseClient
+                        .from('users')
+                        .update({ daysgov: userData.daysgov })
+                        .eq('idtg', userId);
+
+                    if (updateError) throw updateError;
+
+                    // Обновляем режим цен
+                    pricingMode = 'renew';
+                    this.updatePrices();
+
+                    Utils.showToast(`Промокод активирован! Добавлено ${daysToAdd} ${Utils.getDaysWord(daysToAdd)}`, 'success');
+                } else {
+                    Utils.showToast('Промокод активирован!', 'success');
+                }
+
+                // Записываем использование
+                await supabaseClient.from('promo_usages').insert([{
+                    user_idtg: userId,
+                    promo_id: promo.id
+                }]);
+
+                // Обновляем счетчик использований
+                await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
+
+                await this.updateProfileUI();
             }
 
-            const newDate = new Date(startDate);
-            newDate.setDate(newDate.getDate() + daysToAdd);
-
-            const newExpiryString = newDate.toISOString().split('T')[0];
-            userData.daysgov = newExpiryString;
-
-            // Сохраняем изменения (транзакция имитируется последовательными запросами)
-            const { error: updateError } = await supabaseClient
-                .from('users')
-                .update({ daysgov: userData.daysgov })
-                .eq('idtg', tg.initDataUnsafe?.user?.id);
-
-            if (updateError) throw updateError;
-
-            // Записываем использование
-            await supabaseClient.from('promo_usages').insert([{
-                user_idtg: tg.initDataUnsafe?.user?.id,
-                promo_id: promo.id
-            }]);
-
-            // Обновляем счетчик использований
-            await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
-
-            Utils.showToast(`Промокод активирован! Добавлено ${daysToAdd} ${Utils.getDaysWord(daysToAdd)}`, 'success');
-            await this.updateProfileUI();
             this.closeModals();
             document.getElementById('promoCode').value = '';
 
@@ -572,6 +628,7 @@ class UIManager {
 
     static async activateSubscription(plan, isRenewal) {
         try {
+            const userId = tg.initDataUnsafe?.user?.id;
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -595,9 +652,24 @@ class UIManager {
             const { error } = await supabaseClient
                 .from('users')
                 .update({ daysgov: newExpiryString })
-                .eq('idtg', tg.initDataUnsafe?.user?.id);
+                .eq('idtg', userId);
 
             if (error) throw error;
+
+            // Помечаем скидку как использованную после оплаты
+            if (activeDiscount) {
+                await supabaseClient
+                    .from('user_discounts')
+                    .update({ is_used: true })
+                    .eq('user_idtg', userId)
+                    .eq('promo_id', activeDiscount.promoId);
+                
+                // Сбрасываем скидку
+                activeDiscount = null;
+            }
+
+            // Обновляем режим цен на продление
+            pricingMode = 'renew';
             
             return true;
         } catch (error) {
@@ -623,11 +695,49 @@ class UIManager {
             if (pricingData[pricingType]?.[plan]) {
                 const priceEl = card.querySelector('.price');
                 const currencyEl = card.querySelector('.currency');
-                const amount = pricingData[pricingType][plan][currentCurrency];
-                priceEl.textContent = currentCurrency === 'USD' ? amount.toFixed(2) : amount;
-                currencyEl.textContent = { UAH: 'грн', RUB: 'руб', USD: '$' }[currentCurrency];
+                const originalAmount = pricingData[pricingType][plan][currentCurrency];
+                const currencySymbols = { UAH: 'грн', RUB: 'руб', USD: '$' };
+                
+                // Применяем скидку если есть
+                if (activeDiscount && activeDiscount.percent > 0) {
+                    const discountedAmount = applyDiscount(originalAmount);
+                    const formattedOriginal = currentCurrency === 'USD' ? originalAmount.toFixed(2) : originalAmount;
+                    const formattedDiscounted = currentCurrency === 'USD' ? discountedAmount.toFixed(2) : discountedAmount;
+                    
+                    priceEl.innerHTML = `<span class="original-price">${formattedOriginal}</span> ${formattedDiscounted}`;
+                    currencyEl.innerHTML = `${currencySymbols[currentCurrency]} <span class="discount-badge">-${activeDiscount.percent}%</span>`;
+                } else {
+                    priceEl.textContent = currentCurrency === 'USD' ? originalAmount.toFixed(2) : originalAmount;
+                    currencyEl.textContent = currencySymbols[currentCurrency];
+                }
             }
         });
+        
+        // Показываем баннер скидки если есть
+        this.updateDiscountBanner();
+    }
+    
+    static updateDiscountBanner() {
+        let banner = document.getElementById('discountBanner');
+        
+        if (activeDiscount && activeDiscount.percent > 0) {
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'discountBanner';
+                banner.className = 'discount-banner';
+                const pricingSection = document.querySelector('.pricing-section');
+                if (pricingSection) {
+                    pricingSection.insertBefore(banner, pricingSection.firstChild);
+                }
+            }
+            banner.innerHTML = `
+                <i class="fas fa-tag"></i>
+                <span>Промокод <strong>${activeDiscount.code}</strong> активен: скидка ${activeDiscount.percent}% на первую оплату</span>
+            `;
+            banner.style.display = 'flex';
+        } else if (banner) {
+            banner.style.display = 'none';
+        }
     }
 
     static async updateProfileUI() {
@@ -784,6 +894,16 @@ async function initApp() {
             userData = data;
         }
 
+        // Устанавливаем режим цен в зависимости от наличия подписки
+        if (userData && userData.daysgov !== null) {
+            pricingMode = 'renew';
+        } else {
+            pricingMode = 'new';
+        }
+
+        // Загружаем активную скидку пользователя (если есть)
+        await loadActiveDiscount();
+
         UIManager.init();
         await UIManager.updateProfileUI();
 
@@ -800,6 +920,39 @@ async function initApp() {
         console.error('Init error:', e);
         Utils.showToast('Критическая ошибка инициализации', 'error');
     }
+}
+
+// Загрузка активной скидки пользователя
+async function loadActiveDiscount() {
+    try {
+        const userId = tg.initDataUnsafe?.user?.id;
+        if (!userId) return;
+
+        // Проверяем есть ли у пользователя неиспользованная скидка
+        const { data: discountData, error } = await supabaseClient
+            .from('user_discounts')
+            .select('*, promocodes!inner(discount_percent, code)')
+            .eq('user_idtg', userId)
+            .eq('is_used', false)
+            .single();
+
+        if (!error && discountData) {
+            activeDiscount = {
+                percent: discountData.promocodes.discount_percent,
+                promoId: discountData.promo_id,
+                code: discountData.promocodes.code
+            };
+        }
+    } catch (e) {
+        console.error('Error loading discount:', e);
+    }
+}
+
+// Применение скидки к цене
+function applyDiscount(price) {
+    if (!activeDiscount || !activeDiscount.percent) return price;
+    const discountAmount = price * (activeDiscount.percent / 100);
+    return Math.round(price - discountAmount);
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

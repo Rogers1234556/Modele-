@@ -2372,3 +2372,51 @@ input:checked + .slider:before {
 .stars-pay-btn i {
     color: #1a1a2e;
 }
+/* ========== DISCOUNT STYLES ========== */
+.discount-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.1));
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    color: #34D399;
+    font-size: 14px;
+}
+
+.discount-banner i {
+    font-size: 18px;
+    color: #10B981;
+}
+
+.discount-banner strong {
+    color: #fff;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: var(--gray-500);
+    font-size: 0.7em;
+    margin-right: 8px;
+    font-weight: 400;
+}
+
+.discount-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: linear-gradient(135deg, #10B981, #34D399);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: var(--radius-full);
+    margin-left: 8px;
+}
+
+.pricing-card .currency {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
