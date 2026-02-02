@@ -649,7 +649,7 @@ class UIManager {
         }
     }
 
-    static async activateSubscription(plan, isRenewal) {
+    static async activateSubscription(plan) {
         try {
             const userId = tg.initDataUnsafe?.user?.id;
             const today = new Date();
