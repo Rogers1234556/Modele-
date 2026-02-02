@@ -390,8 +390,8 @@ class UIManager {
                     today.setHours(0, 0, 0, 0);
 
                     let startDate = today;
-                    if (userData.daysgow) {
-                        const currentExpiry = new Date(userData.daysgow);
+                    if (userData.daysgov) {
+                        const currentExpiry = new Date(userData.daysgov);
                         if (currentExpiry > today) {
                             startDate = currentExpiry;
                         }
@@ -401,13 +401,13 @@ class UIManager {
                     newDate.setDate(newDate.getDate() + daysToAdd);
 
                     const newExpiryString = newDate.toISOString().split('T')[0];
-                    userData.daysgow = newExpiryString;
+                    userData.daysgov = newExpiryString;
 
                     // Сохраняем изменения
                     const { error: updateError } = await supabaseClient
                         .from('users')
                         .update({ 
-                            daysgow: userData.daysgow,
+                            daysgov: userData.daysgov,
                             notes: `Промо: ${promoType || 'Days'} (${code})`
                         })
                         .eq('idtg', userId);
@@ -712,9 +712,14 @@ class UIManager {
 
     static updatePrices() {
         // Автоматически определяем режим цен на основе подписки пользователя
-        if (userData && userData.daysgow) {
-            const daysLeft = Utils.calculateDaysLeft(userData.daysgow);
+        if (userData && userData.daysgov[) {
+            const daysLeft = Utils.calculateDaysLeft(userData.daysgov);
             pricingMode = daysLeft > 0 ? 'renew' : 'new';
+            
+            // Если подписка активна, принудительно устанавливаем флаг у всех кнопок покупки
+            document.querySelectorAll('.btn-buy').forEach(btn => {
+                btn.dataset.for = pricingMode;
+            });
         }
 
         const pricingType = pricingMode;
@@ -727,12 +732,6 @@ class UIManager {
                 const originalAmount = pricingData[pricingType][plan][currentCurrency];
                 const currencySymbols = { UAH: 'грн', RUB: 'руб', USD: '$' };
                 
-                // Обновляем атрибут data-for у кнопок покупки
-                const buyBtn = card.querySelector('.btn-buy');
-                if (buyBtn) {
-                    buyBtn.dataset.for = pricingType;
-                }
-
                 // Применяем скидку если есть
                 if (activeDiscount && activeDiscount.percent > 0) {
                     const discountedAmount = applyDiscount(originalAmount);
@@ -801,6 +800,9 @@ class UIManager {
             userAvatar.style.backgroundSize = 'cover';
             userAvatar.innerHTML = '';
         }
+
+        // Принудительно обновляем цены после обновления UI профиля
+        this.updatePrices();
     }
 
     static loadFactions(search = '') {
