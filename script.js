@@ -603,7 +603,7 @@ class UIManager {
         try {
             const userId = tg.initDataUnsafe?.user?.id;
             
-            const SERVER_URL = 'https://railway.com'; 
+            const SERVER_URL = 'web-production-3ad44.up.railway.app'; 
 
             const response = await fetch(`${SERVER_URL}/api/create-stars-invoice`, {
                 method: 'POST',
