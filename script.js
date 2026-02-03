@@ -440,8 +440,7 @@ class UIManager {
 
         } catch (e) {
             console.error('Promo activation error:', e);
-            const errorMsg = e.message || 'Ошибка при активации';
-            Utils.showToast(errorMsg, 'error');
+            Utils.showToast('Профиль не найден', 'error');
         }
     }
 
@@ -583,8 +582,8 @@ class UIManager {
 
     static getStarsPrice(plan, isRenewal) {
         const starsPrices = {
-            new: { 15: 150, 30: 355, 365: 2820 },
-            renew: { 15: 220, 30: 425, 365: 3525 }
+            new: { 15: 117, 30: 294, 365: 2358 },
+            renew: { 15: 176, 30: 352, 365: 2948 }
         };
         const priceType = isRenewal ? 'renew' : 'new';
         return starsPrices[priceType]?.[plan] || 100;
@@ -670,18 +669,48 @@ class UIManager {
 
             const newExpiryString = newDate.toISOString().split('T')[0];
             
+            // 1. Обновляем пользователя
+            const { error: updateError } = await supabaseClient
+                .from('users')
+                .update({ 
+                    daysgov: newExpiryString,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('idtg', userId);
+
+            if (updateError) throw updateError;
+            
+            // Обновляем локальные данные
             if (userData) {
                 userData.daysgov = newExpiryString;
             }
 
-            const { error } = await supabaseClient
-                .from('users')
-                .update({ daysgov: newExpiryString })
-                .eq('idtg', userId);
+            // 2. Добавляем лог
+            const logTitle = `Выдача подписки | Пользователю ${userData?.name || 'User'} (ID: ${userData?.id || '?'} | ${userId}) выдана подписка на ${plan} дней . за звезды`;
+            await supabaseClient.from('logs').insert([{
+                title: logTitle,
+                admin: 'system',
+                created_at: new Date().toISOString()
+            }]);
 
-            if (error) throw error;
+            // 3. Добавляем платеж
+            const isRenewal = pricingMode === 'renew';
+            const starsAmount = this.getStarsPrice(plan, isRenewal);
+            const fee = 30; // Фиксированная комиссия 30 руб
+            const netAmount = starsAmount - fee;
 
-            // Помечаем скидку как использованную после оплаты
+            await supabaseClient.from('payments').insert([{
+                user_idtg: userId,
+                amount: starsAmount,
+                fee: fee,
+                net_amount: netAmount,
+                method: 'Starstg',
+                status: 'completed',
+                details: `Подписка на ${plan} дней`,
+                created_at: new Date().toISOString()
+            }]);
+
+            // 4. Помечаем скидку как использованную
             if (activeDiscount) {
                 await supabaseClient
                     .from('user_discounts')
@@ -689,7 +718,6 @@ class UIManager {
                     .eq('user_idtg', userId)
                     .eq('promo_id', activeDiscount.promoId);
                 
-                // Сбрасываем скидку
                 activeDiscount = null;
             }
 
