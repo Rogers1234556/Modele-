@@ -605,7 +605,7 @@ class UIManager {
             
             const SERVER_URL = 'web-production-3ad44.up.railway.app'; 
 
-            const response = await fetch(`${SERVER_URL}/api/create-stars-invoice`, {
+            const response = await fetch(`https://${SERVER_URL}/api/create-stars-invoice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ plan, isRenewal, userId })
