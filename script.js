@@ -821,6 +821,7 @@ class UIManager {
 
         try {
             const userId = tg.initDataUnsafe?.user?.id;
+            const SERVER_URL = 'web-production-3ad44.up.railway.app'; 
             // Отправляем запрос на СВОЙ сервер, а не в CryptoBot напрямую
             const response = await fetch(`https://${SERVER_URL}/api/create-crypto-invoice`, {
                 method: 'POST',
