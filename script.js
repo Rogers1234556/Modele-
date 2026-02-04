@@ -21,10 +21,6 @@ const SUPABASE_URL = 'https://wgxkflgdjzqyengrmlsb.supabase.co/';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneGtmbGdkanpxeWVuZ3JtbHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4OTA2MTUsImV4cCI6MjA4MzQ2NjYxNX0.fM7_sOJCZ9SEZt73sABCE4NsXjnfVcs2h3usaFoNpf0';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-
-const CRYPTO_BOT_TOKEN = '526462:AA8QrbhRpcuPyJ9s9L6ZozzTTdMqT7YyYZ9'; // Ваш токен
-
-
 let userData = null;
 let currentCurrency = localStorage.getItem('gov_currency') || 'USD';
 let pricingMode = 'new'; // 'new' | 'renew'
@@ -814,35 +810,33 @@ class UIManager {
     // === CRYPTO BOT LOGIC ===
 
     static async createCryptoInvoice(plan, isRenewal) {
-        const modal = document.getElementById('paymentMethodModal');
-        if(modal) modal.classList.remove('active');
+      try {
+        const userId = tg.initDataUnsafe?.user?.id;
+        const SERVER_URL = 'https://web-production-3ad44.up.railway.app';
 
-        Utils.showToast('Создание счета...', 'info');
+        const response = await fetch(`${SERVER_URL}/api/create-crypto-invoice`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan, isRenewal, userId })
+        });
 
-        try {
-            const userId = tg.initDataUnsafe?.user?.id;
-            
-            await fetch('https://reil/web-production-3ad44.up.railway.app/create-crypto-invoice', {
-            method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                plan,
-                isRenewal,
-                userId
-              })
-            });
+        const data = await response.json();
 
-
-            const data = await response.json();
-            if (data.ok && data.result) {
-                this.showCryptoWaitModal(data.result, plan, isRenewal, data.result.amount);
-            } else {
-                throw new Error('Ошибка сервера при создании счета');
-            }
-        } catch (error) {
-            console.error(error);
-            Utils.showToast('Ошибка: ' + error.message, 'error');
+        if (!data.ok) {
+          throw new Error(data.description || 'Ошибка создания счета');
         }
+
+        this.showCryptoWaitModal(
+          data.result,
+          plan,
+          isRenewal,
+          data.result.amount
+        );
+
+      } catch (err) {
+        console.error(err);
+        Utils.showToast('Ошибка создания счета', 'error');
+      }
     }
 
 
