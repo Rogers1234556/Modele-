@@ -869,7 +869,7 @@ class UIManager {
 
         } catch (error) {
             console.error(error);
-            Utils.showToast('Ошибка подключения к Crypto Bot. Проверьте консоль.', 'error');
+            Utils.showToast(error);
         }
     }
 
