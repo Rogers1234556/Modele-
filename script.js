@@ -835,7 +835,7 @@ class UIManager {
 
       } catch (err) {
         console.error(err);
-        Utils.showToast('Ошибка создания счета', 'error');
+        Utils.showToast(err);
       }
     }
 
