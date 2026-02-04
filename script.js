@@ -821,12 +821,15 @@ class UIManager {
 
         try {
             const userId = tg.initDataUnsafe?.user?.id;
-            const SERVER_URL = 'web-production-3ad44.up.railway.app'; 
-            // Вместо прямого запроса к Crypto Bot
-            const response = await fetch(`https://${SERVER_URL}/api/create-crypto-invoice`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plan, isRenewal, userId: tg.initDataUnsafe?.user?.id })
+            
+            await fetch('https://reil/web-production-3ad44.up.railway.app/create-crypto-invoice', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                plan,
+                userId,
+                amount
+              })
             });
 
 
