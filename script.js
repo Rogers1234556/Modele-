@@ -809,10 +809,11 @@ class UIManager {
     }
     // === CRYPTO BOT LOGIC ===
 
+    // Обновленный метод создания инвойса
     static async createCryptoInvoice(plan, isRenewal) {
       try {
         const userId = tg.initDataUnsafe?.user?.id;
-        const SERVER_URL = 'https://web-production-3ad44.up.railway.app';
+        const SERVER_URL = 'https://web-production-3ad44.up.railway.app'; // Убедитесь, что URL верный
 
         const response = await fetch(`${SERVER_URL}/api/create-crypto-invoice`, {
           method: 'POST',
@@ -823,6 +824,7 @@ class UIManager {
         const data = await response.json();
 
         if (!data.ok) {
+          // Теперь мы увидим реальную причину ошибки
           throw new Error(data.description || 'Ошибка создания счета');
         }
 
@@ -835,56 +837,18 @@ class UIManager {
 
       } catch (err) {
         console.error(err);
-        Utils.showToast(err);
+        Utils.showToast(err.message || 'Ошибка связи с сервером', 'error');
       }
     }
 
-
-    static showCryptoWaitModal(invoice, plan, isRenewal, amount) {
-        const modal = document.getElementById('cryptoPaymentModal');
-        const title = document.getElementById('cryptoPaymentTitle');
-        const amountEl = document.getElementById('cryptoAmount');
-        const linkBtn = document.getElementById('openCryptoLinkBtn');
-        const checkBtn = document.getElementById('checkCryptoPaymentBtn');
-        const statusText = document.getElementById('cryptoStatusText');
-
-        // Сохраняем данные для проверки
-        document.getElementById('cryptoInvoiceId').value = invoice.invoice_id;
-        document.getElementById('cryptoPlanDays').value = plan;
-        document.getElementById('cryptoIsRenewal').value = isRenewal;
-
-        title.textContent = `Подписка на ${plan} дней`;
-        amountEl.textContent = amount;
-
-        // Настраиваем кнопку ссылки
-        linkBtn.href = invoice.mini_app_invoice_url; // Или invoice.pay_url
-        linkBtn.onclick = (e) => {
-            e.preventDefault();
-            // Пытаемся открыть внутри Telegram
-            if (tg.openTelegramLink) {
-                tg.openTelegramLink(invoice.mini_app_invoice_url);
-            } else {
-                window.open(invoice.mini_app_invoice_url, '_blank');
-            }
-        };
-
-        // Настраиваем кнопку проверки
-        checkBtn.onclick = () => this.checkCryptoStatus();
-        checkBtn.disabled = false;
-        checkBtn.innerHTML = '<i class="fas fa-check"></i><span>Я оплатил</span>';
-
-        statusText.textContent = 'Ожидание оплаты...';
-        statusText.className = 'text-center text-muted';
-
-        modal.classList.add('active');
-    }
-
+    // Обновленный метод проверки статуса (через ваш сервер)
     static async checkCryptoStatus() {
         const invoiceId = document.getElementById('cryptoInvoiceId').value;
         const plan = parseInt(document.getElementById('cryptoPlanDays').value);
         const isRenewal = document.getElementById('cryptoIsRenewal').value === 'true';
         const checkBtn = document.getElementById('checkCryptoPaymentBtn');
         const statusText = document.getElementById('cryptoStatusText');
+        const SERVER_URL = 'https://web-production-3ad44.up.railway.app';
 
         if (!invoiceId) return;
 
@@ -892,14 +856,14 @@ class UIManager {
         checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверка...</span>';
 
         try {
-            const response = await fetch('https://pay.crypt.bot/api/getInvoices', {
+            // ЗАПРОС ИДЕТ НА ВАШ СЕРВЕР, А НЕ НА CRYPTOBOT
+            const response = await fetch(`${SERVER_URL}/api/check-crypto-status`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Crypto-Pay-API-Token': CRYPTO_BOT_TOKEN
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    invoice_ids: invoiceId
+                    invoiceId: invoiceId
                 })
             });
 
@@ -914,7 +878,7 @@ class UIManager {
                     statusText.className = 'text-center text-success';
 
                     // Выдаем подписку
-                    await this.activateSubscription(plan, isRenewal, 'CryptoBot', parseFloat(invoice.amount)); // Передаем сумму и метод
+                    await this.activateSubscription(plan, isRenewal, 'CryptoBot', parseFloat(invoice.amount));
 
                     Utils.showToast('Подписка активирована!', 'success');
                     this.closeModals();
@@ -928,18 +892,20 @@ class UIManager {
                     statusText.textContent = `Статус платежа: ${invoice.status}`;
                     statusText.className = 'text-center text-danger';
                 }
+            } else {
+                 Utils.showToast('Не удалось получить статус', 'error');
             }
         } catch (error) {
             console.error(error);
             Utils.showToast('Ошибка проверки', 'error');
         } finally {
-            // Возвращаем кнопку, если не оплачено
             if (statusText.className.indexOf('success') === -1) {
                 checkBtn.disabled = false;
                 checkBtn.innerHTML = '<i class="fas fa-check"></i><span>Я оплатил</span>';
             }
         }
     }
+
 
 
     static async updateProfileUI() {
