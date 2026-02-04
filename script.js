@@ -813,9 +813,9 @@ class UIManager {
     static async createCryptoInvoice(plan, isRenewal) {
       try {
         const userId = tg.initDataUnsafe?.user?.id;
-        const SERVER_URL = 'https://web-production-3ad44.up.railway.app'; // Убедитесь, что URL верный
+        const SERVER_URLL = 'https://web-production-3ad44.up.railway.app'; // Убедитесь, что URL верный
 
-        const response = await fetch(`${SERVER_URL}/api/create-crypto-invoice`, {
+        const response = await fetch(`${SERVER_URLL}/api/create-crypto-invoice`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ plan, isRenewal, userId })
@@ -848,7 +848,7 @@ class UIManager {
         const isRenewal = document.getElementById('cryptoIsRenewal').value === 'true';
         const checkBtn = document.getElementById('checkCryptoPaymentBtn');
         const statusText = document.getElementById('cryptoStatusText');
-        const SERVER_URL = 'https://web-production-3ad44.up.railway.app';
+        const SERVER_URLL = 'https://web-production-3ad44.up.railway.app';
 
         if (!invoiceId) return;
 
@@ -857,7 +857,7 @@ class UIManager {
 
         try {
             // ЗАПРОС ИДЕТ НА ВАШ СЕРВЕР, А НЕ НА CRYPTOBOT
-            const response = await fetch(`${SERVER_URL}/api/check-crypto-status`, {
+            const response = await fetch(`${SERVER_URLL}/api/check-crypto-status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
