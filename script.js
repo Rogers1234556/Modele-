@@ -819,59 +819,27 @@ class UIManager {
 
         Utils.showToast('Создание счета...', 'info');
 
-        // 1. Получаем цену в USD
-        const priceData = pricingData[isRenewal ? 'renew' : 'new'][plan];
-        const amountUSD = priceData.USD;
-
-        // Применяем скидку если есть
-        let finalAmount = amountUSD;
-        if (activeDiscount && activeDiscount.percent > 0) {
-            finalAmount = amountUSD - (amountUSD * (activeDiscount.percent / 100));
-            finalAmount = parseFloat(finalAmount.toFixed(2));
-        }
-
         try {
-            // 2. Создаем инвойс через API Crypto Bot
-            // ВАЖНО: В браузере может сработать CORS. Если это произойдет, 
-            // вам нужно использовать прокси или Supabase Edge Function.
-            // Для теста используем прямой запрос (может потребовать отключения защиты CORS в браузере при разработке)
-
-            const response = await fetch('https://pay.crypt.bot/api/createInvoice', {
+            const userId = tg.initDataUnsafe?.user?.id;
+            // Отправляем запрос на СВОЙ сервер, а не в CryptoBot напрямую
+            const response = await fetch(`https://${SERVER_URL}/api/create-crypto-invoice`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Crypto-Pay-API-Token': CRYPTO_BOT_TOKEN
-                },
-                body: JSON.stringify({
-                    asset: 'USDT', // Можно менять, но CryptoBot сам предложит выбор если использовать currency_type: 'fiat'
-                    amount: finalAmount.toString(),
-                    currency_type: 'fiat',
-                    fiat: 'USD',
-                    description: `Подписка GOV Helper (${plan} дн.)`,
-                    payload: `${tg.initDataUnsafe?.user?.id || 'unknown'}_${plan}_${isRenewal}`,
-                    allow_comments: false,
-                    allow_anonymous: false,
-                    expires_in: 3600 // 1 час
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plan, isRenewal, userId })
             });
 
             const data = await response.json();
-
-            if (!data.ok) {
-                console.error('CryptoBot Error:', data);
-                throw new Error(data.error?.name || 'Ошибка создания счета');
+            if (data.ok && data.result) {
+                this.showCryptoWaitModal(data.result, plan, isRenewal, data.result.amount);
+            } else {
+                throw new Error('Ошибка сервера при создании счета');
             }
-
-            const invoice = data.result;
-
-            // 3. Открываем модалку ожидания оплаты
-            this.showCryptoWaitModal(invoice, plan, isRenewal, finalAmount);
-
         } catch (error) {
             console.error(error);
-            Utils.showToast(error);
+            Utils.showToast('Ошибка: ' + error.message, 'error');
         }
     }
+
 
     static showCryptoWaitModal(invoice, plan, isRenewal, amount) {
         const modal = document.getElementById('cryptoPaymentModal');
