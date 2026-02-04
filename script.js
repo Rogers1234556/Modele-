@@ -841,6 +841,59 @@ class UIManager {
       }
     }
 
+    static showCryptoWaitModal(invoice, plan, isRenewal, amount) {
+        const modal = document.getElementById('cryptoPaymentModal');
+        if (!modal) {
+            console.error('cryptoPaymentModal not found');
+            return;
+        }
+
+        // Заголовок
+        const title = document.getElementById('cryptoPaymentTitle');
+        if (title) {
+            title.textContent = 'Ожидание оплаты...';
+        }
+
+        // Сумма
+        const amountEl = document.getElementById('cryptoAmount');
+        if (amountEl) {
+            amountEl.textContent = amount;
+        }
+
+        // Валюта
+        const currencyLabel = document.getElementById('cryptoCurrencyLabel');
+        if (currencyLabel) {
+            currencyLabel.textContent = invoice.asset || 'USD';
+        }
+
+        // Ссылка на оплату
+        const payBtn = document.getElementById('openCryptoLinkBtn');
+        if (payBtn) {
+            payBtn.href = invoice.pay_url;
+        }
+
+        // Скрытые поля (для проверки)
+        document.getElementById('cryptoInvoiceId').value = invoice.invoice_id;
+        document.getElementById('cryptoPlanDays').value = plan;
+        document.getElementById('cryptoIsRenewal').value = isRenewal;
+
+        // Кнопка "Я оплатил"
+        const checkBtn = document.getElementById('checkCryptoPaymentBtn');
+        if (checkBtn) {
+            checkBtn.onclick = () => this.checkCryptoStatus();
+        }
+
+        // Статус
+        const statusText = document.getElementById('cryptoStatusText');
+        if (statusText) {
+            statusText.textContent = 'Ожидаем оплату...';
+            statusText.className = 'text-center text-muted';
+        }
+
+        // Показываем модалку
+        modal.classList.add('active');
+    }
+
     // Обновленный метод проверки статуса (через ваш сервер)
     static async checkCryptoStatus() {
         const invoiceId = document.getElementById('cryptoInvoiceId').value;
