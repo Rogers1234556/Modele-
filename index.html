@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>MR Helper</title>
+    <title>GOV Helper</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" id="theme-color" content="#0F172A">
     <link rel="stylesheet" href="style.css">
@@ -243,7 +243,7 @@
                                     <li><i class="fas fa-check"></i> Продление на год</li>
                                     <li><i class="fas fa-check"></i> VIP поддержка 24/7</li>
                                     <li><i class="fas fa-check"></i> Все функции + бета-тест</li>
-                                    <li><i class="fas fa-check"></i> менеджер</li>
+                                    <li><i class="fas fa-check"></i> Автообновления</li>
                                     <li><i class="fas fa-check"></i> Высший приоритет</li>
                                 </ul>
                                 <button class="btn-primary btn-buy" data-plan="365" data-for="renew">
@@ -354,7 +354,7 @@
                                     <i class="fas fa-trophy"></i>
                                 </div>
                                 <div class="contest-info">
-                                    <h3>GOV Helper Giveaway</h3>
+                                    <h3>GOV Helper</h3>
                                     <p class="contest-subtitle">Получи подписку на 30 дней</p>
                                 </div>
                             </div>
@@ -370,7 +370,7 @@
                                 </div>
                                 <div class="detail">
                                     <i class="fab fa-telegram"></i>
-                                    <span>Канал: <strong>@mr</strong></span>
+                                    <span>Канал: <strong>@mr_helpers</strong></span>
                                 </div>
                             </div>
 
@@ -586,6 +586,53 @@
             </div>
         </div>
     </div>
+
+    <div id="cryptoPaymentModal" class="modal">
+        <div class="modal-content medium">
+            <div class="modal-header">
+                <h3>Оплата через Crypto Bot</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stars-payment-container">
+                    <div class="stars-info-box" style="border-color: rgba(59, 130, 246, 0.3); background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));">
+                        <div class="stars-big-icon" style="background: linear-gradient(135deg, #3B82F6, #2563EB); box-shadow: 0 8px 32px rgba(37, 99, 235, 0.3);">
+                            <i class="fab fa-bitcoin"></i>
+                        </div>
+                        <h4 id="cryptoPaymentTitle">Ожидание оплаты...</h4>
+                        <div class="stars-price">
+                            <span class="stars-amount" id="cryptoAmount" style="background: white; -webkit-background-clip: text; -webkit-text-fill-color: white;">0.00</span>
+                            <span class="stars-label" id="cryptoCurrencyLabel">USD</span>
+                        </div>
+                    </div>
+
+                    <div class="payment-instruction">
+                        <p style="color: var(--gray-300); text-align: center; margin-bottom: 15px;">
+                            Нажмите кнопку ниже, чтобы перейти к оплате. После оплаты нажмите "Я оплатил".
+                        </p>
+                    </div>
+
+                    <div class="payment-actions" style="grid-template-columns: 1fr;">
+                        <a href="#" id="openCryptoLinkBtn" target="_blank" class="btn-primary" style="text-decoration: none;">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>Перейти к оплате</span>
+                        </a>
+
+                        <button class="btn-secondary" id="checkCryptoPaymentBtn" style="margin-top: 10px; background: var(--success); color: white; border: none;">
+                            <i class="fas fa-check"></i>
+                            <span>Я оплатил</span>
+                        </button>
+                    </div>
+
+                    <div id="cryptoStatusText" class="text-center text-muted" style="margin-top: 10px; font-size: 13px;"></div>
+                </div>
+                <input type="hidden" id="cryptoInvoiceId">
+                <input type="hidden" id="cryptoPlanDays">
+                <input type="hidden" id="cryptoIsRenewal">
+            </div>
+        </div>
+    </div>
+
 
     <!-- Остальные модалки оставляем без изменений -->
 

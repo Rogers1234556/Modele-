@@ -21,6 +21,10 @@ const SUPABASE_URL = 'https://wgxkflgdjzqyengrmlsb.supabase.co/';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneGtmbGdkanpxeWVuZ3JtbHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4OTA2MTUsImV4cCI6MjA4MzQ2NjYxNX0.fM7_sOJCZ9SEZt73sABCE4NsXjnfVcs2h3usaFoNpf0';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+
+const CRYPTO_BOT_TOKEN = '526462:AA8QrbhRpcuPyJ9s9L6ZozzTTdMqT7YyYZ9'; // Ваш токен
+
+
 let userData = null;
 let currentCurrency = localStorage.getItem('gov_currency') || 'USD';
 let pricingMode = 'new'; // 'new' | 'renew'
@@ -231,10 +235,10 @@ class UIManager {
                     case 'stars':
                         this.showStarsPayment(plan, isRenewal);
                         break;
-                    case 'cryptobot':
-                        window.open('https://t.me/CryptoBot', '_blank');
-                        Utils.showToast('Для оплаты через Crypto Bot напишите в поддержку', 'info');
+                        case 'cryptobot':
+                        this.createCryptoInvoice(plan, isRenewal);
                         break;
+
                     case 'funpay':
                         window.open('https://funpay.com', '_blank');
                         Utils.showToast('Для оплаты через FunPay найдите нас на площадке', 'info');
@@ -650,13 +654,16 @@ class UIManager {
         }
     }
 
-    static async activateSubscription(plan) {
+    static async activateSubscription(plan, isRenewalForce = null, method = 'Starstg', paidAmount = 0) {
         try {
             const userId = tg.initDataUnsafe?.user?.id;
+            const userName = tg.initDataUnsafe?.user?.first_name || 'User';
+
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             let startDate = today;
+            // Проверяем текущую подписку
             if (userData?.daysgov) {
                 const currentExpiry = new Date(userData.daysgov);
                 if (currentExpiry > today) {
@@ -665,10 +672,9 @@ class UIManager {
             }
 
             const newDate = new Date(startDate);
-            newDate.setDate(newDate.getDate() + plan);
-
+            newDate.setDate(newDate.getDate() + parseInt(plan));
             const newExpiryString = newDate.toISOString().split('T')[0];
-            
+
             // 1. Обновляем пользователя
             const { error: updateError } = await supabaseClient
                 .from('users')
@@ -679,57 +685,59 @@ class UIManager {
                 .eq('idtg', userId);
 
             if (updateError) throw updateError;
-            
+
             // Обновляем локальные данные
             if (userData) {
                 userData.daysgov = newExpiryString;
             }
 
-            // 2. Добавляем лог
-            const logTitle = `Выдача подписки | Пользователю ${userData?.name || 'User'} (ID: ${userData?.id || '?'} | ${userId}) выдана подписка на ${plan} дней . за звезды`;
+            // 2. Добавляем лог (Logs Table)
+            // Формируем красивое сообщение для логов
+            const logTitle = `Выдача подписки | Пользователю ${userData?.name || userName} (ID: ${userId}) выдана подписка на ${plan} дней. Оплата через ${method}`;
+
             await supabaseClient.from('logs').insert([{
                 title: logTitle,
-                admin: 'system',
+                admin: 'system', // или 'CryptoBot'
                 created_at: new Date().toISOString()
             }]);
 
-            // 3. Добавляем платеж
-            const isRenewal = pricingMode === 'renew';
-            const starsAmount = this.getStarsPrice(plan, isRenewal);
-            const fee = 30; // Фиксированная комиссия 30 руб
-            const netAmount = starsAmount - fee;
+            // 3. Добавляем запись о платеже (Payments Table)
+            // Расчет комиссии (условно 5% для примера)
+            const fee = paidAmount * 0.05; 
+            const netAmount = paidAmount - fee;
 
             await supabaseClient.from('payments').insert([{
                 user_idtg: userId,
-                amount: starsAmount,
+                amount: paidAmount, // Сколько заплатил клиент
                 fee: fee,
                 net_amount: netAmount,
-                method: 'Starstg',
+                method: method, // 'CryptoBot' или 'Starstg'
                 status: 'completed',
-                details: `Подписка на ${plan} дней`,
+                details: `Подписка на ${plan} дней (${isRenewalForce ? 'Продление' : 'Новая'})`,
                 created_at: new Date().toISOString()
             }]);
 
-            // 4. Помечаем скидку как использованную
+            // 4. Помечаем скидку как использованную (если была)
             if (activeDiscount) {
                 await supabaseClient
                     .from('user_discounts')
                     .update({ is_used: true })
                     .eq('user_idtg', userId)
                     .eq('promo_id', activeDiscount.promoId);
-                
+
                 activeDiscount = null;
             }
 
-            // Обновляем режим цен на продление
+            // Обновляем режим цен
             pricingMode = 'renew';
-            
+
             return true;
         } catch (error) {
             console.error('Subscription activation error:', error);
             throw error;
         }
     }
+
 
     static showSupportPayment(plan, isRenewal) {
         const modal = document.getElementById('supportPaymentModal');
@@ -803,6 +811,169 @@ class UIManager {
             banner.style.display = 'none';
         }
     }
+    // === CRYPTO BOT LOGIC ===
+
+    static async createCryptoInvoice(plan, isRenewal) {
+        const modal = document.getElementById('paymentMethodModal');
+        if(modal) modal.classList.remove('active');
+
+        Utils.showToast('Создание счета...', 'info');
+
+        // 1. Получаем цену в USD
+        const priceData = pricingData[isRenewal ? 'renew' : 'new'][plan];
+        const amountUSD = priceData.USD;
+
+        // Применяем скидку если есть
+        let finalAmount = amountUSD;
+        if (activeDiscount && activeDiscount.percent > 0) {
+            finalAmount = amountUSD - (amountUSD * (activeDiscount.percent / 100));
+            finalAmount = parseFloat(finalAmount.toFixed(2));
+        }
+
+        try {
+            // 2. Создаем инвойс через API Crypto Bot
+            // ВАЖНО: В браузере может сработать CORS. Если это произойдет, 
+            // вам нужно использовать прокси или Supabase Edge Function.
+            // Для теста используем прямой запрос (может потребовать отключения защиты CORS в браузере при разработке)
+
+            const response = await fetch('https://pay.crypt.bot/api/createInvoice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Crypto-Pay-API-Token': CRYPTO_BOT_TOKEN
+                },
+                body: JSON.stringify({
+                    asset: 'USDT', // Можно менять, но CryptoBot сам предложит выбор если использовать currency_type: 'fiat'
+                    amount: finalAmount.toString(),
+                    currency_type: 'fiat',
+                    fiat: 'USD',
+                    description: `Подписка GOV Helper (${plan} дн.)`,
+                    payload: `${tg.initDataUnsafe?.user?.id || 'unknown'}_${plan}_${isRenewal}`,
+                    allow_comments: false,
+                    allow_anonymous: false,
+                    expires_in: 3600 // 1 час
+                })
+            });
+
+            const data = await response.json();
+
+            if (!data.ok) {
+                console.error('CryptoBot Error:', data);
+                throw new Error(data.error?.name || 'Ошибка создания счета');
+            }
+
+            const invoice = data.result;
+
+            // 3. Открываем модалку ожидания оплаты
+            this.showCryptoWaitModal(invoice, plan, isRenewal, finalAmount);
+
+        } catch (error) {
+            console.error(error);
+            Utils.showToast('Ошибка подключения к Crypto Bot. Проверьте консоль.', 'error');
+        }
+    }
+
+    static showCryptoWaitModal(invoice, plan, isRenewal, amount) {
+        const modal = document.getElementById('cryptoPaymentModal');
+        const title = document.getElementById('cryptoPaymentTitle');
+        const amountEl = document.getElementById('cryptoAmount');
+        const linkBtn = document.getElementById('openCryptoLinkBtn');
+        const checkBtn = document.getElementById('checkCryptoPaymentBtn');
+        const statusText = document.getElementById('cryptoStatusText');
+
+        // Сохраняем данные для проверки
+        document.getElementById('cryptoInvoiceId').value = invoice.invoice_id;
+        document.getElementById('cryptoPlanDays').value = plan;
+        document.getElementById('cryptoIsRenewal').value = isRenewal;
+
+        title.textContent = `Подписка на ${plan} дней`;
+        amountEl.textContent = amount;
+
+        // Настраиваем кнопку ссылки
+        linkBtn.href = invoice.mini_app_invoice_url; // Или invoice.pay_url
+        linkBtn.onclick = (e) => {
+            e.preventDefault();
+            // Пытаемся открыть внутри Telegram
+            if (tg.openTelegramLink) {
+                tg.openTelegramLink(invoice.mini_app_invoice_url);
+            } else {
+                window.open(invoice.mini_app_invoice_url, '_blank');
+            }
+        };
+
+        // Настраиваем кнопку проверки
+        checkBtn.onclick = () => this.checkCryptoStatus();
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = '<i class="fas fa-check"></i><span>Я оплатил</span>';
+
+        statusText.textContent = 'Ожидание оплаты...';
+        statusText.className = 'text-center text-muted';
+
+        modal.classList.add('active');
+    }
+
+    static async checkCryptoStatus() {
+        const invoiceId = document.getElementById('cryptoInvoiceId').value;
+        const plan = parseInt(document.getElementById('cryptoPlanDays').value);
+        const isRenewal = document.getElementById('cryptoIsRenewal').value === 'true';
+        const checkBtn = document.getElementById('checkCryptoPaymentBtn');
+        const statusText = document.getElementById('cryptoStatusText');
+
+        if (!invoiceId) return;
+
+        checkBtn.disabled = true;
+        checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверка...</span>';
+
+        try {
+            const response = await fetch('https://pay.crypt.bot/api/getInvoices', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Crypto-Pay-API-Token': CRYPTO_BOT_TOKEN
+                },
+                body: JSON.stringify({
+                    invoice_ids: invoiceId
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.ok && data.result && data.result.items.length > 0) {
+                const invoice = data.result.items[0];
+
+                if (invoice.status === 'paid') {
+                    // УСПЕШНАЯ ОПЛАТА
+                    statusText.textContent = 'Оплата прошла успешно!';
+                    statusText.className = 'text-center text-success';
+
+                    // Выдаем подписку
+                    await this.activateSubscription(plan, isRenewal, 'CryptoBot', parseFloat(invoice.amount)); // Передаем сумму и метод
+
+                    Utils.showToast('Подписка активирована!', 'success');
+                    this.closeModals();
+                    this.updateProfileUI();
+
+                } else if (invoice.status === 'active') {
+                    statusText.textContent = 'Оплата еще не поступила. Попробуйте через минуту.';
+                    statusText.className = 'text-center text-warning';
+                    Utils.showToast('Платеж не найден', 'warning');
+                } else {
+                    statusText.textContent = `Статус платежа: ${invoice.status}`;
+                    statusText.className = 'text-center text-danger';
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            Utils.showToast('Ошибка проверки', 'error');
+        } finally {
+            // Возвращаем кнопку, если не оплачено
+            if (statusText.className.indexOf('success') === -1) {
+                checkBtn.disabled = false;
+                checkBtn.innerHTML = '<i class="fas fa-check"></i><span>Я оплатил</span>';
+            }
+        }
+    }
+
 
     static async updateProfileUI() {
         if (!userData) return;
