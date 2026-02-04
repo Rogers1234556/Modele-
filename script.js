@@ -823,12 +823,12 @@ class UIManager {
             const userId = tg.initDataUnsafe?.user?.id;
             
             await fetch('https://reil/web-production-3ad44.up.railway.app/create-crypto-invoice', {
-              method: 'POST',
+            method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 plan,
-                userId,
-                amount
+                isRenewal,
+                userId
               })
             });
 
