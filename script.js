@@ -327,121 +327,139 @@ class UIManager {
                 return;
             }
 
-            // Проверяем, не использовал ли пользователь его уже
-            const { data: usage } = await supabaseClient
-                .from('promo_usages')
+            // ПРОВЕРКА ТИПА: Пользователь не может активировать второй промокод того же типа (например, YouTube)
+            const { data: existingTypeUsage } = await supabaseClient
+                .from('user_discounts')
                 .select('*')
                 .eq('user_idtg', userId)
-                .eq('promo_id', promo.id)
+                .eq('promo_type', promo.type)
                 .single();
 
-            if (usage) {
-                Utils.showToast('Вы уже использовали этот промокод', 'error');
+            if (existingTypeUsage) {
+                Utils.showToast(`Вы уже активировали промокод типа ${promo.type}`, 'error');
                 return;
             }
 
-            // Обработка в зависимости от типа промокода
-            if (promo.type === 'discount' && promo.discount_percent > 0) {
-                // Промокод со скидкой - сохраняем до первой оплаты
-                // Проверяем нет ли уже активной скидки
+            // Обработка скидочного промокода
+            if (promo.discount_percent > 0) {
                 if (activeDiscount) {
                     Utils.showToast('У вас уже есть активная скидка', 'error');
                     return;
                 }
 
-                // Создаем запись о скидке пользователя
+                // Сохраняем скидку в базу
                 const { error: discountError } = await supabaseClient
                     .from('user_discounts')
                     .insert([{
                         user_idtg: userId,
                         promo_id: promo.id,
                         discount_percent: promo.discount_percent,
+                        promo_type: promo.type,
                         is_used: false
                     }]);
 
                 if (discountError) throw discountError;
 
-                // Записываем использование промокода
-                await supabaseClient.from('promo_usages').insert([{
-                    user_idtg: userId,
-                    promo_id: promo.id
-                }]);
-
-                // Обновляем счетчик использований
+                // Записываем использование
+                await supabaseClient.from('promo_usages').insert([{ user_idtg: userId, promo_id: promo.id }]);
                 await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
 
-                // Обновляем локальное состояние
                 activeDiscount = {
                     percent: promo.discount_percent,
                     promoId: promo.id,
                     code: promo.code
                 };
 
-                Utils.showToast(`Скидка ${promo.discount_percent}% активирована! Действует до первой оплаты`, 'success');
-                this.updatePrices();
-                
-            } else {
-                // Промокод с днями подписки
-                const daysToAdd = parseInt(promo.days) || 0;
-                const promoType = promo.type; // YouTuber, Promotion, Gift, FanPay
-                
-                if (daysToAdd > 0) {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
+                // Если у пользователя нет хелпера (0 дней), начисляем бонусные дни сразу
+                const currentDays = Utils.calculateDaysLeft(userData.daysgov);
+                if (currentDays <= 0) {
+                    let bonusDays = 0;
+                    const p = promo.discount_percent;
+                    
+                    // Логика бонусов: 50-60% -> 10д, 40-49% -> 9д, 30-39% -> 8д, 20-29% -> 7д, 10-19% -> 6д, 1-9% -> 5д
+                    if (p >= 50) bonusDays = 10;
+                    else if (p >= 40) bonusDays = 9;
+                    else if (p >= 30) bonusDays = 8;
+                    else if (p >= 20) bonusDays = 7;
+                    else if (p >= 10) bonusDays = 6;
+                    else if (p >= 1) bonusDays = 5;
 
-                    let startDate = today;
-                    if (userData.daysgov) {
-                        const currentExpiry = new Date(userData.daysgov);
-                        if (currentExpiry > today) {
-                            startDate = currentExpiry;
-                        }
+                    if (bonusDays > 0) {
+                        await this.addDaysToUser(userId, bonusDays, `Бонус за промокод ${promo.type}`);
+                        Utils.showToast(`Скидка ${p}% + ${bonusDays} дней в подарок!`, 'success');
+                    } else {
+                        Utils.showToast(`Скидка ${p}% активирована!`, 'success');
                     }
-
-                    const newDate = new Date(startDate);
-                    newDate.setDate(newDate.getDate() + daysToAdd);
-
-                    const newExpiryString = newDate.toISOString().split('T')[0];
-                    userData.daysgov = newExpiryString;
-
-                    // Сохраняем изменения
-                    const { error: updateError } = await supabaseClient
-                        .from('users')
-                        .update({ 
-                            daysgov: userData.daysgov,
-                            notes: `Промо: ${promoType || 'Days'} (${code})`
-                        })
-                        .eq('idtg', userId);
-
-                    if (updateError) throw updateError;
-
-                    // Обновляем режим цен
-                    pricingMode = 'renew';
-                    this.updatePrices();
-
-                    Utils.showToast(`Промокод активирован! Добавлено ${daysToAdd} ${Utils.getDaysWord(daysToAdd)}`, 'success');
                 } else {
-                    Utils.showToast('Промокод активирован!', 'success');
+                    Utils.showToast(`Скидка ${promo.discount_percent}% активирована!`, 'success');
                 }
 
-                // Записываем использование
-                await supabaseClient.from('promo_usages').insert([{
-                    user_idtg: userId,
-                    promo_id: promo.id
-                }]);
-
-                // Обновляем счетчик использований
-                await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
-
-                await this.updateProfileUI();
+                this.updatePrices();
             }
 
             this.closeModals();
             document.getElementById('promoCode').value = '';
+            await this.updateProfileUI();
 
         } catch (e) {
             console.error('Promo activation error:', e);
-            Utils.showToast('Профиль не найден', 'error');
+            Utils.showToast('Ошибка активации', 'error');
         }
+    }
+
+    static async addDaysToUser(userId, days, note = '') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let startDate = today;
+        if (userData.daysgov) {
+            const currentExpiry = new Date(userData.daysgov);
+            if (currentExpiry > today) startDate = currentExpiry;
+        }
+
+        const newDate = new Date(startDate);
+        newDate.setDate(newDate.getDate() + days);
+        const newExpiryString = newDate.toISOString().split('T')[0];
+
+        userData.daysgov = newExpiryString;
+        await supabaseClient.from('users').update({ 
+            daysgov: userData.daysgov,
+            notes: note
+        }).eq('idtg', userId);
+    }
+
+    static updatePrices() {
+        const discount = activeDiscount ? activeDiscount.percent : 0;
+        
+        document.querySelectorAll('.pricing-card').forEach(card => {
+            const priceElements = card.querySelectorAll('.price');
+            priceElements.forEach(el => {
+                const baseUah = parseFloat(el.dataset.uah);
+                const baseRub = parseFloat(el.dataset.rub);
+                const baseUsd = parseFloat(el.dataset.usd);
+
+                const finalUah = (baseUah * (1 - discount / 100)).toFixed(0);
+                const finalRub = (baseRub * (1 - discount / 100)).toFixed(0);
+                const finalUsd = (baseUsd * (1 - discount / 100)).toFixed(2);
+
+                if (currentCurrency === 'UAH') el.textContent = finalUah;
+                if (currentCurrency === 'RUB') el.textContent = finalRub;
+                if (currentCurrency === 'USD') el.textContent = finalUsd;
+            });
+        });
+    }
+
+    static async markDiscountAsUsed() {
+        if (!activeDiscount) return;
+        const userId = tg.initDataUnsafe?.user?.id;
+        await supabaseClient
+            .from('user_discounts')
+            .update({ is_used: true })
+            .eq('user_idtg', userId)
+            .eq('promo_id', activeDiscount.promoId);
+        
+        activeDiscount = null;
+        this.updatePrices();
     }
 
     static async loadContests() {
