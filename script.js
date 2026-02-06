@@ -586,8 +586,17 @@ class UIManager {
             renew: { 15: 176, 30: 352, 365: 2948 }
         };
         const priceType = isRenewal ? 'renew' : 'new';
-        return starsPrices[priceType]?.[plan] || 100;
+        let price = starsPrices[priceType]?.[plan] || 100;
+
+        // Применяем скидку, если она активна
+        if (activeDiscount && activeDiscount.percent > 0) {
+            const discountAmount = price * (activeDiscount.percent / 100);
+            price = Math.round(price - discountAmount);
+        }
+
+        return price;
     }
+
 
     static async processStarsPayment() {
         const plan = parseInt(document.getElementById('starsPlanDays').value);
@@ -687,30 +696,33 @@ class UIManager {
                 userData.daysgov = newExpiryString;
             }
 
-            // 2. Добавляем лог (Logs Table)
-            // Формируем красивое сообщение для логов
-            const logTitle = `Выдача подписки | Пользователю ${userData?.name || userName} (ID: ${userId}) выдана подписка на ${plan} дней. Оплата через ${method}`;
+            // 2. Добавляем лог
+            const logTitle = `Выдача подписки`;
+            const logContent = `Пользователю ${userData?.name || userName} (ID: ${userId}) выдана подписка на ${plan} дней. Оплата через ${method}`;
 
             await supabaseClient.from('logs').insert([{
                 title: logTitle,
-                admin: 'system', // или 'CryptoBot'
+                content: logContent, // Добавлено поле content согласно схеме
+                admin: 'system',
                 created_at: new Date().toISOString()
             }]);
 
+
             // 3. Добавляем запись о платеже (Payments Table)
-            // Расчет комиссии (условно 5% для примера)
-            const fee = paidAmount * 0.05; 
+            const fee = paidAmount * 0.05;
             const netAmount = paidAmount - fee;
 
             await supabaseClient.from('payments').insert([{
-                user_idtg: userId,
-                amount: paidAmount, // Сколько заплатил клиент
+                user_id: userId,          // В схеме user_id, а не user_idtg
+                user_name: userName,      // Требуется по схеме
+                amount: paidAmount,
                 fee: fee,
                 net_amount: netAmount,
-                method: method, // 'CryptoBot' или 'Starstg'
+                method: method,
                 status: 'completed',
-                details: `Подписка на ${plan} дней (${isRenewalForce ? 'Продление' : 'Новая'})`,
+                description: `Подписка на ${plan} дней (${isRenewalForce ? 'Продление' : 'Новая'})`, // В схеме description, а не details
                 created_at: new Date().toISOString()
+                // admin_id и admin_name можно оставить пустыми или добавить, если они обязательны (null)
             }]);
 
             // 4. Помечаем скидку как использованную (если была)
