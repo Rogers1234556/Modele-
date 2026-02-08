@@ -82,7 +82,14 @@ class Utils {
     static formatDate(dateString) {
         if (!dateString) return '--.--.----';
         const date = new Date(dateString);
-        return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return date.toLocaleString('ru-RU', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
     }
 
     static formatCurrency(amount, currency) {
@@ -327,21 +334,35 @@ class UIManager {
                 return;
             }
 
-            // ПРОВЕРКА ТИПА: Пользователь не может активировать второй промокод того же типа (например, YouTube)
-            const { data: existingTypeUsage } = await supabaseClient
-                .from('user_discounts')
+            // Проверяем, не использовал ли пользователь ЭТОТ промокод ранее
+            const { data: usage } = await supabaseClient
+                .from('promo_usages')
                 .select('*')
+                .eq('promo_id', promo.id)
                 .eq('user_idtg', userId)
-                .eq('promo_type', promo.type)
                 .single();
 
-            if (existingTypeUsage) {
-                Utils.showToast(`Вы уже активировали промокод типа ${promo.type}`, 'error');
+            if (usage) {
+                Utils.showToast('Вы уже активировали этот промокод', 'error');
                 return;
             }
 
-            // Обработка скидочного промокода
-            if (promo.discount_percent > 0) {
+            // Обработка разных типов промокодов
+            if (promo.type === 'Gift' || promo.type === 'FunPay') {
+                // Эти типы дают дни сразу
+                if (promo.days > 0) {
+                    await this.addDaysToUser(userId, promo.days, `Активация промокода ${promo.code} (${promo.type})`);
+                    
+                    // Записываем использование
+                    await supabaseClient.from('promo_usages').insert([{ user_idtg: userId, promo_id: promo.id }]);
+                    await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
+                    
+                    Utils.showToast(`Промокод активирован! Добавлено ${promo.days} ${Utils.getDaysWord(promo.days)}`, 'success');
+                } else {
+                    Utils.showToast('Ошибка: промокод не содержит дней', 'error');
+                }
+            } else if (promo.type === 'Price') {
+                // Скидочный промокод
                 if (activeDiscount) {
                     Utils.showToast('У вас уже есть активная скидка', 'error');
                     return;
@@ -483,8 +504,19 @@ class UIManager {
                 const now = new Date();
                 if (end > now) {
                     timerEl.textContent = Utils.formatDate(contest.ends_at);
+                    
+                    // Установка таймера для автоматического завершения
+                    const timeLeft = end.getTime() - now.getTime();
+                    if (timeLeft < 86400000) { // Если осталось меньше суток, запускаем проверку
+                        setTimeout(() => {
+                            this.loadContests();
+                        }, timeLeft + 1000);
+                    }
                 } else {
                     timerEl.textContent = 'Завершено';
+                    if (!contest.winner_idtg) {
+                        this.determineWinner(contest.id);
+                    }
                 }
             }
 
@@ -539,6 +571,38 @@ class UIManager {
         } catch (e) {
             console.error('Join contest error:', e);
             Utils.showToast('Ошибка при регистрации', 'error');
+        }
+    }
+
+    static async determineWinner(contestId) {
+        try {
+            // Получаем всех участников
+            const { data: participants, error: pError } = await supabaseClient
+                .from('contest_participants')
+                .select('user_idtg')
+                .eq('contest_id', contestId);
+            
+            if (pError || !participants || participants.length === 0) return;
+
+            // Выбираем случайного победителя
+            const winner = participants[Math.floor(Math.random() * participants.length)];
+            
+            // Обновляем таблицу конкурсов
+            const { error: uError } = await supabaseClient
+                .from('contests')
+                .update({ 
+                    winner_idtg: winner.user_idtg,
+                    is_active: false 
+                })
+                .eq('id', contestId);
+
+            if (uError) throw uError;
+            
+            console.log('Winner determined:', winner.user_idtg);
+            this.loadContests();
+
+        } catch (e) {
+            console.error('Determine winner error:', e);
         }
     }
 
