@@ -189,8 +189,8 @@ class UIManager {
             const content = document.createElement('div');
             content.className = 'sector-content';
             content.style.position = 'absolute';
-            content.style.top = '7%'; // Сдвигаем выше (было 20%)
-            content.style.left = '50%';
+            content.style.top = '4%'; // Сдвигаем выше (было 20%)
+            content.style.left = '30%';
             content.style.transform = `translateX(-50%) rotate(${angleStep / 2}deg)`;
             content.style.transformOrigin = 'center 135px'; // Поднимаем центр вращения контента
             content.innerHTML = `<i class="fas ${prize.icon}"></i><span>${prize.name}</span>`;
