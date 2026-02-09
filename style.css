@@ -903,22 +903,21 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 4px; /* Уменьшил зазор между иконкой и текстом */
     color: white;
     text-align: center;
 }
 
 .sector-content i { 
-    font-size: 32px;
+    font-size: 28px; /* Немного уменьшил, чтобы не теснились сверху */
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-    margin-bottom: 4px;
 }
 
 .sector-content span { 
-    font-size: 14px; 
+    font-size: 11px; /* Чуть меньше текст для компактности */
     font-weight: 800; 
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     text-shadow: 0 2px 8px rgba(0,0,0,1);
     white-space: nowrap;
 }

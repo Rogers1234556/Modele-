@@ -148,12 +148,12 @@ class UIManager {
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
     static ROULETTE_ENABLED = true;
     static ROULETTE_PRIZES = [
-        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#1e293b' },
-        { id: 'extra_spin', name: '+1 Попытка', icon: 'fa-rotate-right', color: '#334155' },
-        { id: 'discount_5', name: 'Скидка 5%', icon: 'fa-percent', color: '#1e293b' },
-        { id: 'sub_1', name: '1 день саба', icon: 'fa-calendar-day', color: '#334155' },
-        { id: 'nothing_2', name: 'Пусто', icon: 'fa-ghost', color: '#1e293b' },
-        { id: 'discount_10', name: 'Скидка 10%', icon: 'fa-tags', color: '#334155' }
+        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#1e293b', weight: 1 },
+        { id: 'extra_spin', name: '+1 Попытка', icon: 'fa-rotate-right', color: '#334155', weight: 1 },
+        { id: 'discount_5', name: 'Скидка 5%', icon: 'fa-percent', color: '#1e293b', weight: 1 },
+        { id: 'sub_1', name: '1 день подписка', icon: 'fa-calendar-day', color: '#334155', weight: 1 },
+        { id: 'nothing_2', name: '10 дней подписка', icon: 'fa-ghost', color: '#1e293b', weight: 1 },
+        { id: 'discount_10', name: 'Скидка 10%', icon: 'fa-tags', color: '#334155', weight: 1 }
     ];
 
     static async initRoulette() {
@@ -175,8 +175,6 @@ class UIManager {
             const sector = document.createElement('div');
             sector.className = 'wheel-sector';
             
-            // Расчет клипа для сектора (конический градиент имитируется через clip-path)
-            // Для 6 секторов (60 градусов) мы используем полигон
             sector.style.transform = `rotate(${i * angleStep}deg)`;
             sector.style.backgroundColor = prize.color;
             sector.style.width = '100%';
@@ -186,20 +184,15 @@ class UIManager {
             sector.style.top = '0';
             sector.style.transformOrigin = '50% 50%';
             
-            // Создаем треугольный сектор
-            const startAngle = 0;
-            const endAngle = angleStep;
-            sector.style.clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% ${Math.tan((angleStep - 45) * Math.PI / 180) * 50 + 50}%)`;
-            // Для 60 градусов (6 секторов) проще:
             sector.style.clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% 28.87%)`;
             
             const content = document.createElement('div');
             content.className = 'sector-content';
             content.style.position = 'absolute';
-            content.style.top = '20%';
+            content.style.top = '12%'; // Сдвигаем выше (было 20%)
             content.style.left = '50%';
             content.style.transform = `translateX(-50%) rotate(${angleStep / 2}deg)`;
-            content.style.transformOrigin = 'center 150px';
+            content.style.transformOrigin = 'center 135px'; // Поднимаем центр вращения контента
             content.innerHTML = `<i class="fas ${prize.icon}"></i><span>${prize.name}</span>`;
             
             sector.appendChild(content);
@@ -220,7 +213,7 @@ class UIManager {
         try {
             spinBtn.disabled = true;
 
-            // Проверка попыток
+            // Проверка попыток (код опущен для краткости, берем из существующего)
             let { data: usage } = await supabaseClient
                 .from('roulette_usage')
                 .select('*')
@@ -242,12 +235,24 @@ class UIManager {
                 return;
             }
 
-            // Анимация
-            const prizeCount = this.ROULETTE_PRIZES.length;
-            const prizeIndex = Math.floor(Math.random() * prizeCount);
+            // Логика взвешенного рандома
+            const totalWeight = this.ROULETTE_PRIZES.reduce((acc, p) => acc + (p.weight || 1), 0);
+            let random = Math.random() * totalWeight;
+            let prizeIndex = 0;
+            
+            for (let i = 0; i < this.ROULETTE_PRIZES.length; i++) {
+                random -= (this.ROULETTE_PRIZES[i].weight || 1);
+                if (random <= 0) {
+                    prizeIndex = i;
+                    break;
+                }
+            }
+
             const prize = this.ROULETTE_PRIZES[prizeIndex];
             
-            const extraSpins = 5; // количество полных оборотов
+            // Анимация
+            const prizeCount = this.ROULETTE_PRIZES.length;
+            const extraSpins = 5; 
             const anglePerPrize = 360 / prizeCount;
             const finalAngle = (extraSpins * 360) + (360 - (prizeIndex * anglePerPrize)) - (anglePerPrize / 2);
 
