@@ -148,12 +148,12 @@ class UIManager {
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
     static ROULETTE_ENABLED = true;
     static ROULETTE_PRIZES = [
-        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#94a3b8' },
-        { id: 'extra_spin', name: '+1 Крутка', icon: 'fa-rotate-right', color: '#10b981' },
-        { id: 'discount_5', name: 'Скидка 5%', icon: 'fa-percent', color: '#3b82f6' },
-        { id: 'sub_1', name: '1 день саба', icon: 'fa-calendar-day', color: '#f59e0b' },
-        { id: 'nothing_2', name: 'Пусто', icon: 'fa-ghost', color: '#64748b' },
-        { id: 'discount_10', name: 'Скидка 10%', icon: 'fa-tags', color: '#ef4444' }
+        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#1e293b' },
+        { id: 'extra_spin', name: '+1 Попытка', icon: 'fa-rotate-right', color: '#334155' },
+        { id: 'discount_5', name: 'Скидка 5%', icon: 'fa-percent', color: '#1e293b' },
+        { id: 'sub_1', name: '1 день саба', icon: 'fa-calendar-day', color: '#334155' },
+        { id: 'nothing_2', name: 'Пусто', icon: 'fa-ghost', color: '#1e293b' },
+        { id: 'discount_10', name: 'Скидка 10%', icon: 'fa-tags', color: '#334155' }
     ];
 
     static async initRoulette() {
