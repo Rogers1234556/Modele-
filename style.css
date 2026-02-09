@@ -820,110 +820,101 @@ body {
     font-weight: 600;
 }
 
-/* ========== РУЛЕТКА (Summer Atmosphere) ========== */
+/* ========== РУЛЕТКА (iOS 26 Summer Premium) ========== */
 :root {
-    --roulette-bg: rgba(255, 248, 220, 0.7); /* Песочный полупрозрачный */
-    --roulette-border: #FFD700; /* Золотой песок */
-    --roulette-accent: #FF8C00; /* Оранжевый закат */
-    --roulette-text: #1e293b;
-    --summer-sky: #00BFFF; /* Голубое небо */
-    --summer-sun: #FFD700; /* Солнце */
-    --summer-sea: #1E90FF; /* Море */
-    --summer-palm: #228B22; /* Пальма */
+    --ios-glass: rgba(255, 255, 255, 0.08);
+    --ios-glass-heavy: rgba(255, 255, 255, 0.12);
+    --ios-border: rgba(255, 255, 255, 0.15);
+    --summer-vibe: linear-gradient(135deg, #FF9F0A, #FF375F); /* iOS Summer Orange to Pink */
+    --ocean-vibe: linear-gradient(135deg, #007AFF, #5856D6); /* iOS Blue to Indigo */
 }
 
 .roulette-section {
     margin-top: 32px;
-    background: var(--roulette-bg);
-    border-radius: 30px;
+    background: var(--ios-glass);
+    border-radius: 32px;
     padding: 40px 24px;
-    border: 4px solid var(--roulette-border);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--ios-border);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     text-align: center;
-    box-shadow: 0 15px 45px rgba(255, 140, 0, 0.3);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
-/* Летние декорации */
+/* Эстетичные градиентные блики вместо детских иконок */
 .roulette-section::before {
-    content: '☀️';
+    content: '';
     position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 40px;
-    filter: drop-shadow(0 0 10px var(--summer-sun));
-    animation: sunPulse 3s infinite ease-in-out;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255, 159, 10, 0.2) 0%, transparent 70%);
+    filter: blur(20px);
+    z-index: 0;
 }
 
 .roulette-section::after {
-    content: '🌴';
+    content: '';
     position: absolute;
-    bottom: 5px;
-    left: 10px;
-    font-size: 45px;
-    filter: drop-shadow(0 0 5px rgba(0,0,0,0.2));
-}
-
-@keyframes sunPulse {
-    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
-    50% { transform: scale(1.1) rotate(15deg); opacity: 1; }
+    bottom: -50px;
+    left: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(0, 122, 255, 0.15) 0%, transparent 70%);
+    filter: blur(30px);
+    z-index: 0;
 }
 
 .roulette-wrapper {
     position: relative;
-    width: 300px;
-    height: 300px;
-    margin: 40px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 280px;
+    height: 280px;
+    margin: 30px auto;
     z-index: 5;
 }
 
 .roulette-pointer {
     position: absolute;
-    top: -30px;
+    top: -15px;
     left: 50%;
     transform: translateX(-50%);
-    width: 45px;
-    height: 45px;
-    background: #FF4500; /* Ярко-оранжевый указатель */
+    width: 24px;
+    height: 40px;
+    background: white;
     clip-path: polygon(50% 100%, 0 0, 100% 0);
-    z-index: 35;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+    z-index: 40;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
 }
 
 .roulette-wheel {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 12px solid #FF8C00;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     position: relative;
     overflow: hidden;
     transition: transform 6s cubic-bezier(0.15, 0, 0.15, 1);
-    background: white;
-    box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.5), 0 25px 60px rgba(0,0,0,0.4);
+    background: #000;
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.05), inset 0 0 40px rgba(0,0,0,0.8);
 }
 
 .roulette-wheel::after {
-    content: '🌊';
+    content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 70px;
-    height: 70px;
-    background: var(--summer-sky);
-    border: 8px solid white;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    z-index: 15;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    z-index: 20;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
 .wheel-sector {
@@ -933,72 +924,60 @@ body {
     left: 0;
     top: 0;
     transform-origin: 50% 50%;
-    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .sector-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 6px;
     color: white;
     text-align: center;
 }
 
 .sector-content i { 
-    font-size: 32px;
-    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
+    font-size: 24px;
+    opacity: 0.9;
+    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4));
 }
 
 .sector-content span { 
     font-size: 10px;
-    font-weight: 900; 
+    font-weight: 600; 
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-    white-space: nowrap;
-}
-
-.roulette-footer {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 24px;
+    letter-spacing: 1px;
+    opacity: 0.8;
 }
 
 #spinBtn {
-    background: linear-gradient(135deg, #FF8C00, #FF4500);
-    color: white;
-    height: 60px;
-    border-radius: 30px;
-    font-size: 18px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 8px 25px rgba(255, 69, 0, 0.4);
-    border: 2px solid rgba(255,255,255,0.3);
+    background: white;
+    color: black;
+    height: 54px;
+    border-radius: 27px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    border: none;
     width: 100%;
-    max-width: 260px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 220px;
+    transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
     cursor: pointer;
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
 }
 
 #spinBtn:hover:not(:disabled) {
-    transform: scale(1.05) translateY(-2px);
-    box-shadow: 0 12px 35px rgba(255, 69, 0, 0.5);
-    filter: brightness(1.1);
+    transform: scale(1.02) translateY(-2px);
+    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.15);
 }
 
 #spinBtn:active:not(:disabled) {
-    transform: scale(0.96);
+    transform: scale(0.98);
 }
 
 #spinBtn:disabled {
-    background: #cbd5e1;
-    color: #64748b;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.2);
     box-shadow: none;
-    transform: none;
-    cursor: not-allowed;
 }
 .faction-modal-details {
     display: flex;

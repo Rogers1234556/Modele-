@@ -148,12 +148,12 @@ class UIManager {
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
     static ROULETTE_ENABLED = true;
     static ROULETTE_PRIZES = [
-        { id: 'nothing_2', name: '+10 дней', icon: 'fa-calendar-day', color: '#FFD700', weight: 3 }, // Золотой
-        { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: '#FF8C00', weight: 5 }, // Оранжевый
-        { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: '#1E90FF', weight: 4 }, // Голубой
-        { id: 'sub_1', name: '+5 дней', icon: 'fa-calendar-day', color: '#00BFFF', weight: 4 }, // Светло-голубой
-        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#FF4500', weight: 5 }, // Красно-оранжевый
-        { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: '#32CD32', weight: 3 } // Лаймовый
+        { id: 'nothing_2', name: '+10 дней', icon: 'fa-calendar-day', color: 'rgba(255, 159, 10, 0.8)', weight: 3 }, // iOS Orange
+        { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(255, 55, 95, 0.8)', weight: 5 }, // iOS Pink
+        { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: 'rgba(0, 122, 255, 0.8)', weight: 4 }, // iOS Blue
+        { id: 'sub_1', name: '+5 дней', icon: 'fa-calendar-day', color: 'rgba(88, 86, 214, 0.8)', weight: 4 }, // iOS Indigo
+        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: 'rgba(142, 142, 147, 0.8)', weight: 5 }, // iOS Gray
+        { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: 'rgba(52, 199, 89, 0.8)', weight: 3 } // iOS Green
     ];
 
     static async initRoulette() {
@@ -184,15 +184,18 @@ class UIManager {
             sector.style.top = '0';
             sector.style.transformOrigin = '50% 50%';
             
+            // Тонкие разделители в стиле iOS
+            sector.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+            
             sector.style.clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% 28.87%)`;
             
             const content = document.createElement('div');
             content.className = 'sector-content';
             content.style.position = 'absolute';
-            content.style.top = '4%'; // Сдвигаем выше (было 20%)
+            content.style.top = '12%'; 
             content.style.left = '50%';
             content.style.transform = `translateX(-50%) rotate(${angleStep / 2}deg)`;
-            content.style.transformOrigin = 'center 135px'; // Поднимаем центр вращения контента
+            content.style.transformOrigin = 'center 120px'; 
             content.innerHTML = `<i class="fas ${prize.icon}"></i><span>${prize.name}</span>`;
             
             sector.appendChild(content);
