@@ -148,10 +148,10 @@ class UIManager {
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
     static ROULETTE_ENABLED = true;
     static ROULETTE_PRIZES = [
-        { id: 'nothing_2', name: '10 дней подписки', icon: 'fa-calendar-day', color: '#1e293b', weight: 3 },
-        { id: 'extra_spin', name: '+1 Попытка', icon: 'fa-rotate-right', color: '#334155', weight: 5 },
+        { id: 'nothing_2', name: '+10 дней', icon: 'fa-calendar-day', color: '#1e293b', weight: 3 },
+        { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: '#334155', weight: 5 },
         { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: '#1e293b', weight: 4 },
-        { id: 'sub_1', name: '5 дней подписки', icon: 'fa-calendar-day', color: '#334155', weight: 4 },
+        { id: 'sub_1', name: '+5 дней', icon: 'fa-calendar-day', color: '#334155', weight: 4 },
         { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#1e293b', weight: 5 },
         { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: '#334155', weight: 3 }
     ];
@@ -190,7 +190,7 @@ class UIManager {
             content.className = 'sector-content';
             content.style.position = 'absolute';
             content.style.top = '4%'; // Сдвигаем выше (было 20%)
-            content.style.left = '35%';
+            content.style.left = '50%';
             content.style.transform = `translateX(-50%) rotate(${angleStep / 2}deg)`;
             content.style.transformOrigin = 'center 135px'; // Поднимаем центр вращения контента
             content.innerHTML = `<i class="fas ${prize.icon}"></i><span>${prize.name}</span>`;
