@@ -820,24 +820,55 @@ body {
     font-weight: 600;
 }
 
-/* ========== РУЛЕТКА (Minimalist iOS Style) ========== */
+/* ========== РУЛЕТКА (Summer Atmosphere) ========== */
 :root {
-    --roulette-bg: rgba(30, 41, 59, 0.5);
-    --roulette-border: rgba(255, 255, 255, 0.1);
-    --roulette-accent: #3b82f6;
-    --roulette-text: #f8fafc;
+    --roulette-bg: rgba(255, 248, 220, 0.7); /* Песочный полупрозрачный */
+    --roulette-border: #FFD700; /* Золотой песок */
+    --roulette-accent: #FF8C00; /* Оранжевый закат */
+    --roulette-text: #1e293b;
+    --summer-sky: #00BFFF; /* Голубое небо */
+    --summer-sun: #FFD700; /* Солнце */
+    --summer-sea: #1E90FF; /* Море */
+    --summer-palm: #228B22; /* Пальма */
 }
 
 .roulette-section {
     margin-top: 32px;
     background: var(--roulette-bg);
-    border-radius: 24px;
-    padding: 32px 24px;
-    border: 1px solid var(--roulette-border);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    border-radius: 30px;
+    padding: 40px 24px;
+    border: 4px solid var(--roulette-border);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     text-align: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 15px 45px rgba(255, 140, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Летние декорации */
+.roulette-section::before {
+    content: '☀️';
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 40px;
+    filter: drop-shadow(0 0 10px var(--summer-sun));
+    animation: sunPulse 3s infinite ease-in-out;
+}
+
+.roulette-section::after {
+    content: '🌴';
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    font-size: 45px;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.2));
+}
+
+@keyframes sunPulse {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+    50% { transform: scale(1.1) rotate(15deg); opacity: 1; }
 }
 
 .roulette-wrapper {
@@ -848,46 +879,51 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 5;
 }
 
 .roulette-pointer {
     position: absolute;
-    top: -25px;
+    top: -30px;
     left: 50%;
     transform: translateX(-50%);
-    width: 40px;
-    height: 40px;
-    background: white;
+    width: 45px;
+    height: 45px;
+    background: #FF4500; /* Ярко-оранжевый указатель */
     clip-path: polygon(50% 100%, 0 0, 100% 0);
-    z-index: 30;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    z-index: 35;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
 }
 
 .roulette-wheel {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 10px solid #1e293b;
+    border: 12px solid #FF8C00;
     position: relative;
     overflow: hidden;
     transition: transform 6s cubic-bezier(0.15, 0, 0.15, 1);
-    background: #0f172a;
-    box-shadow: 0 0 0 4px rgba(255,255,255,0.1), 0 20px 50px rgba(0,0,0,0.6);
+    background: white;
+    box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.5), 0 25px 60px rgba(0,0,0,0.4);
 }
 
 .roulette-wheel::after {
-    content: '';
+    content: '🌊';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 60px;
-    height: 60px;
-    background: white;
-    border: 10px solid #0f172a;
+    width: 70px;
+    height: 70px;
+    background: var(--summer-sky);
+    border: 8px solid white;
     border-radius: 50%;
     z-index: 15;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
 }
 
 .wheel-sector {
@@ -897,28 +933,29 @@ body {
     left: 0;
     top: 0;
     transform-origin: 50% 50%;
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .sector-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px; /* Уменьшил зазор между иконкой и текстом */
+    gap: 2px;
     color: white;
     text-align: center;
 }
 
 .sector-content i { 
-    font-size: 28px; /* Немного уменьшил, чтобы не теснились сверху */
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    font-size: 32px;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
 }
 
 .sector-content span { 
-    font-size: 11px; /* Чуть меньше текст для компактности */
-    font-weight: 800; 
+    font-size: 10px;
+    font-weight: 900; 
     text-transform: uppercase;
-    letter-spacing: 0.3px;
-    text-shadow: 0 2px 8px rgba(0,0,0,1);
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
     white-space: nowrap;
 }
 
@@ -930,24 +967,26 @@ body {
 }
 
 #spinBtn {
-    background: white;
-    color: black;
-    height: 56px;
-    border-radius: 28px;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -0.4px;
-    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
-    border: none;
+    background: linear-gradient(135deg, #FF8C00, #FF4500);
+    color: white;
+    height: 60px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 25px rgba(255, 69, 0, 0.4);
+    border: 2px solid rgba(255,255,255,0.3);
     width: 100%;
-    max-width: 240px;
+    max-width: 260px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
 }
 
 #spinBtn:hover:not(:disabled) {
-    transform: scale(1.02);
-    box-shadow: 0 8px 30px rgba(255, 255, 255, 0.15);
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 12px 35px rgba(255, 69, 0, 0.5);
+    filter: brightness(1.1);
 }
 
 #spinBtn:active:not(:disabled) {
@@ -955,9 +994,11 @@ body {
 }
 
 #spinBtn:disabled {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.3);
+    background: #cbd5e1;
+    color: #64748b;
     box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
 }
 .faction-modal-details {
     display: flex;
