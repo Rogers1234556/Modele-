@@ -146,7 +146,7 @@ class UIManager {
     }
 
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
-    static ROULETTE_ENABLED = false;
+    static ROULETTE_ENABLED = true;
     static ROULETTE_PRIZES = [
         { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#1e293b' },
         { id: 'extra_spin', name: '+1 Попытка', icon: 'fa-rotate-right', color: '#334155' },
@@ -168,17 +168,38 @@ class UIManager {
         if (!wheel) return;
 
         wheel.innerHTML = '';
-        const angleStep = 360 / this.ROULETTE_PRIZES.length;
+        const prizeCount = this.ROULETTE_PRIZES.length;
+        const angleStep = 360 / prizeCount;
 
         this.ROULETTE_PRIZES.forEach((prize, i) => {
             const sector = document.createElement('div');
             sector.className = 'wheel-sector';
-            sector.style.transform = `rotate(${i * angleStep}deg) skewY(${90 - angleStep}deg)`;
+            
+            // Расчет клипа для сектора (конический градиент имитируется через clip-path)
+            // Для 6 секторов (60 градусов) мы используем полигон
+            sector.style.transform = `rotate(${i * angleStep}deg)`;
             sector.style.backgroundColor = prize.color;
+            sector.style.width = '100%';
+            sector.style.height = '100%';
+            sector.style.position = 'absolute';
+            sector.style.left = '0';
+            sector.style.top = '0';
+            sector.style.transformOrigin = '50% 50%';
+            
+            // Создаем треугольный сектор
+            const startAngle = 0;
+            const endAngle = angleStep;
+            sector.style.clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% ${Math.tan((angleStep - 45) * Math.PI / 180) * 50 + 50}%)`;
+            // Для 60 градусов (6 секторов) проще:
+            sector.style.clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% 28.87%)`;
             
             const content = document.createElement('div');
             content.className = 'sector-content';
-            content.style.transform = `rotate(${angleStep / 2}deg) skewY(${-(90 - angleStep)}deg)`;
+            content.style.position = 'absolute';
+            content.style.top = '20%';
+            content.style.left = '50%';
+            content.style.transform = `translateX(-50%) rotate(${angleStep / 2}deg)`;
+            content.style.transformOrigin = 'center 150px';
             content.innerHTML = `<i class="fas ${prize.icon}"></i><span>${prize.name}</span>`;
             
             sector.appendChild(content);
@@ -187,18 +208,6 @@ class UIManager {
 
         const spinBtn = document.getElementById('spinBtn');
         if (spinBtn) {
-            const userId = tg.initDataUnsafe?.user?.id;
-            const { data: usage } = await supabaseClient
-                .from('roulette_usage')
-                .select('*')
-                .eq('user_idtg', userId)
-                .single();
-
-            if (usage && usage.spins_left <= 0) {
-                spinBtn.disabled = true;
-                spinBtn.querySelector('span').textContent = 'Попытки закончились';
-            }
-
             spinBtn.onclick = () => this.spinRoulette();
         }
     }

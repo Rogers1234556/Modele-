@@ -852,39 +852,27 @@ body {
 
 .roulette-pointer {
     position: absolute;
-    top: -10px;
+    top: -25px;
     left: 50%;
     transform: translateX(-50%);
-    width: 4px;
-    height: 32px;
-    background: white;
-    border-radius: 2px;
-    z-index: 20;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
-}
-
-.roulette-pointer::after {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 12px;
-    height: 12px;
+    width: 40px;
+    height: 40px;
     background: white;
     clip-path: polygon(50% 100%, 0 0, 100% 0);
+    z-index: 30;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
 }
 
 .roulette-wheel {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 1px solid var(--roulette-border);
+    border: 10px solid #1e293b;
     position: relative;
     overflow: hidden;
-    transition: transform 6s cubic-bezier(0.2, 0, 0, 1);
-    background: rgba(255, 255, 255, 0.03);
-    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.2);
+    transition: transform 6s cubic-bezier(0.15, 0, 0.15, 1);
+    background: #0f172a;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.1), 0 20px 50px rgba(0,0,0,0.6);
 }
 
 .roulette-wheel::after {
@@ -893,48 +881,46 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    background: var(--bg-primary);
-    border: 1px solid var(--roulette-border);
+    width: 60px;
+    height: 60px;
+    background: white;
+    border: 10px solid #0f172a;
     border-radius: 50%;
     z-index: 15;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 .wheel-sector {
     position: absolute;
-    width: 50%;
-    height: 50%;
-    left: 50%;
+    width: 100%;
+    height: 100%;
+    left: 0;
     top: 0;
-    transform-origin: 0% 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: 60px;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    transform-origin: 50% 50%;
 }
 
 .sector-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-align: center;
 }
 
 .sector-content i { 
-    font-size: 22px;
-    opacity: 0.9;
+    font-size: 32px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    margin-bottom: 4px;
 }
 
 .sector-content span { 
-    font-size: 11px; 
-    font-weight: 500; 
-    letter-spacing: 0.3px;
-    opacity: 0.8;
+    font-size: 14px; 
+    font-weight: 800; 
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 8px rgba(0,0,0,1);
+    white-space: nowrap;
 }
 
 #spinBtn {
