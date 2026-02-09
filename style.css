@@ -950,6 +950,13 @@ body {
 }
 
 #spinBtn {
+    /* --- ДОБАВЛЕННЫЕ СТРОКИ ДЛЯ ЦЕНТРОВКИ --- */
+    display: flex;              /* Включаем флексбокс */
+    align-items: center;        /* Центрируем по вертикали */
+    justify-content: center;    /* Центрируем по горизонтали */
+    padding: 0;                 /* Убираем отступы, которые ломают высоту */
+    /* ---------------------------------------- */
+
     background: white;
     color: black;
     height: 54px;
@@ -964,6 +971,7 @@ body {
     cursor: pointer;
     box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
 }
+
 
 #spinBtn:hover:not(:disabled) {
     transform: scale(1.02) translateY(-2px);
