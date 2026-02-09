@@ -148,12 +148,12 @@ class UIManager {
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
     static ROULETTE_ENABLED = true;
     static ROULETTE_PRIZES = [
-        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#1e293b', weight: 1 },
-        { id: 'extra_spin', name: '+1 Попытка', icon: 'fa-rotate-right', color: '#334155', weight: 1 },
-        { id: 'discount_5', name: 'Скидка 5%', icon: 'fa-percent', color: '#1e293b', weight: 1 },
-        { id: 'sub_1', name: '1 день подписка', icon: 'fa-calendar-day', color: '#334155', weight: 1 },
-        { id: 'nothing_2', name: '10 дней подписка', icon: 'fa-ghost', color: '#1e293b', weight: 1 },
-        { id: 'discount_10', name: 'Скидка 10%', icon: 'fa-tags', color: '#334155', weight: 1 }
+        { id: 'nothing_2', name: '10 дней подписки', icon: 'fa-calendar-day', color: '#1e293b', weight: 3 },
+        { id: 'extra_spin', name: '+1 Попытка', icon: 'fa-rotate-right', color: '#334155', weight: 5 },
+        { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: '#1e293b', weight: 4 },
+        { id: 'sub_1', name: '5 дней подписки', icon: 'fa-calendar-day', color: '#334155', weight: 4 },
+        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#1e293b', weight: 5 },
+        { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: '#334155', weight: 3 }
     ];
 
     static async initRoulette() {
