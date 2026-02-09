@@ -146,7 +146,7 @@ class UIManager {
     }
 
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
-    static ROULETTE_ENABLED = true;
+    static ROULETTE_ENABLED = false;
     static ROULETTE_PRIZES = [
         { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#1e293b' },
         { id: 'extra_spin', name: '+1 Попытка', icon: 'fa-rotate-right', color: '#334155' },
