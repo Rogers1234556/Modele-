@@ -201,6 +201,20 @@ class UIManager {
 
         const spinBtn = document.getElementById('spinBtn');
         if (spinBtn) {
+            const userId = tg.initDataUnsafe?.user?.id;
+            const { data: usage } = await supabaseClient
+                .from('roulette_usage')
+                .select('*')
+                .eq('user_idtg', userId)
+                .single();
+
+            if (usage && usage.spins_left > 0) {
+                spinBtn.disabled = false;
+                spinBtn.querySelector('span').textContent = 'Испытать удачу';
+            } else {
+                spinBtn.disabled = true;
+                spinBtn.querySelector('span').textContent = 'Попытки закончились';
+            }
             spinBtn.onclick = () => this.spinRoulette();
         }
     }
@@ -270,7 +284,7 @@ class UIManager {
                     await this.addDaysToUser(userId, 1, 'Приз из рулетки');
                 }
 
-                // Обновляем состояние
+                // Обновляем состояние в базе
                 await supabaseClient
                     .from('roulette_usage')
                     .update({ 
@@ -289,12 +303,20 @@ class UIManager {
 
                 Utils.showToast(message, prize.id === 'nothing' ? 'info' : 'success');
                 
+                // Обновляем кнопку сразу после анимации
+                if (nextSpins > 0) {
+                    spinBtn.disabled = false;
+                    spinBtn.querySelector('span').textContent = 'Испытать удачу';
+                } else {
+                    spinBtn.disabled = true;
+                    spinBtn.querySelector('span').textContent = 'Попытки закончились';
+                }
+
                 // Сброс колеса для следующего раза (без анимации)
                 setTimeout(() => {
                     wheel.style.transition = 'none';
                     wheel.style.transform = `rotate(${finalAngle % 360}deg)`;
                     setTimeout(() => wheel.style.transition = '', 50);
-                    this.initRoulette();
                 }, 1000);
 
             }, 5000);

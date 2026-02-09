@@ -922,8 +922,14 @@ body {
     white-space: nowrap;
 }
 
+.roulette-footer {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 24px;
+}
+
 #spinBtn {
-    margin-top: 12px;
     background: white;
     color: black;
     height: 56px;
@@ -936,6 +942,7 @@ body {
     width: 100%;
     max-width: 240px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
 }
 
 #spinBtn:hover:not(:disabled) {
