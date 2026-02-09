@@ -142,6 +142,153 @@ class UIManager {
         this.initEventListeners();
         this.loadFactions();
         this.updateContestTimer();
+        this.initRoulette();
+    }
+
+    // Настройка рулетки (укажите false, чтобы полностью скрыть)
+    static ROULETTE_ENABLED = true;
+    static ROULETTE_PRIZES = [
+        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: '#94a3b8' },
+        { id: 'extra_spin', name: '+1 Крутка', icon: 'fa-rotate-right', color: '#10b981' },
+        { id: 'discount_5', name: 'Скидка 5%', icon: 'fa-percent', color: '#3b82f6' },
+        { id: 'sub_1', name: '1 день саба', icon: 'fa-calendar-day', color: '#f59e0b' },
+        { id: 'nothing_2', name: 'Пусто', icon: 'fa-ghost', color: '#64748b' },
+        { id: 'discount_10', name: 'Скидка 10%', icon: 'fa-tags', color: '#ef4444' }
+    ];
+
+    static async initRoulette() {
+        const container = document.getElementById('rouletteContainer');
+        if (!this.ROULETTE_ENABLED) {
+            if (container) container.style.display = 'none';
+            return;
+        }
+        if (container) container.style.display = 'block';
+
+        const wheel = document.getElementById('rouletteWheel');
+        if (!wheel) return;
+
+        wheel.innerHTML = '';
+        const angleStep = 360 / this.ROULETTE_PRIZES.length;
+
+        this.ROULETTE_PRIZES.forEach((prize, i) => {
+            const sector = document.createElement('div');
+            sector.className = 'wheel-sector';
+            sector.style.transform = `rotate(${i * angleStep}deg) skewY(${90 - angleStep}deg)`;
+            sector.style.backgroundColor = prize.color;
+            
+            const content = document.createElement('div');
+            content.className = 'sector-content';
+            content.style.transform = `rotate(${angleStep / 2}deg) skewY(${-(90 - angleStep)}deg)`;
+            content.innerHTML = `<i class="fas ${prize.icon}"></i><span>${prize.name}</span>`;
+            
+            sector.appendChild(content);
+            wheel.appendChild(sector);
+        });
+
+        const spinBtn = document.getElementById('spinBtn');
+        if (spinBtn) {
+            const userId = tg.initDataUnsafe?.user?.id;
+            const { data: usage } = await supabaseClient
+                .from('roulette_usage')
+                .select('*')
+                .eq('user_idtg', userId)
+                .single();
+
+            if (usage && usage.spins_left <= 0) {
+                spinBtn.disabled = true;
+                spinBtn.querySelector('span').textContent = 'Попытки закончились';
+            }
+
+            spinBtn.onclick = () => this.spinRoulette();
+        }
+    }
+
+    static async spinRoulette() {
+        const userId = tg.initDataUnsafe?.user?.id;
+        const spinBtn = document.getElementById('spinBtn');
+        const wheel = document.getElementById('rouletteWheel');
+
+        try {
+            spinBtn.disabled = true;
+
+            // Проверка попыток
+            let { data: usage } = await supabaseClient
+                .from('roulette_usage')
+                .select('*')
+                .eq('user_idtg', userId)
+                .single();
+
+            if (!usage) {
+                const { data: newUsage, error } = await supabaseClient
+                    .from('roulette_usage')
+                    .insert([{ user_idtg: userId, spins_left: 1, total_spins: 0 }])
+                    .select()
+                    .single();
+                if (error) throw error;
+                usage = newUsage;
+            }
+
+            if (usage.spins_left <= 0) {
+                Utils.showToast('У вас нет попыток', 'error');
+                return;
+            }
+
+            // Анимация
+            const prizeCount = this.ROULETTE_PRIZES.length;
+            const prizeIndex = Math.floor(Math.random() * prizeCount);
+            const prize = this.ROULETTE_PRIZES[prizeIndex];
+            
+            const extraSpins = 5; // количество полных оборотов
+            const anglePerPrize = 360 / prizeCount;
+            const finalAngle = (extraSpins * 360) + (360 - (prizeIndex * anglePerPrize)) - (anglePerPrize / 2);
+
+            wheel.style.transform = `rotate(${finalAngle}deg)`;
+
+            setTimeout(async () => {
+                // Логика выигрыша
+                let nextSpins = usage.spins_left - 1;
+                let message = `Вы выиграли: ${prize.name}`;
+
+                if (prize.id === 'extra_spin') {
+                    nextSpins += 1;
+                    message = 'Выпала еще одна попытка!';
+                } else if (prize.id === 'sub_1') {
+                    await this.addDaysToUser(userId, 1, 'Приз из рулетки');
+                }
+
+                // Обновляем состояние
+                await supabaseClient
+                    .from('roulette_usage')
+                    .update({ 
+                        spins_left: nextSpins,
+                        total_spins: usage.total_spins + 1,
+                        last_prize: prize.name
+                    })
+                    .eq('user_idtg', userId);
+
+                // Логирование
+                await supabaseClient.from('logs').insert([{
+                    title: 'Рулетка',
+                    content: `Пользователь ${userId} выбил: ${prize.name}. Всего круток: ${usage.total_spins + 1}`,
+                    admin: 'System'
+                }]);
+
+                Utils.showToast(message, prize.id === 'nothing' ? 'info' : 'success');
+                
+                // Сброс колеса для следующего раза (без анимации)
+                setTimeout(() => {
+                    wheel.style.transition = 'none';
+                    wheel.style.transform = `rotate(${finalAngle % 360}deg)`;
+                    setTimeout(() => wheel.style.transition = '', 50);
+                    this.initRoulette();
+                }, 1000);
+
+            }, 5000);
+
+        } catch (e) {
+            console.error('Spin error:', e);
+            spinBtn.disabled = false;
+        }
     }
 
     static initTabNavigation() {

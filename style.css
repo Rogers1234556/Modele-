@@ -820,7 +820,93 @@ body {
     font-weight: 600;
 }
 
-/* ========== ДЕТАЛИ ФРАКЦИИ В МОДАЛКЕ ========== */
+/* ========== РУЛЕТКА (ЛЕТНЯЯ) ========== */
+:root {
+    --roulette-theme-primary: #FFD700;
+    --roulette-theme-secondary: #FF8C00;
+    --roulette-theme-bg: #40E0D0;
+    --roulette-theme-accent: #FF4500;
+}
+
+.roulette-section {
+    margin-top: 30px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+}
+
+.roulette-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 30px auto;
+}
+
+.roulette-pointer {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 40px;
+    background: var(--roulette-theme-accent);
+    clip-path: polygon(50% 100%, 0 0, 100% 0);
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.roulette-wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 10px solid var(--roulette-theme-bg);
+    position: relative;
+    overflow: hidden;
+    transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.wheel-sector {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    left: 50%;
+    top: 0;
+    transform-origin: 0% 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 50px;
+}
+
+.sector-content {
+    transform: rotate(30deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.sector-content i { font-size: 20px; }
+.sector-content span { font-size: 10px; font-weight: 700; white-space: nowrap; }
+
+/* Примеры стилей секторов */
+.wheel-sector:nth-child(odd) { background: #FFEB3B; color: #333; }
+.wheel-sector:nth-child(even) { background: #4CAF50; color: white; }
+.wheel-sector:nth-child(3n) { background: #2196F3; color: white; }
+.wheel-sector:nth-child(4n) { background: #FF5722; color: white; }
+
+#spinBtn {
+    margin-top: 20px;
+    background: linear-gradient(135deg, var(--roulette-theme-secondary), var(--roulette-theme-accent));
+}
+
+#spinBtn:disabled {
+    opacity: 0.6;
+    filter: grayscale(1);
+}
 .faction-modal-details {
     display: flex;
     flex-direction: column;
