@@ -147,22 +147,49 @@ class UIManager {
 
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
     static ROULETTE_ENABLED = true;
-    static ROULETTE_PRIZES = [
-        { id: 'nothing_2', name: '+10 дней', icon: 'fa-calendar-day', color: 'rgba(255, 159, 10, 0.8)', weight: 3 }, // iOS Orange
-        { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(255, 55, 95, 0.8)', weight: 5 }, // iOS Pink
-        { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: 'rgba(0, 122, 255, 0.8)', weight: 4 }, // iOS Blue
-        { id: 'sub_1', name: '+5 дней', icon: 'fa-calendar-day', color: 'rgba(88, 86, 214, 0.8)', weight: 4 }, // iOS Indigo
-        { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: 'rgba(142, 142, 147, 0.8)', weight: 5 }, // iOS Gray
-        { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: 'rgba(52, 199, 89, 0.8)', weight: 3 } // iOS Green
-    ];
+    
+    // ТЕКУЩИЙ СТИЛЬ РУЛЕТКИ: 'summer' | 'winter' | и т.д.
+    static ROULETTE_STYLE = 'winter'; 
+
+    static ROULETTE_THEMES = {
+        summer: [
+            { id: 'nothing_2', name: '+10 дней', icon: 'fa-calendar-day', color: 'rgba(255, 159, 10, 0.8)', weight: 3 },
+            { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(255, 55, 95, 0.8)', weight: 5 },
+            { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: 'rgba(0, 122, 255, 0.8)', weight: 4 },
+            { id: 'sub_1', name: '+5 дней', icon: 'fa-calendar-day', color: 'rgba(88, 86, 214, 0.8)', weight: 4 },
+            { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: 'rgba(142, 142, 147, 0.8)', weight: 5 },
+            { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: 'rgba(52, 199, 89, 0.8)', weight: 3 }
+        ],
+        winter: [
+            { id: 'nothing_2', name: '+10 дней', icon: 'fa-snowflake', color: 'rgba(0, 199, 255, 0.8)', weight: 3 },
+            { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(173, 216, 230, 0.8)', weight: 5 },
+            { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: 'rgba(70, 130, 180, 0.8)', weight: 4 },
+            { id: 'sub_1', name: '+5 дней', icon: 'fa-snowflake', color: 'rgba(0, 122, 255, 0.8)', weight: 4 },
+            { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: 'rgba(112, 128, 144, 0.8)', weight: 5 },
+            { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: 'rgba(176, 224, 230, 0.8)', weight: 3 }
+        ]
+    };
+
+    static get ROULETTE_PRIZES() {
+        return this.ROULETTE_THEMES[this.ROULETTE_STYLE] || this.ROULETTE_THEMES.summer;
+    }
 
     static async initRoulette() {
         const container = document.getElementById('rouletteContainer');
+        const section = document.querySelector('.roulette-section');
+        
         if (!this.ROULETTE_ENABLED) {
             if (container) container.style.display = 'none';
             return;
         }
         if (container) container.style.display = 'block';
+
+        // Применяем класс стиля к секции
+        if (section) {
+            // Удаляем старые стили
+            section.className = section.className.replace(/\bstyle-\S+/g, '');
+            section.classList.add(`style-${this.ROULETTE_STYLE}`);
+        }
 
         const wheel = document.getElementById('rouletteWheel');
         if (!wheel) return;

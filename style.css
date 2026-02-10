@@ -829,6 +829,32 @@ body {
     --ocean-vibe: linear-gradient(135deg, #007AFF, #5856D6); /* iOS Blue to Indigo */
 }
 
+/* ========== СИСТЕМА СТИЛЕЙ РУЛЕТКИ (iOS 26) ========== */
+.roulette-section.style-summer {
+    --roulette-bg-glow: rgba(255, 159, 10, 0.2);
+    --roulette-accent-glow: rgba(255, 55, 95, 0.15);
+}
+
+.roulette-section.style-winter {
+    --roulette-bg-glow: rgba(0, 199, 255, 0.2);
+    --roulette-accent-glow: rgba(255, 255, 255, 0.15);
+    background: rgba(240, 248, 255, 0.05);
+    border-color: rgba(200, 230, 255, 0.3);
+}
+
+.roulette-section.style-winter::before {
+    background: radial-gradient(circle, rgba(135, 206, 250, 0.25) 0%, transparent 70%);
+}
+
+.roulette-section.style-winter::after {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+}
+
+.roulette-section.style-winter .roulette-wheel {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: #001a33; /* Глубокий синий */
+}
+
 .roulette-section {
     margin-top: 32px;
     background: var(--ios-glass);
@@ -839,14 +865,13 @@ body {
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     text-align: center;
     position: relative;
-    overflow: hidden; /* Fixes protruding sun */
+    overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centers content */
+    align-items: center;
 }
 
-/* Aesthetic gradient flares */
 .roulette-section::before {
     content: '';
     position: absolute;
@@ -854,7 +879,7 @@ body {
     right: -50px;
     width: 150px;
     height: 150px;
-    background: radial-gradient(circle, rgba(255, 159, 10, 0.2) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--roulette-bg-glow, rgba(255, 159, 10, 0.2)) 0%, transparent 70%);
     filter: blur(20px);
     z-index: 0;
     pointer-events: none;
@@ -867,7 +892,7 @@ body {
     left: -50px;
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(0, 122, 255, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--roulette-accent-glow, rgba(0, 122, 255, 0.15)) 0%, transparent 70%);
     filter: blur(30px);
     z-index: 0;
     pointer-events: none;
