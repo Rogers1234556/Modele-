@@ -149,7 +149,7 @@ class UIManager {
     static ROULETTE_ENABLED = true;
     
     // ТЕКУЩИЙ СТИЛЬ РУЛЕТКИ: 'summer' | 'winter' | 'new-year'
-    static ROULETTE_STYLE = 'winter'; 
+    static ROULETTE_STYLE = 'new-year'; 
 
     static ROULETTE_THEMES = {
         summer: [
