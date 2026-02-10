@@ -830,93 +830,26 @@ body {
 .roulette-section {
     margin-top: 32px;
     background: var(--ios-glass);
-    border-radius: 40px; /* iOS 26 Squircle */
+    border-radius: 40px;
     padding: 40px 24px;
-    border: 1px solid var(--ios-border);
+    border: 2px solid var(--ios-border);
     backdrop-filter: blur(40px) saturate(200%);
     -webkit-backdrop-filter: blur(40px) saturate(200%);
     text-align: center;
     position: relative;
-    overflow: visible; 
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    overflow: hidden; /* For snow under glass effect */
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Декорации: Зима */
-.decoration-winter {
-    display: none;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10;
-}
-
-.style-winter .decoration-winter {
-    display: block;
-}
-
-.snow-ground {
-    position: absolute;
-    bottom: -15px;
-    left: -10%;
-    width: 120%;
-    height: 40px;
-    background: white;
-    border-radius: 50% 50% 0 0;
-    box-shadow: 0 -5px 15px rgba(255,255,255,0.5);
-    filter: blur(2px);
-}
-
-.snowman {
-    position: absolute;
-    bottom: 5px;
-    right: -10px;
-    width: 40px;
-}
-
-.snowman-body {
-    width: 40px;
-    height: 40px;
-    background: white;
-    border-radius: 50%;
-}
-
-.snowman-head {
-    width: 25px;
-    height: 25px;
-    background: white;
-    border-radius: 50%;
-    margin: -15px auto 0;
-    position: relative;
-}
-
-.snowman-head::before { /* Нос */
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: -5px;
-    border-left: 8px solid orange;
-    border-top: 3px solid transparent;
-    border-bottom: 3px solid transparent;
-}
-
-/* Декорации: New Year */
-.decoration-newyear {
-    display: none;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 15;
-}
-
-.style-new-year .decoration-newyear {
-    display: block;
+.style-new-year.roulette-section {
+    border: 3px solid #1a472a; 
+    box-shadow: 0 0 40px rgba(26, 71, 42, 0.4), 
+                inset 0 0 30px rgba(0, 0, 0, 0.6);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.9) 100%);
 }
 
 /* Эффект снега */
@@ -927,21 +860,22 @@ body {
     top: 0;
     left: 0;
     overflow: hidden;
-    z-index: 1;
+    z-index: 0; /* Под контентом, но над фоновым слоем для видимости через стекло */
+    pointer-events: none;
 }
 
 @keyframes snowFall {
-    0% { transform: translateY(0) translateX(0); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateY(450px) translateX(20px); opacity: 0; }
+    0% { transform: translateY(-10%) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(110%) translateX(20px); opacity: 0; }
 }
 
 /* Гирлянда на колесе */
 .garland-wrap {
     position: absolute;
-    width: 310px; /* Чуть больше колеса для контура */
-    height: 310px;
+    width: 290px; 
+    height: 290px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -953,42 +887,65 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 3px solid rgba(255,255,255,0.08);
-    box-shadow: 0 0 10px rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .garland-bulb {
     position: absolute;
-    width: 14px;
-    height: 14px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    top: -7px;
+    top: -4px;
     left: 50%;
-    margin-left: -7px;
-    transform-origin: 50% 162px;
+    margin-left: -4px;
+    transform-origin: 50% 149px;
     transform: rotate(calc(var(--i) * (360deg / 20)));
-    box-shadow: 0 0 15px currentColor;
-    animation: bulbGlow 1.2s infinite alternate ease-in-out;
-    animation-delay: calc(var(--i) * 0.15s);
+    box-shadow: 0 0 10px currentColor;
+    opacity: 0.8;
 }
 
-@keyframes bulbGlow {
-    0% { 
-        filter: brightness(0.6) saturate(0.8); 
-        box-shadow: 0 0 5px currentColor;
-        transform: rotate(calc(var(--i) * (360deg / 20))) scale(0.9);
-    }
-    100% { 
-        filter: brightness(2) saturate(1.5); 
-        box-shadow: 0 0 25px currentColor, 0 0 45px currentColor;
-        transform: rotate(calc(var(--i) * (360deg / 20))) scale(1.1);
-    }
+.garland-bulb:nth-child(4n+1) { color: #ff3b30; }
+.garland-bulb:nth-child(4n+2) { color: #34c759; }
+.garland-bulb:nth-child(4n+3) { color: #007aff; }
+.garland-bulb:nth-child(4n+4) { color: #ffcc00; }
+
+/* Новогодние украшения */
+.christmas-decorations {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 5;
 }
 
-.garland-bulb:nth-child(4n+1) { color: #ff0000; }
-.garland-bulb:nth-child(4n+2) { color: #00ff00; }
-.garland-bulb:nth-child(4n+3) { color: #0088ff; }
-.garland-bulb:nth-child(4n+4) { color: #ffff00; }
+.branch {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.9;
+}
+
+.branch.left {
+    top: -20px;
+    left: -30px;
+    transform: rotate(-15deg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10,90 Q30,70 50,85 T90,70' fill='none' stroke='%231a472a' stroke-width='8'/%3E%3Ccircle cx='30' cy='75' r='5' fill='%23ff0000'/%3E%3Ccircle cx='70' cy='78' r='5' fill='%23ffd700'/%3E%3C/svg%3E");
+}
+
+.branch.right {
+    top: -20px;
+    right: -30px;
+    transform: rotate(15deg) scaleX(-1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10,90 Q30,70 50,85 T90,70' fill='none' stroke='%231a472a' stroke-width='8'/%3E%3Ccircle cx='30' cy='75' r='5' fill='%23ff0000'/%3E%3Ccircle cx='70' cy='78' r='5' fill='%23ffd700'/%3E%3C/svg%3E");
+}
+
+.style-new-year .roulette-wheel {
+    border: 8px solid #1a472a; 
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3), inset 0 0 50px rgba(0,0,0,0.9);
+}
 
 /* Новогодние украшения */
 .christmas-decorations {

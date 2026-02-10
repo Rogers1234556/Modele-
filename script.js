@@ -1,6 +1,5 @@
 // Инициализация Telegram Web App
 const tg = window.Telegram.WebApp;
-
 function applySafeArea() {
     document.documentElement.style.setProperty(
         '--tg-safe-top',
