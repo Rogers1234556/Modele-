@@ -148,8 +148,8 @@ class UIManager {
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
     static ROULETTE_ENABLED = true;
     
-    // ТЕКУЩИЙ СТИЛЬ РУЛЕТКИ: 'summer' | 'winter' | и т.д.
-    static ROULETTE_STYLE = 'winter'; 
+    // ТЕКУЩИЙ СТИЛЬ РУЛЕТКИ: 'summer' | 'winter' | 'new-year'
+    static ROULETTE_STYLE = 'new-year'; 
 
     static ROULETTE_THEMES = {
         summer: [
@@ -167,6 +167,14 @@ class UIManager {
             { id: 'sub_1', name: '+5 дней', icon: 'fa-snowflake', color: 'rgba(0, 122, 255, 0.8)', weight: 4 },
             { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: 'rgba(112, 128, 144, 0.8)', weight: 5 },
             { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: 'rgba(176, 224, 230, 0.8)', weight: 3 }
+        ],
+        'new-year': [
+            { id: 'gift_1', name: 'Подарок VIP', icon: 'fa-gift', color: 'rgba(255, 0, 0, 0.8)', weight: 2 },
+            { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(0, 255, 0, 0.8)', weight: 5 },
+            { id: 'discount_20', name: 'Скидка 20%', icon: 'fa-star', color: 'rgba(255, 215, 0, 0.8)', weight: 3 },
+            { id: 'sub_30', name: '30 дней саба', icon: 'fa-crown', color: 'rgba(75, 0, 130, 0.8)', weight: 1 },
+            { id: 'nothing', name: 'Ничего', icon: 'fa-snowflake', color: 'rgba(255, 255, 255, 0.3)', weight: 6 },
+            { id: 'discount_50', name: 'Скидка 50%', icon: 'fa-candy-cane', color: 'rgba(255, 20, 147, 0.8)', weight: 1 }
         ]
     };
 

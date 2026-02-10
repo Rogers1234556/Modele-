@@ -820,90 +820,137 @@ body {
     font-weight: 600;
 }
 
-/* ========== РУЛЕТКА (iOS 26 Summer Premium) ========== */
+/* ========== РУЛЕТКА (iOS 26 Premium) ========== */
 :root {
     --ios-glass: rgba(255, 255, 255, 0.08);
     --ios-glass-heavy: rgba(255, 255, 255, 0.12);
     --ios-border: rgba(255, 255, 255, 0.15);
-    --summer-vibe: linear-gradient(135deg, #FF9F0A, #FF375F); /* iOS Summer Orange to Pink */
-    --ocean-vibe: linear-gradient(135deg, #007AFF, #5856D6); /* iOS Blue to Indigo */
-}
-
-/* ========== СИСТЕМА СТИЛЕЙ РУЛЕТКИ (iOS 26) ========== */
-.roulette-section.style-summer {
-    --roulette-bg-glow: rgba(255, 159, 10, 0.2);
-    --roulette-accent-glow: rgba(255, 55, 95, 0.15);
-}
-
-.roulette-section.style-winter {
-    --roulette-bg-glow: rgba(0, 199, 255, 0.2);
-    --roulette-accent-glow: rgba(255, 255, 255, 0.15);
-    background: rgba(240, 248, 255, 0.05);
-    border-color: rgba(200, 230, 255, 0.3);
-}
-
-.roulette-section.style-winter::before {
-    background: radial-gradient(circle, rgba(135, 206, 250, 0.25) 0%, transparent 70%);
-}
-
-.roulette-section.style-winter::after {
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-}
-
-.roulette-section.style-winter .roulette-wheel {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: #001a33; /* Глубокий синий */
 }
 
 .roulette-section {
     margin-top: 32px;
     background: var(--ios-glass);
-    border-radius: 32px;
+    border-radius: 40px; /* iOS 26 Squircle */
     padding: 40px 24px;
     border: 1px solid var(--ios-border);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
     text-align: center;
     position: relative;
-    overflow: hidden !important; /* Forces clip on all browsers */
-    isolation: isolate; /* Creates a new stacking context for pseudo-elements */
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    overflow: visible; 
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.roulette-section::before,
-.roulette-section::after {
-    /* Ensure pseudo-elements respect parent border-radius and overflow */
-    border-radius: inherit;
-    z-index: -1;
+/* Декорации: Зима */
+.decoration-winter {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
 }
 
-.roulette-section::before {
-    content: '';
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 150px;
-    height: 150px;
-    background: radial-gradient(circle, var(--roulette-bg-glow, rgba(255, 159, 10, 0.2)) 0%, transparent 70%);
-    filter: blur(20px);
-    z-index: 0;
-    pointer-events: none;
+.style-winter .decoration-winter {
+    display: block;
 }
 
-.roulette-section::after {
+.snow-ground {
+    position: absolute;
+    bottom: -15px;
+    left: -10%;
+    width: 120%;
+    height: 40px;
+    background: white;
+    border-radius: 50% 50% 0 0;
+    box-shadow: 0 -5px 15px rgba(255,255,255,0.5);
+    filter: blur(2px);
+}
+
+.snowman {
+    position: absolute;
+    bottom: 5px;
+    right: -10px;
+    width: 40px;
+}
+
+.snowman-body {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+}
+
+.snowman-head {
+    width: 25px;
+    height: 25px;
+    background: white;
+    border-radius: 50%;
+    margin: -15px auto 0;
+    position: relative;
+}
+
+.snowman-head::before { /* Нос */
     content: '';
     position: absolute;
-    bottom: -50px;
-    left: -50px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, var(--roulette-accent-glow, rgba(0, 122, 255, 0.15)) 0%, transparent 70%);
-    filter: blur(30px);
-    z-index: 0;
+    top: 50%;
+    right: -5px;
+    border-left: 8px solid orange;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+}
+
+/* Декорации: New Year */
+.decoration-newyear {
+    display: none;
+    position: absolute;
+    width: 320px;
+    height: 320px;
     pointer-events: none;
+    z-index: 15;
+}
+
+.style-new-year .decoration-newyear {
+    display: block;
+}
+
+.garland {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.05);
+}
+
+.garland-light {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    top: -6px;
+    left: 50%;
+    margin-left: -6px;
+    transform-origin: 50% 166px;
+    transform: rotate(calc(var(--i) * (360deg / 12)));
+    animation: flash 1s infinite alternate;
+    animation-delay: calc(var(--i) * 0.1s);
+}
+
+@keyframes flash {
+    0% { background: #ff0000; box-shadow: 0 0 10px #ff0000; }
+    25% { background: #00ff00; box-shadow: 0 0 10px #00ff00; }
+    50% { background: #0000ff; box-shadow: 0 0 10px #0000ff; }
+    75% { background: #ffff00; box-shadow: 0 0 10px #ffff00; }
+    100% { background: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
+}
+
+.style-new-year .roulette-wheel {
+    border: 8px solid #1a472a; 
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2), inset 0 0 50px rgba(0,0,0,0.9);
 }
 
 .roulette-wrapper {
