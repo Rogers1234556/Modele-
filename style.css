@@ -839,11 +839,14 @@ body {
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     text-align: center;
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Fixes protruding sun */
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers content */
 }
 
-/* Эстетичные градиентные блики вместо детских иконок */
+/* Aesthetic gradient flares */
 .roulette-section::before {
     content: '';
     position: absolute;
@@ -854,6 +857,7 @@ body {
     background: radial-gradient(circle, rgba(255, 159, 10, 0.2) 0%, transparent 70%);
     filter: blur(20px);
     z-index: 0;
+    pointer-events: none;
 }
 
 .roulette-section::after {
@@ -866,6 +870,7 @@ body {
     background: radial-gradient(circle, rgba(0, 122, 255, 0.15) 0%, transparent 70%);
     filter: blur(30px);
     z-index: 0;
+    pointer-events: none;
 }
 
 .roulette-wrapper {
@@ -874,6 +879,9 @@ body {
     height: 280px;
     margin: 30px auto;
     z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .roulette-pointer {
@@ -933,6 +941,8 @@ body {
     gap: 6px;
     color: white;
     text-align: center;
+    position: absolute;
+    width: 100%;
 }
 
 .sector-content i { 
@@ -950,13 +960,10 @@ body {
 }
 
 #spinBtn {
-    /* --- ДОБАВЛЕННЫЕ СТРОКИ ДЛЯ ЦЕНТРОВКИ --- */
-    display: flex;              /* Включаем флексбокс */
-    align-items: center;        /* Центрируем по вертикали */
-    justify-content: center;    /* Центрируем по горизонтали */
-    padding: 0;                 /* Убираем отступы, которые ломают высоту */
-    /* ---------------------------------------- */
-
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
     background: white;
     color: black;
     height: 54px;
@@ -970,6 +977,7 @@ body {
     transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
     cursor: pointer;
     box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+    margin: 24px auto 0; /* Centered margin-top */
 }
 
 

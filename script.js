@@ -184,15 +184,13 @@ class UIManager {
             sector.style.top = '0';
             sector.style.transformOrigin = '50% 50%';
             
-            // Тонкие разделители в стиле iOS
-            sector.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-            
-            sector.style.clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% 28.87%)`;
+            // Precise sector geometry
+            sector.style.clipPath = `polygon(50% 50%, 50% 0%, ${50 + 50 * Math.tan((angleStep * Math.PI) / 180)}% 0%)`;
             
             const content = document.createElement('div');
             content.className = 'sector-content';
             content.style.position = 'absolute';
-            content.style.top = '12%'; 
+            content.style.top = '10%'; 
             content.style.left = '50%';
             content.style.transform = `translateX(-50%) rotate(${angleStep / 2}deg)`;
             content.style.transformOrigin = 'center 120px'; 
