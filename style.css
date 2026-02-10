@@ -2627,3 +2627,15 @@ input:checked + .slider:before {
     flex-wrap: wrap;
     gap: 4px;
 }
+
+/* Специальный фикс для модального окна колеса */
+#wheelModal .modal-content {
+    overflow: hidden !important;
+    position: relative;
+}
+
+#wheelModal .modal-content::before {
+    right: 0;
+    top: 0;
+    border-top-right-radius: inherit; /* Наследовать скругление родителя */
+}
