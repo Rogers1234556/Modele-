@@ -206,6 +206,26 @@ class UIManager {
         const prizeCount = this.ROULETTE_PRIZES.length;
         const angleStep = 360 / prizeCount;
 
+        // Генерация снежинок для фона
+        const snowContainer = section.querySelector('.snowflakes-container');
+        if (snowContainer && this.ROULETTE_STYLE === 'new-year') {
+            snowContainer.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                const snow = document.createElement('div');
+                snow.style.position = 'absolute';
+                snow.style.left = Math.random() * 100 + '%';
+                snow.style.top = '-20px';
+                snow.style.opacity = Math.random();
+                snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                snow.style.color = 'white';
+                snow.innerHTML = '❄';
+                snow.style.animation = `snowFall ${Math.random() * 5 + 3}s linear infinite`;
+                snow.style.animationDelay = Math.random() * 10 + 's';
+                snow.style.filter = 'blur(1px)';
+                snowContainer.appendChild(snow);
+            }
+        }
+
         this.ROULETTE_PRIZES.forEach((prize, i) => {
             const sector = document.createElement('div');
             sector.className = 'wheel-sector';

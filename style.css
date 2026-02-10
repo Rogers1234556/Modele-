@@ -907,8 +907,10 @@ body {
 .decoration-newyear {
     display: none;
     position: absolute;
-    width: 320px;
-    height: 320px;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
     pointer-events: none;
     z-index: 15;
 }
@@ -917,40 +919,125 @@ body {
     display: block;
 }
 
-.garland {
+/* Эффект снега */
+.snowflakes-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    z-index: 1;
+}
+
+@keyframes snowFall {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(450px) translateX(20px); opacity: 0; }
+}
+
+/* Гирлянда на колесе */
+.garland-wrap {
+    position: absolute;
+    width: 310px; /* Чуть больше колеса для контура */
+    height: 310px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+}
+
+.garland-wire {
     position: absolute;
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 4px solid rgba(255,255,255,0.05);
+    border: 3px solid rgba(255,255,255,0.08);
+    box-shadow: 0 0 10px rgba(255,255,255,0.05);
 }
 
-.garland-light {
+.garland-bulb {
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: white;
-    top: -6px;
+    top: -7px;
     left: 50%;
-    margin-left: -6px;
-    transform-origin: 50% 166px;
-    transform: rotate(calc(var(--i) * (360deg / 12)));
-    animation: flash 1s infinite alternate;
-    animation-delay: calc(var(--i) * 0.1s);
+    margin-left: -7px;
+    transform-origin: 50% 162px;
+    transform: rotate(calc(var(--i) * (360deg / 20)));
+    box-shadow: 0 0 15px currentColor;
+    animation: bulbGlow 1.2s infinite alternate ease-in-out;
+    animation-delay: calc(var(--i) * 0.15s);
 }
 
-@keyframes flash {
-    0% { background: #ff0000; box-shadow: 0 0 10px #ff0000; }
-    25% { background: #00ff00; box-shadow: 0 0 10px #00ff00; }
-    50% { background: #0000ff; box-shadow: 0 0 10px #0000ff; }
-    75% { background: #ffff00; box-shadow: 0 0 10px #ffff00; }
-    100% { background: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
+@keyframes bulbGlow {
+    0% { 
+        filter: brightness(0.6) saturate(0.8); 
+        box-shadow: 0 0 5px currentColor;
+        transform: rotate(calc(var(--i) * (360deg / 20))) scale(0.9);
+    }
+    100% { 
+        filter: brightness(2) saturate(1.5); 
+        box-shadow: 0 0 25px currentColor, 0 0 45px currentColor;
+        transform: rotate(calc(var(--i) * (360deg / 20))) scale(1.1);
+    }
+}
+
+.garland-bulb:nth-child(4n+1) { color: #ff0000; }
+.garland-bulb:nth-child(4n+2) { color: #00ff00; }
+.garland-bulb:nth-child(4n+3) { color: #0088ff; }
+.garland-bulb:nth-child(4n+4) { color: #ffff00; }
+
+/* Новогодние украшения */
+.christmas-decorations {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 5;
+}
+
+.branch {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.9;
+}
+
+.branch.left {
+    top: -20px;
+    left: -30px;
+    transform: rotate(-15deg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10,90 Q30,70 50,85 T90,70' fill='none' stroke='%231a472a' stroke-width='8'/%3E%3Ccircle cx='30' cy='75' r='5' fill='%23ff0000'/%3E%3Ccircle cx='70' cy='78' r='5' fill='%23ffd700'/%3E%3C/svg%3E");
+}
+
+.branch.right {
+    top: -20px;
+    right: -30px;
+    transform: rotate(15deg) scaleX(-1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10,90 Q30,70 50,85 T90,70' fill='none' stroke='%231a472a' stroke-width='8'/%3E%3Ccircle cx='30' cy='75' r='5' fill='%23ff0000'/%3E%3Ccircle cx='70' cy='78' r='5' fill='%23ffd700'/%3E%3C/svg%3E");
+}
+
+.gifts-pile {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 50px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 50'%3E%3Crect x='10' y='20' width='30' height='30' fill='%23ff3b30'/%3E%3Crect x='10' y='32' width='30' height='5' fill='%23ffd700'/%3E%3Crect x='50' y='10' width='40' height='40' fill='%2334c759'/%3E%3Crect x='68' y='10' width='5' height='40' fill='%23ffffff'/%3E%3Crect x='100' y='25' width='20' height='25' fill='%23007aff'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .style-new-year .roulette-wheel {
     border: 8px solid #1a472a; 
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2), inset 0 0 50px rgba(0,0,0,0.9);
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3), inset 0 0 50px rgba(0,0,0,0.9);
 }
 
 .roulette-wrapper {
