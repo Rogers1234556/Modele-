@@ -899,14 +899,24 @@ body {
 /* Паутина */
 .web {
     position: absolute;
-    width: 120px;
-    height: 120px;
-    opacity: 0.4;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M0,0 L100,0 M0,0 L0,100 M0,0 L100,100 M0,20 Q20,20 20,0 M0,40 Q40,40 40,0 M0,60 Q60,60 60,0 M0,80 Q80,80 80,0' fill='none' stroke='white' stroke-width='1'/%3E%3C/svg%3E");
+    width: 160px; /* Увеличил размер */
+    height: 160px;
+    opacity: 0.8; /* Сделал ярче */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M0,0 L100,0 M0,0 L0,100 M0,0 L100,100 M0,20 Q20,20 20,0 M0,40 Q40,40 40,0 M0,60 Q60,60 60,0 M0,80 Q80,80 80,0' fill='none' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E");
+    z-index: 100; /* Максимальный приоритет */
+    pointer-events: none;
 }
 
-.web.top-left { top: 0; left: 0; }
-.web.top-right { top: 0; right: 0; transform: scaleX(-1); }
+.web.top-left { 
+    top: -15px; 
+    left: -15px; 
+}
+
+.web.top-right { 
+    top: -15px; 
+    right: -15px; 
+    transform: scaleX(-1); 
+}
 
 /* Летучие мыши */
 .bat {

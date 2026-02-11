@@ -217,6 +217,7 @@ class UIManager {
         const snowContainer = section.querySelector('.snowflakes-container');
         if (snowContainer) {
             snowContainer.innerHTML = '';
+            // Убрал halloween отсюда, чтобы не было снега
             if (this.ROULETTE_STYLE === 'winter' || this.ROULETTE_STYLE === 'new-year') {
                 for (let i = 0; i < 20; i++) {
                     const snow = document.createElement('div');
