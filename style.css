@@ -845,30 +845,113 @@ body {
     align-items: center;
 }
 
-.style-new-year.roulette-section {
-    border: 3px solid #1a472a; 
-    box-shadow: 0 0 40px rgba(26, 71, 42, 0.4), 
-                inset 0 0 30px rgba(0, 0, 0, 0.6);
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.9) 100%);
+/* ========== ХЭЛЛОУИН (Halloween Style) ========== */
+.style-halloween.roulette-section {
+    background: radial-gradient(circle at center, #2b1055, #000000);
+    border: 3px solid #ff7518; /* Тыквенный оранжевый */
+    box-shadow: 0 0 50px rgba(255, 117, 24, 0.3), inset 0 0 40px rgba(138, 43, 226, 0.2);
 }
 
-/* Эффект снега */
-.snowflakes-container {
+.decoration-halloween {
+    display: none;
     position: absolute;
     width: 100%;
     height: 100%;
     top: 0;
     left: 0;
-    overflow: hidden;
-    z-index: 0; /* Под контентом, но над фоновым слоем для видимости через стекло */
     pointer-events: none;
+    z-index: 10;
 }
 
-@keyframes snowFall {
-    0% { transform: translateY(-10%) translateX(0); opacity: 0; }
-    10% { opacity: 0.6; }
-    90% { opacity: 0.6; }
-    100% { transform: translateY(110%) translateX(20px); opacity: 0; }
+.style-halloween .decoration-halloween {
+    display: block;
+}
+
+.halloween-decorations {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* Тыквы */
+.pumpkin {
+    position: absolute;
+    width: 70px;
+    height: 60px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 10px #ff7518);
+    bottom: -15px;
+}
+
+.pumpkin.left {
+    left: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50,10 C20,10 5,30 5,55 C5,80 25,95 50,95 C75,95 95,80 95,55 C95,30 80,10 50,10' fill='%23ff7518'/%3E%3Cpath d='M45,5 L55,5 L52,15 L48,15 Z' fill='%231a472a'/%3E%3Cpath d='M25,40 L35,50 L25,50 Z M65,40 L75,50 L65,50 Z' fill='%23000'/%3E%3Cpath d='M30,70 Q50,85 70,70 Q50,75 30,70' fill='%23000'/%3E%3C/svg%3E");
+    transform: rotate(-10deg);
+}
+
+.pumpkin.right {
+    right: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50,10 C20,10 5,30 5,55 C5,80 25,95 50,95 C75,95 95,80 95,55 C95,30 80,10 50,10' fill='%23ff7518'/%3E%3Cpath d='M45,5 L55,5 L52,15 L48,15 Z' fill='%231a472a'/%3E%3Cpath d='M25,40 L40,45 L30,50 Z M60,45 L75,40 L70,50 Z' fill='%23000'/%3E%3Cpath d='M25,75 L35,65 L45,75 L55,65 L65,75 L75,65' fill='none' stroke='%23000' stroke-width='4'/%3E%3C/svg%3E");
+    transform: rotate(10deg);
+}
+
+/* Паутина */
+.web {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M0,0 L100,0 M0,0 L0,100 M0,0 L100,100 M0,20 Q20,20 20,0 M0,40 Q40,40 40,0 M0,60 Q60,60 60,0 M0,80 Q80,80 80,0' fill='none' stroke='white' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+.web.top-left { top: 0; left: 0; }
+.web.top-right { top: 0; right: 0; transform: scaleX(-1); }
+
+/* Летучие мыши */
+.bat {
+    position: absolute;
+    width: 40px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50'%3E%3Cpath d='M50,10 Q60,0 70,10 Q85,0 100,20 Q85,25 70,20 Q60,40 50,25 Q40,40 30,20 Q15,25 0,20 Q15,0 30,10 Q40,0 50,10' fill='%23000'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: batFloat 4s infinite ease-in-out;
+}
+
+@keyframes batFloat {
+    0%, 100% { transform: translateY(0) rotate(5deg); }
+    50% { transform: translateY(-20px) rotate(-5deg); }
+}
+
+.bat-1 { top: 20px; left: 20%; animation-delay: 0s; }
+.bat-2 { top: 50px; right: 15%; animation-delay: -2s; }
+
+/* Туман */
+.spooky-fog {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(transparent, rgba(138, 43, 226, 0.1));
+    filter: blur(20px);
+    animation: fogFlow 8s infinite linear;
+}
+
+@keyframes fogFlow {
+    0% { transform: translateX(-10%); }
+    50% { transform: translateX(10%); }
+    100% { transform: translateX(-10%); }
+}
+
+.style-halloween .roulette-wheel {
+    border: 8px solid #ff7518;
+    box-shadow: 0 0 30px rgba(255, 117, 24, 0.4), inset 0 0 50px rgba(0,0,0,0.9);
+}
+
+.style-halloween .roulette-pointer {
+    color: #ff7518;
+    filter: drop-shadow(0 0 10px #ff7518);
 }
 
 /* Гирлянда на колесе */

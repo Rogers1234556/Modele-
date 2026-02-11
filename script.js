@@ -1,5 +1,6 @@
 // Инициализация Telegram Web App
 const tg = window.Telegram.WebApp;
+
 function applySafeArea() {
     document.documentElement.style.setProperty(
         '--tg-safe-top',
@@ -147,8 +148,8 @@ class UIManager {
     // Настройка рулетки (укажите false, чтобы полностью скрыть)
     static ROULETTE_ENABLED = true;
     
-    // ТЕКУЩИЙ СТИЛЬ РУЛЕТКИ: 'summer' | 'winter' | 'new-year'
-    static ROULETTE_STYLE = 'new-year'; 
+    // ТЕКУЩИЙ СТИЛЬ РУЛЕТКИ: 'summer' | 'winter' | 'new-year' | 'halloween'
+    static ROULETTE_STYLE = 'halloween'; 
 
     static ROULETTE_THEMES = {
         summer: [
@@ -168,12 +169,20 @@ class UIManager {
             { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: 'rgba(176, 224, 230, 0.8)', weight: 3 }
         ],
         'new-year': [
-            { id: 'gift_1', name: 'Подарок VIP', icon: 'fa-gift', color: 'rgba(255, 0, 0, 0.8)', weight: 2 },
+            { id: 'gift_1', name: 'Подарок', icon: 'fa-gift', color: 'rgba(255, 0, 0, 0.8)', weight: 2 },
             { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(0, 255, 0, 0.8)', weight: 5 },
             { id: 'discount_20', name: 'Скидка 20%', icon: 'fa-star', color: 'rgba(255, 215, 0, 0.8)', weight: 3 },
-            { id: 'sub_30', name: '30 дней саба', icon: 'fa-crown', color: 'rgba(75, 0, 130, 0.8)', weight: 1 },
+            { id: 'sub_30', name: '+30 дней', icon: 'fa-crown', color: 'rgba(75, 0, 130, 0.8)', weight: 1 },
             { id: 'nothing', name: 'Ничего', icon: 'fa-snowflake', color: 'rgba(255, 255, 255, 0.3)', weight: 6 },
             { id: 'discount_50', name: 'Скидка 50%', icon: 'fa-candy-cane', color: 'rgba(255, 20, 147, 0.8)', weight: 1 }
+        ],
+        halloween: [
+            { id: 'pumpkin_prize', name: 'Джек-пот', icon: 'fa-ghost', color: '#ff7518', weight: 1 },
+            { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: '#8a2be2', weight: 5 },
+            { id: 'discount_31', name: 'Скидка 31%', icon: 'fa-spiders', color: '#4b0082', weight: 3 },
+            { id: 'sub_13', name: '+13 дней', icon: 'fa-skull', color: '#2b1055', weight: 3 },
+            { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown-open', color: 'rgba(50, 50, 50, 0.8)', weight: 6 },
+            { id: 'treat', name: 'Сладость', icon: 'fa-candy-cane', color: '#ff00ff', weight: 4 }
         ]
     };
 
@@ -193,8 +202,7 @@ class UIManager {
 
         // Применяем класс стиля к секции
         if (section) {
-            // Удаляем старые стили
-            section.className = section.className.replace(/\bstyle-\S+/g, '');
+            section.classList.remove('style-summer', 'style-winter', 'style-new-year', 'style-halloween');
             section.classList.add(`style-${this.ROULETTE_STYLE}`);
         }
 
@@ -207,21 +215,23 @@ class UIManager {
 
         // Генерация снежинок для фона
         const snowContainer = section.querySelector('.snowflakes-container');
-        if (snowContainer && this.ROULETTE_STYLE === 'new-year') {
+        if (snowContainer) {
             snowContainer.innerHTML = '';
-            for (let i = 0; i < 20; i++) {
-                const snow = document.createElement('div');
-                snow.style.position = 'absolute';
-                snow.style.left = Math.random() * 100 + '%';
-                snow.style.top = '-20px';
-                snow.style.opacity = Math.random();
-                snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
-                snow.style.color = 'white';
-                snow.innerHTML = '❄';
-                snow.style.animation = `snowFall ${Math.random() * 5 + 3}s linear infinite`;
-                snow.style.animationDelay = Math.random() * 10 + 's';
-                snow.style.filter = 'blur(1px)';
-                snowContainer.appendChild(snow);
+            if (this.ROULETTE_STYLE === 'winter' || this.ROULETTE_STYLE === 'new-year') {
+                for (let i = 0; i < 20; i++) {
+                    const snow = document.createElement('div');
+                    snow.style.position = 'absolute';
+                    snow.style.left = Math.random() * 100 + '%';
+                    snow.style.top = '-20px';
+                    snow.style.opacity = Math.random();
+                    snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                    snow.style.color = 'white';
+                    snow.innerHTML = '❄';
+                    snow.style.animation = `snowFall ${Math.random() * 5 + 3}s linear infinite`;
+                    snow.style.animationDelay = Math.random() * 10 + 's';
+                    snow.style.filter = 'blur(1px)';
+                    snowContainer.appendChild(snow);
+                }
             }
         }
 
