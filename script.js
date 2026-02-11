@@ -1,4 +1,3 @@
-// Инициализация Telegram Web App
 const tg = window.Telegram.WebApp;
 
 function applySafeArea() {
@@ -11,22 +10,19 @@ function applySafeArea() {
 applySafeArea();
 tg.onEvent('viewportChanged', applySafeArea);
 
-// Настройка темы и кнопок
 tg.expand();
-tg.setHeaderColor('bg_color'); // Устанавливаем цвет заголовка в цвет фона приложения
-tg.setBackgroundColor('bg_color'); // Устанавливаем цвет фона
+tg.setHeaderColor('bg_color'); 
+tg.setBackgroundColor('bg_color');
 
-// Supabase configuration
 const SUPABASE_URL = 'https://wgxkflgdjzqyengrmlsb.supabase.co/';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneGtmbGdkanpxeWVuZ3JtbHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4OTA2MTUsImV4cCI6MjA4MzQ2NjYxNX0.fM7_sOJCZ9SEZt73sABCE4NsXjnfVcs2h3usaFoNpf0';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let userData = null;
 let currentCurrency = localStorage.getItem('gov_currency') || 'USD';
-let pricingMode = 'new'; // 'new' | 'renew'
-let activeDiscount = null; // { percent: number, promoId: number } - активная скидка до первой оплаты
+let pricingMode = 'new'; 
+let activeDiscount = null; 
 
-// Цены в разных валютах
 const pricingData = {
     new: {
         15: { UAH: 99, RUB: 188, USD: 2.30 },
@@ -40,7 +36,6 @@ const pricingData = {
     }
 };
 
-// Данные фракций
 const factionsData = [
     { id: 'mvd', name: 'МВД', fullName: 'Министерство Внутренних Дел', icon: 'fas fa-shield-alt', color: '#3B82F6', features: ['в разработке'], status: 'available' },
     { id: 'fsb', name: 'ФСБ', fullName: 'Федеральная Служба Безопасности', icon: 'fas fa-user-secret', color: '#EF4444', features: ['в разработке'], status: 'available' },
@@ -51,7 +46,6 @@ const factionsData = [
     { id: 'trk', name: 'ТРК', fullName: 'ТРК "Ритм"', icon: 'fas fa-tower-broadcast', color: '#EC4899', features: ['в разработке'], status: 'available' }
 ];
 
-// Утилитарные функции
 class Utils {
     static showToast(message, type = 'info', title = '') {
         let container = document.getElementById('toastContainer');
@@ -142,255 +136,6 @@ class UIManager {
         this.initEventListeners();
         this.loadFactions();
         this.updateContestTimer();
-        this.initRoulette();
-    }
-
-    // Настройка рулетки (укажите false, чтобы полностью скрыть)
-    static ROULETTE_ENABLED = true;
-    
-    // ТЕКУЩИЙ СТИЛЬ РУЛЕТКИ: 'summer' | 'winter' | 'new-year' | 'halloween'
-    static ROULETTE_STYLE = 'halloween'; 
-
-    static ROULETTE_THEMES = {
-        summer: [
-            { id: 'nothing_2', name: '+10 дней', icon: 'fa-calendar-day', color: 'rgba(255, 159, 10, 0.8)', weight: 3 },
-            { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(255, 55, 95, 0.8)', weight: 5 },
-            { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: 'rgba(0, 122, 255, 0.8)', weight: 4 },
-            { id: 'sub_1', name: '+5 дней', icon: 'fa-calendar-day', color: 'rgba(88, 86, 214, 0.8)', weight: 4 },
-            { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: 'rgba(142, 142, 147, 0.8)', weight: 5 },
-            { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: 'rgba(52, 199, 89, 0.8)', weight: 3 }
-        ],
-        winter: [
-            { id: 'nothing_2', name: '+10 дней', icon: 'fa-snowflake', color: 'rgba(0, 199, 255, 0.8)', weight: 3 },
-            { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(173, 216, 230, 0.8)', weight: 5 },
-            { id: 'discount_5', name: 'Скидка 10%', icon: 'fa-percent', color: 'rgba(70, 130, 180, 0.8)', weight: 4 },
-            { id: 'sub_1', name: '+5 дней', icon: 'fa-snowflake', color: 'rgba(0, 122, 255, 0.8)', weight: 4 },
-            { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown', color: 'rgba(112, 128, 144, 0.8)', weight: 5 },
-            { id: 'discount_10', name: 'Скидка 15%', icon: 'fa-tags', color: 'rgba(176, 224, 230, 0.8)', weight: 3 }
-        ],
-        'new-year': [
-            { id: 'gift_1', name: 'Подарок', icon: 'fa-gift', color: 'rgba(255, 0, 0, 0.8)', weight: 2 },
-            { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: 'rgba(0, 255, 0, 0.8)', weight: 5 },
-            { id: 'discount_20', name: 'Скидка 20%', icon: 'fa-star', color: 'rgba(255, 215, 0, 0.8)', weight: 3 },
-            { id: 'sub_30', name: '+30 дней', icon: 'fa-crown', color: 'rgba(75, 0, 130, 0.8)', weight: 1 },
-            { id: 'nothing', name: 'Ничего', icon: 'fa-snowflake', color: 'rgba(255, 255, 255, 0.3)', weight: 6 },
-            { id: 'discount_50', name: 'Скидка 50%', icon: 'fa-candy-cane', color: 'rgba(255, 20, 147, 0.8)', weight: 1 }
-        ],
-        halloween: [
-            { id: 'pumpkin_prize', name: 'Джек-пот', icon: 'fa-ghost', color: '#ff7518', weight: 1 },
-            { id: 'extra_spin', name: '+1 попытка', icon: 'fa-rotate-right', color: '#8a2be2', weight: 5 },
-            { id: 'discount_31', name: 'Скидка 31%', icon: 'fa-spiders', color: '#4b0082', weight: 3 },
-            { id: 'sub_13', name: '+13 дней', icon: 'fa-skull', color: '#2b1055', weight: 3 },
-            { id: 'nothing', name: 'Ничего', icon: 'fa-face-frown-open', color: 'rgba(50, 50, 50, 0.8)', weight: 6 },
-            { id: 'treat', name: 'Сладость', icon: 'fa-candy-cane', color: '#ff00ff', weight: 4 }
-        ]
-    };
-
-    static get ROULETTE_PRIZES() {
-        return this.ROULETTE_THEMES[this.ROULETTE_STYLE] || this.ROULETTE_THEMES.summer;
-    }
-
-    static async initRoulette() {
-        const container = document.getElementById('rouletteContainer');
-        const section = document.querySelector('.roulette-section');
-        
-        if (!this.ROULETTE_ENABLED) {
-            if (container) container.style.display = 'none';
-            return;
-        }
-        if (container) container.style.display = 'block';
-
-        // Применяем класс стиля к секции
-        if (section) {
-            section.classList.remove('style-summer', 'style-winter', 'style-new-year', 'style-halloween');
-            section.classList.add(`style-${this.ROULETTE_STYLE}`);
-        }
-
-        const wheel = document.getElementById('rouletteWheel');
-        if (!wheel) return;
-
-        wheel.innerHTML = '';
-        const prizeCount = this.ROULETTE_PRIZES.length;
-        const angleStep = 360 / prizeCount;
-
-        // Генерация снежинок для фона
-        const snowContainer = section.querySelector('.snowflakes-container');
-        if (snowContainer) {
-            snowContainer.innerHTML = '';
-            // Убрал halloween отсюда, чтобы не было снега
-            if (this.ROULETTE_STYLE === 'winter' || this.ROULETTE_STYLE === 'new-year') {
-                for (let i = 0; i < 20; i++) {
-                    const snow = document.createElement('div');
-                    snow.style.position = 'absolute';
-                    snow.style.left = Math.random() * 100 + '%';
-                    snow.style.top = '-20px';
-                    snow.style.opacity = Math.random();
-                    snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
-                    snow.style.color = 'white';
-                    snow.innerHTML = '❄';
-                    snow.style.animation = `snowFall ${Math.random() * 5 + 3}s linear infinite`;
-                    snow.style.animationDelay = Math.random() * 10 + 's';
-                    snow.style.filter = 'blur(1px)';
-                    snowContainer.appendChild(snow);
-                }
-            }
-        }
-
-        this.ROULETTE_PRIZES.forEach((prize, i) => {
-            const sector = document.createElement('div');
-            sector.className = 'wheel-sector';
-            
-            sector.style.transform = `rotate(${i * angleStep}deg)`;
-            sector.style.backgroundColor = prize.color;
-            sector.style.width = '100%';
-            sector.style.height = '100%';
-            sector.style.position = 'absolute';
-            sector.style.left = '0';
-            sector.style.top = '0';
-            sector.style.transformOrigin = '50% 50%';
-            
-            // Precise sector geometry
-            sector.style.clipPath = `polygon(50% 50%, 50% 0%, ${50 + 50 * Math.tan((angleStep * Math.PI) / 180)}% 0%)`;
-            
-            const content = document.createElement('div');
-            content.className = 'sector-content';
-            content.style.position = 'absolute';
-            content.style.top = '10%'; 
-            content.style.left = '50%';
-            content.style.transform = `translateX(-50%) rotate(${angleStep / 2}deg)`;
-            content.style.transformOrigin = 'center 120px'; 
-            content.innerHTML = `<i class="fas ${prize.icon}"></i><span>${prize.name}</span>`;
-            
-            sector.appendChild(content);
-            wheel.appendChild(sector);
-        });
-
-        const spinBtn = document.getElementById('spinBtn');
-        if (spinBtn) {
-            const userId = tg.initDataUnsafe?.user?.id;
-            const { data: usage } = await supabaseClient
-                .from('roulette_usage')
-                .select('*')
-                .eq('user_idtg', userId)
-                .single();
-
-            if (usage && usage.spins_left > 0) {
-                spinBtn.disabled = false;
-                spinBtn.querySelector('span').textContent = 'Испытать удачу';
-            } else {
-                spinBtn.disabled = true;
-                spinBtn.querySelector('span').textContent = 'Попытки закончились';
-            }
-            spinBtn.onclick = () => this.spinRoulette();
-        }
-    }
-
-    static async spinRoulette() {
-        const userId = tg.initDataUnsafe?.user?.id;
-        const spinBtn = document.getElementById('spinBtn');
-        const wheel = document.getElementById('rouletteWheel');
-
-        try {
-            spinBtn.disabled = true;
-
-            // Проверка попыток (код опущен для краткости, берем из существующего)
-            let { data: usage } = await supabaseClient
-                .from('roulette_usage')
-                .select('*')
-                .eq('user_idtg', userId)
-                .single();
-
-            if (!usage) {
-                const { data: newUsage, error } = await supabaseClient
-                    .from('roulette_usage')
-                    .insert([{ user_idtg: userId, spins_left: 1, total_spins: 0 }])
-                    .select()
-                    .single();
-                if (error) throw error;
-                usage = newUsage;
-            }
-
-            if (usage.spins_left <= 0) {
-                Utils.showToast('У вас нет попыток', 'error');
-                return;
-            }
-
-            // Логика взвешенного рандома
-            const totalWeight = this.ROULETTE_PRIZES.reduce((acc, p) => acc + (p.weight || 1), 0);
-            let random = Math.random() * totalWeight;
-            let prizeIndex = 0;
-            
-            for (let i = 0; i < this.ROULETTE_PRIZES.length; i++) {
-                random -= (this.ROULETTE_PRIZES[i].weight || 1);
-                if (random <= 0) {
-                    prizeIndex = i;
-                    break;
-                }
-            }
-
-            const prize = this.ROULETTE_PRIZES[prizeIndex];
-            
-            // Анимация
-            const prizeCount = this.ROULETTE_PRIZES.length;
-            const extraSpins = 5; 
-            const anglePerPrize = 360 / prizeCount;
-            const finalAngle = (extraSpins * 360) + (360 - (prizeIndex * anglePerPrize)) - (anglePerPrize / 2);
-
-            wheel.style.transform = `rotate(${finalAngle}deg)`;
-
-            setTimeout(async () => {
-                // Логика выигрыша
-                let nextSpins = usage.spins_left - 1;
-                let message = `Вы выиграли: ${prize.name}`;
-
-                if (prize.id === 'extra_spin') {
-                    nextSpins += 1;
-                    message = 'Выпала еще одна попытка!';
-                } else if (prize.id === 'sub_1') {
-                    await this.addDaysToUser(userId, 1, 'Приз из рулетки');
-                }
-
-                // Обновляем состояние в базе
-                await supabaseClient
-                    .from('roulette_usage')
-                    .update({ 
-                        spins_left: nextSpins,
-                        total_spins: usage.total_spins + 1,
-                        last_prize: prize.name
-                    })
-                    .eq('user_idtg', userId);
-
-                // Логирование
-                await supabaseClient.from('logs').insert([{
-                    title: 'Рулетка',
-                    content: `Пользователь ${userId} выбил: ${prize.name}. Всего круток: ${usage.total_spins + 1}`,
-                    admin: 'System'
-                }]);
-
-                Utils.showToast(message, prize.id === 'nothing' ? 'info' : 'success');
-                
-                // Обновляем кнопку сразу после анимации
-                if (nextSpins > 0) {
-                    spinBtn.disabled = false;
-                    spinBtn.querySelector('span').textContent = 'Испытать удачу';
-                } else {
-                    spinBtn.disabled = true;
-                    spinBtn.querySelector('span').textContent = 'Попытки закончились';
-                }
-
-                // Сброс колеса для следующего раза (без анимации)
-                setTimeout(() => {
-                    wheel.style.transition = 'none';
-                    wheel.style.transform = `rotate(${finalAngle % 360}deg)`;
-                    setTimeout(() => wheel.style.transition = '', 50);
-                }, 1000);
-
-            }, 5000);
-
-        } catch (e) {
-            console.error('Spin error:', e);
-            spinBtn.disabled = false;
-        }
     }
 
     static initTabNavigation() {
@@ -1489,13 +1234,12 @@ async function initApp() {
     }
 }
 
-// Загрузка активной скидки пользователя
+
 async function loadActiveDiscount() {
     try {
         const userId = tg.initDataUnsafe?.user?.id;
         if (!userId) return;
 
-        // Проверяем есть ли у пользователя неиспользованная скидка
         const { data: discountData, error } = await supabaseClient
             .from('user_discounts')
             .select('*, promocodes!inner(discount_percent, code)')
@@ -1515,7 +1259,6 @@ async function loadActiveDiscount() {
     }
 }
 
-// Применение скидки к цене
 function applyDiscount(price) {
     if (!activeDiscount || !activeDiscount.percent) return price;
     const discountAmount = price * (activeDiscount.percent / 100);

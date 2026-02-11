@@ -42,16 +42,11 @@
     </style>
 </head>
 <body>
-    <!-- Главный контейнер -->
     <div class="app-container">
-        <!-- Хедер -->
-        <header class="app-header">
-
+        <header class="app-header">      
         </header>
 
-        <!-- Основной контент -->
         <main class="app-main">
-            <!-- Главная страница -->
             <section id="main" class="page active">
                 <div class="hero-section">
                     <div class="hero-content">
@@ -59,11 +54,8 @@
                             <span class="gradient-text">GOV Helper</span>
                         </h1>
                         <p class="hero-subtitle">Ваш помощник в работе государственных структур</p>
-
                         <div class="currency-selector">
                             <div class="currency-tabs">
-                                
-                                
                                 <button class="currency-tab" data-currency="USD">
                                     <span class="flag">🇺🇸</span>
                                     <span>USD</span>
@@ -86,11 +78,8 @@
                         <h2>Выберите тариф</h2>
                         <p id="currentCurrencyInfo">Для новых пользователей</p>
                     </div>
-
-                    <!-- Тарифы для новых пользователей -->
                     <div class="pricing-section" id="newUserPricing">
                         <div class="pricing-cards">
-                            <!-- Карточка 15 дней -->
                             <div class="pricing-card" data-plan="15">
                                 <div class="pricing-badge">
                                     <i class="fas fa-bolt"></i>
@@ -113,8 +102,6 @@
                                     <span>Купить</span>
                                 </button>
                             </div>
-
-                            <!-- Карточка 30 дней -->
                             <div class="pricing-card popular" data-plan="30">
                                 <div class="pricing-badge popular-badge">
                                     <i class="fas fa-crown"></i>
@@ -138,8 +125,6 @@
                                     <span>Купить</span>
                                 </button>
                             </div>
-
-                            <!-- Карточка 365 дней -->
                             <div class="pricing-card" data-plan="365">
                                 <div class="pricing-badge">
                                     <i class="fas fa-gem"></i>
@@ -169,11 +154,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Тарифы для продления (скрыты по умолчанию) -->
                     <div class="pricing-section hidden" id="renewalPricing">
                         <div class="pricing-cards">
-                            <!-- Карточка 15 дней -->
                             <div class="pricing-card" data-plan="15-renew">
                                 <div class="pricing-badge">
                                     <i class="fas fa-bolt"></i>
@@ -196,8 +178,6 @@
                                     <span>Продлить</span>
                                 </button>
                             </div>
-
-                            <!-- Карточка 30 дней -->
                             <div class="pricing-card popular" data-plan="30-renew">
                                 <div class="pricing-badge popular-badge">
                                     <i class="fas fa-crown"></i>
@@ -221,8 +201,6 @@
                                     <span>Продлить</span>
                                 </button>
                             </div>
-
-                            <!-- Карточка 365 дней -->
                             <div class="pricing-card" data-plan="365-renew">
                                 <div class="pricing-badge">
                                     <i class="fas fa-gem"></i>
@@ -252,12 +230,9 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-
-                    
+                    </div>           
             </section>
 
-            <!-- Профиль -->
             <section id="profile" class="page">
                 <div class="profile-section">
                     <div class="profile-header">
@@ -273,7 +248,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="profile-stats">
                         <div class="stat-item">
                             <div class="stat-icon">
@@ -296,9 +270,7 @@
                                 </button>
                             </div>
                         </div>
-                        
                     </div>
-
                     <div class="profile-actions">
                         <button class="action-btn" id="supportBtn">
                             <i class="fas fa-headset"></i>
@@ -311,36 +283,27 @@
                         <a href="#" class="action-btn" id="launcherBtn" style="display: none;">
                             <i class="fas fa-download"></i>
                             <span>Скачать лаунчер</span>
-                        </a>
-                        
-                        
+                        </a> 
                     </div>
                 </div>
             </section>
 
-            <!-- Фракции -->
             <section id="factions" class="page">
-                <!-- Оставляем без изменений -->
                 <div class="factions-section">
                     <div class="section-header">
                         <h2>Доступные фракции</h2>
                         <p>Выберите фракцию для просмотра функций</p>
                     </div>
-
                     <div class="search-box">
                         <i class="fas fa-search"></i>
                         <input type="text" id="factionSearch" placeholder="Поиск фракции...">
                     </div>
-
                     <div class="factions-grid" id="factionsList">
-                        <!-- Фракции будут загружены через JS -->
                     </div>
                 </div>
             </section>
 
-            <!-- Конкурсы -->
             <section id="contests" class="page">
-                <!-- Оставляем без изменений -->
                 <div class="contests-section">
                     <div class="section-header">
                         <h2>Текущие конкурсы</h2>
@@ -358,7 +321,6 @@
                                     <p class="contest-subtitle">Получи подписку на 30 дней</p>
                                 </div>
                             </div>
-
                             <div class="contest-details">
                                 <div class="detail">
                                     <i class="fas fa-clock"></i>
@@ -368,141 +330,11 @@
                                     <i class="fas fa-users"></i>
                                     <span>Участников: <strong id="contestParticipants">0</strong></span>
                                 </div>
-                                <div class="detail">
-                                    <i class="fab fa-telegram"></i>
-                                    <span>Канал: <strong>@mr_helpers</strong></span>
-                                </div>
                             </div>
-
                             <button class="btn-secondary btn-disabled" disabled>
                                 <i class="fas fa-calendar-check"></i>
                                 <span>Конкурс завершен</span>
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- Рулетка -->
-                    <div id="rouletteContainer" class="roulette-section" style="display: none;">
-                        <div class="decoration-halloween">
-                            <div class="web top-left"></div>
-                            <div class="web top-right"></div>
-                            <div class="halloween-decorations">
-                                <div class="bat bat-1"></div>
-                                <div class="bat bat-2"></div>
-                                <div class="pumpkin left"></div>
-                                <div class="pumpkin right"></div>
-                                <div class="spooky-fog"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="snowflakes-container"></div>
-                        
-                        <div class="section-header">
-                            <h2>Колесо удачи</h2>
-                            <p>Эксклюзивные награды</p>
-                        </div>
-                        <div class="roulette-wrapper">
-                            <div class="roulette-decoration decoration-winter">
-                                <div class="snow-ground"></div>
-                                <div class="snowman">
-                                    <div class="snowman-body"></div>
-                                    <div class="snowman-head"></div>
-                                </div>
-                            </div>
-                            <div class="roulette-decoration decoration-newyear">
-                                <div class="christmas-decorations">
-                                    <div class="branch left"></div>
-                                    <div class="branch right"></div>
-                                </div>
-                                <div class="garland-wrap">
-                                    <div class="garland-wire"></div>
-                                    <div class="garland-lights-container">
-                                        <div class="garland-bulb" style="--i:0"></div>
-                                        <div class="garland-bulb" style="--i:1"></div>
-                                        <div class="garland-bulb" style="--i:2"></div>
-                                        <div class="garland-bulb" style="--i:3"></div>
-                                        <div class="garland-bulb" style="--i:4"></div>
-                                        <div class="garland-bulb" style="--i:5"></div>
-                                        <div class="garland-bulb" style="--i:6"></div>
-                                        <div class="garland-bulb" style="--i:7"></div>
-                                        <div class="garland-bulb" style="--i:8"></div>
-                                        <div class="garland-bulb" style="--i:9"></div>
-                                        <div class="garland-bulb" style="--i:10"></div>
-                                        <div class="garland-bulb" style="--i:11"></div>
-                                        <div class="garland-bulb" style="--i:12"></div>
-                                        <div class="garland-bulb" style="--i:13"></div>
-                                        <div class="garland-bulb" style="--i:14"></div>
-                                        <div class="garland-bulb" style="--i:15"></div>
-                                        <div class="garland-bulb" style="--i:16"></div>
-                                        <div class="garland-bulb" style="--i:17"></div>
-                                        <div class="garland-bulb" style="--i:18"></div>
-                                        <div class="garland-bulb" style="--i:19"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="roulette-decoration decoration-halloween">
-                                <div class="halloween-decorations">
-                                    <div class="pumpkin left"></div>
-                                    <div class="pumpkin right"></div>
-                                    <div class="web top-left"></div>
-                                    <div class="web top-right"></div>
-                                    <div class="bat bat-1"></div>
-                                    <div class="bat bat-2"></div>
-                                </div>
-                                <div class="spooky-fog"></div>
-                            </div>
-                            <div class="snowflakes-container"></div>
-                            <div class="roulette-decoration decoration-winter">
-                                <div class="snow-ground"></div>
-                                <div class="snowman">
-                                    <div class="snowman-body"></div>
-                                    <div class="snowman-head"></div>
-                                </div>
-                            </div>
-                            <div class="roulette-decoration decoration-newyear">
-                                <div class="snowflakes-container"></div>
-                                <div class="christmas-decorations">
-                                    <div class="branch left"></div>
-                                    <div class="branch right"></div>
-                                    <div class="gifts-pile"></div>
-                                </div>
-                                <div class="garland-wrap">
-                                    <div class="garland-wire"></div>
-                                    <div class="garland-lights-container">
-                                        <div class="garland-bulb" style="--i:0"></div>
-                                        <div class="garland-bulb" style="--i:1"></div>
-                                        <div class="garland-bulb" style="--i:2"></div>
-                                        <div class="garland-bulb" style="--i:3"></div>
-                                        <div class="garland-bulb" style="--i:4"></div>
-                                        <div class="garland-bulb" style="--i:5"></div>
-                                        <div class="garland-bulb" style="--i:6"></div>
-                                        <div class="garland-bulb" style="--i:7"></div>
-                                        <div class="garland-bulb" style="--i:8"></div>
-                                        <div class="garland-bulb" style="--i:9"></div>
-                                        <div class="garland-bulb" style="--i:10"></div>
-                                        <div class="garland-bulb" style="--i:11"></div>
-                                        <div class="garland-bulb" style="--i:12"></div>
-                                        <div class="garland-bulb" style="--i:13"></div>
-                                        <div class="garland-bulb" style="--i:14"></div>
-                                        <div class="garland-bulb" style="--i:15"></div>
-                                        <div class="garland-bulb" style="--i:16"></div>
-                                        <div class="garland-bulb" style="--i:17"></div>
-                                        <div class="garland-bulb" style="--i:18"></div>
-                                        <div class="garland-bulb" style="--i:19"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="roulette-pointer"></div>
-                            <div id="rouletteWheel" class="roulette-wheel">
-                                <!-- Сектора будут добавлены через JS -->
-                            </div>
-                        </div>
-                        <div class="roulette-footer">
-                            <div class="bat-side bat-left"></div>
-                            <button id="spinBtn" class="btn-primary">
-                                <span>Испытать удачу</span>
-                            </button>
-                            <div class="bat-side bat-right"></div>
                         </div>
                     </div>
                 </div>
@@ -510,8 +342,6 @@
         </main>
     </div>
 
-    <!-- Модальные окна -->
-    <!-- Оставляем без изменений -->
     <div id="promoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -531,7 +361,6 @@
         </div>
     </div>
 
-
     <div id="factionModal" class="modal">
         <div class="modal-content large">
             <div class="modal-header">
@@ -542,10 +371,6 @@
         </div>
     </div>
 
-    <!-- Удалите этот блок из header -->
-    <!-- <div class="header-tabs"> ... </div> -->
-
-    <!-- И добавьте после main -->
     <footer class="app-footer">
         <div class="header-tabs">
             <button class="tab-btn active" data-tab="main">
@@ -567,7 +392,6 @@
         </div>
     </footer>
 
-    <!-- Модальное окно выбора способа оплаты -->
     <div id="paymentMethodModal" class="modal">
         <div class="modal-content medium">
             <div class="modal-header">
@@ -627,7 +451,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно оплаты звездами -->
     <div id="starsPaymentModal" class="modal">
         <div class="modal-content medium">
             <div class="modal-header">
@@ -675,7 +498,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно оплаты через поддержку -->
     <div id="supportPaymentModal" class="modal">
         <div class="modal-content medium">
             <div class="modal-header">
@@ -736,7 +558,6 @@
                             Нажмите кнопку ниже, чтобы перейти к оплате. После оплаты нажмите "Я оплатил".
                         </p>
                     </div>
-
                     <div class="payment-actions" style="grid-template-columns: 1fr;">
                         <a href="#" id="openCryptoLinkBtn" target="_blank" class="btn-primary" style="text-decoration: none;">
                             <i class="fas fa-external-link-alt"></i>
@@ -748,7 +569,6 @@
                             <span>Я оплатил</span>
                         </button>
                     </div>
-
                     <div id="cryptoStatusText" class="text-center text-muted" style="margin-top: 10px; font-size: 13px;"></div>
                 </div>
                 <input type="hidden" id="cryptoInvoiceId">
@@ -758,13 +578,7 @@
         </div>
     </div>
 
-
-    <!-- Остальные модалки оставляем без изменений -->
-
-    <!-- Уведомления в стиле Toast -->
     <div id="toastContainer"></div>
-
-    <!-- Скрипты -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="script.js"></script>
