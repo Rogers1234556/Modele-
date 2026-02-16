@@ -1100,18 +1100,7 @@ class UIManager {
     }
 
     static downloadLauncher() {
-        try {
-            const link = document.createElement('a');
-            link.href = 'https://github.com/govsu1231/234234/raw/refs/heads/main/MRLauncherSetup.exe';
-            link.download = 'MRLauncherSetup.exe';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            Utils.showToast('Скачивание началось', 'success');
-        } catch (error) {
-            console.error('Ошибка при скачивании:', error);
-            Utils.showToast('Ошибка при скачивании файла', 'error');
-        }
+        window.open('https://github.com/govsu1231/234234/raw/refs/heads/main/MRLauncherSetup.exe', '_blank');
     }
 
     static loadFactions(search = '') {
