@@ -696,7 +696,7 @@ class UIManager {
         try {
             const userId = tg.initDataUnsafe?.user?.id;
             
-            const SERVER_URL = 'web-production-3ad44.up.railway.app'; 
+            const SERVER_URL = 'web-production-3ad44.up.koyeb.app'; 
 
             const response = await fetch(`https://${SERVER_URL}/api/create-stars-invoice`, {
                 method: 'POST',
@@ -910,7 +910,7 @@ class UIManager {
     static async createCryptoInvoice(plan, isRenewal) {
       try {
         const userId = tg.initDataUnsafe?.user?.id;
-        const SERVER_URLL = 'https://web-production-3ad44.up.railway.app'; // Убедитесь, что URL верный
+        const SERVER_URLL = 'https://web-production-3ad44.up.koyeb.app'; // Убедитесь, что URL верный
 
         const response = await fetch(`${SERVER_URLL}/api/create-crypto-invoice`, {
           method: 'POST',
@@ -998,7 +998,7 @@ class UIManager {
         const isRenewal = document.getElementById('cryptoIsRenewal').value === 'true';
         const checkBtn = document.getElementById('checkCryptoPaymentBtn');
         const statusText = document.getElementById('cryptoStatusText');
-        const SERVER_URLL = 'https://web-production-3ad44.up.railway.app';
+        const SERVER_URLL = 'https://web-production-3ad44.up.koyeb.app';
 
         if (!invoiceId) return;
 
