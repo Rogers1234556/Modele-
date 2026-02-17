@@ -18,9 +18,7 @@ const SUPABASE_URL = 'https://wgxkflgdjzqyengrmlsb.supabase.co/';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneGtmbGdkanpxeWVuZ3JtbHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4OTA2MTUsImV4cCI6MjA4MzQ2NjYxNX0.fM7_sOJCZ9SEZt73sABCE4NsXjnfVcs2h3usaFoNpf0';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const BACKEND_URL = 'https://normal-meadowlark-funtalingo-5c982800.koyeb.app';
-
-
+const API_BASE = "https://normal-meadowlark-funtalingo-5c982800.koyeb.app";
 
 let userData = null;
 let currentCurrency = localStorage.getItem('gov_currency') || 'USD';
@@ -703,7 +701,7 @@ class UIManager {
                 throw new Error('Не удалось получить Telegram ID. Откройте приложение через Telegram.');
             } 
 
-                                             const response = await fetch(`${BACKEND_URL}/api/create-stars-invoice`, {
+                                             const response = await fetch(`${API_BASE}/api/create-stars-invoice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ plan, isRenewal, userId })
@@ -922,7 +920,7 @@ class UIManager {
         const userId = tg.initDataUnsafe?.user?.id;
         
 
-            const response = await fetch(`${BACKEND_URL}/api/create-crypto-invoice`, {
+            const response = await fetch(`${API_BASE}/api/create-crypto-invoice`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ plan, isRenewal, userId })
@@ -1017,7 +1015,7 @@ class UIManager {
 
         try {
             // ЗАПРОС ИДЕТ НА ВАШ СЕРВЕР, А НЕ НА CRYPTOBOT
-                const response = await fetch(`${BACKEND_URL}/api/create-crypto-invoice`, {
+                const response = await fetch(`${API_BASE}/api/create-crypto-invoice`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
