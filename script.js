@@ -698,42 +698,50 @@ class UIManager {
         }
 
         try {
-            const userId = tg.initDataUnsafe?.user?.id; 
+            const userId = tg.initDataUnsafe?.user?.id;
+            if (!userId) {
+                throw new Error('Не удалось получить Telegram ID. Откройте приложение через Telegram.');
+            } 
 
-                                         const response = await fetch(`${BACKEND_URL}/api/create-stars-invoice`, {
+                                             const response = await fetch(`${BACKEND_URL}/api/create-stars-invoice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ plan, isRenewal, userId })
             });
             
-            const data = await response.json();
-            
-            if (data.success && data.invoiceUrl) {
-                if (typeof tg !== 'undefined' && tg.openInvoice) {
-                    tg.openInvoice(data.invoiceUrl, async (status) => {
-                        if (status === 'paid') {
-                            await this.activateSubscription(plan, isRenewal);
-                            Utils.showToast('Оплата прошла успешно! Подписка активирована.', 'success');
-                            this.closeModals();
-                            this.updateProfileUI();
-                        } else if (status === 'cancelled') {
-                            Utils.showToast('Оплата отменена', 'info');
-                        } else if (status === 'failed') {
-                            Utils.showToast('Ошибка оплаты. Попробуйте снова.', 'error');
-                        }
-                        this.resetPayButton();
-                    });
-                } else {
-                    window.open(data.invoiceUrl, '_blank');
-                    Utils.showToast('Откройте ссылку для оплаты', 'info');
+                    const payload = await response.json().catch(() => null);
+                    const invoiceUrl = payload?.invoiceUrl
+                        || payload?.invoice_url
+                        || payload?.result?.invoiceUrl
+                        || payload?.result?.invoice_url
+                        || payload?.result?.url;
+                    const isSuccess = payload?.success === true || payload?.ok === true || Boolean(invoiceUrl);
+
+                    if (!response.ok || !isSuccess || !invoiceUrl) {
+                        const backendMessage = payload?.message || payload?.error || payload?.description;
+                        throw new Error(backendMessage || `Ошибка создания платежа (HTTP ${response.status})`);
+                    }
+
+                    if (typeof tg !== 'undefined' && tg.openInvoice) {
+                        tg.openInvoice(invoiceUrl, async (status) => {
+                            if (status === 'paid') {
+                                await this.activateSubscription(plan, isRenewal);
+                                Utils.showToast('Оплата прошла успешно! Подписка активирована.', 'success');
+                                this.closeModals();
+                                this.updateProfileUI();
+                            } else if (status === 'cancelled') {
+                                Utils.showToast('Оплата отменена', 'info');
+                            } else if (status === 'failed') {
+                                Utils.showToast('Ошибка оплаты. Попробуйте снова.', 'error');
+                            }
                     this.resetPayButton();
-                }
+                });
             } else {
                 throw new Error(data.message || 'Не удалось создать платеж');
             }
         } catch (error) {
             console.error('Stars payment error:', error);
-            Utils.showToast(error);
+            Utils.showToast(error.message || 'Не удалось создать платеж. Попробуйте позже.', 'error');
             this.resetPayButton();
         }
     }
