@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <title>GOV Helper</title>
@@ -9,7 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         .toast-container {
             position: fixed;
@@ -23,6 +25,7 @@
             width: 90%;
             max-width: 400px;
         }
+
         .toast {
             background: var(--bg-secondary);
             border-radius: var(--radius-md);
@@ -34,16 +37,43 @@
             border-left: 4px solid var(--primary);
             animation: slideIn 0.3s ease-out;
         }
-        .toast.success { border-left-color: var(--success); }
-        .toast.error { border-left-color: var(--danger); }
-        .toast.hiding { animation: slideOut 0.3s ease-in forwards; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideOut { to { opacity: 0; transform: translateY(-20px); } }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="app-container">
-        <header class="app-header">      
+        <header class="app-header">
         </header>
 
         <main class="app-main">
@@ -51,33 +81,23 @@
                 <div class="hero-section">
                     <div class="hero-content">
                         <h1 class="hero-title">
-                            <span class="gradient-text">GOV Helper</span>
-                        </h1>
-                        <p class="hero-subtitle">Ваш помощник в работе государственных структур</p>
-                        <div class="currency-selector">
-                            <div class="currency-tabs">
-                                <button class="currency-tab" data-currency="USD">
-                                    <span class="flag">🇺🇸</span>
-                                    <span>USD</span>
-                                </button>
-                                <button class="currency-tab" data-currency="RUB">
-                                    <span class="flag">🇷🇺</span>
-                                    <span>RUB</span>
-                                </button>
-                                <button class="currency-tab" data-currency="UAH">
-                                    <span class="flag">🇺🇦</span>
-                                    <span>UAH</span>
-                                </button>
+                            <div class="product-selector">
+                                <div class="product-tabs">
+                                    <button class="product-tab active" data-product="gov">
+                                        <i class="fas fa-shield-halved"></i>
+                                        <span>GOV Helper</span>
+                                    </button>
+                                    <button class="product-tab" data-product="admin">
+                                        <i class="fas fa-crown"></i>
+                                        <span>Admin Helper</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+
                     </div>
                 </div>
 
                 <div class="content-section">
-                    <div class="section-header">
-                        <h2>Выберите тариф</h2>
-                        <p id="currentCurrencyInfo">Для новых пользователей</p>
-                    </div>
                     <div class="pricing-section" id="newUserPricing">
                         <div class="pricing-cards">
                             <div class="pricing-card" data-plan="15">
@@ -95,7 +115,7 @@
                                 <ul class="pricing-features">
                                     <li><i class="fas fa-check"></i> Полный доступ ко всем функциям</li>
                                     <li><i class="fas fa-check"></i> Техподдержка</li>
-                                    
+
                                 </ul>
                                 <button class="btn-primary btn-buy" data-plan="15" data-for="new">
                                     <i class="fas fa-shopping-cart"></i>
@@ -117,7 +137,7 @@
                                 <ul class="pricing-features">
                                     <li><i class="fas fa-check"></i> Полный доступ ко всем функциям</li>
                                     <li><i class="fas fa-check"></i> Приоритетная поддержка</li>
-                                
+
                                     <li><i class="fas fa-check"></i> Раный доступ к обновлению</li>
                                 </ul>
                                 <button class="btn-primary btn-buy" data-plan="30" data-for="new">
@@ -145,7 +165,7 @@
                                     <li><i class="fas fa-check"></i> Полный доступ ко всем функциям</li>
                                     <li><i class="fas fa-check"></i> VIP поддержка 24/7</li>
                                     <li><i class="fas fa-check"></i> Ранный доступ + бета-тест</li>
-                                    
+
                                 </ul>
                                 <button class="btn-primary btn-buy" data-plan="365" data-for="new">
                                     <i class="fas fa-shopping-cart"></i>
@@ -230,136 +250,267 @@
                                 </button>
                             </div>
                         </div>
-                    </div>           
+                    </div>
             </section>
 
             <section id="profile" class="page">
-                <div class="profile-section">
-                    <div class="profile-header">
-                        <div class="profile-avatar" id="userAvatar">
-                            <i class="fas fa-user"></i>
+                <div class="profile-container">
+                    <div class="profile-header-new">
+                        <div class="avatar-container">
+                            <div id="userAvatar" class="user-avatar-new">
+                                <i class="fas fa-user"></i>
+                            </div>
                         </div>
-                        <div class="profile-info">
-                            <h2 id="userName">Загрузка...</h2>
-                            <p class="user-id" id="userTelegram"></p>
-                            <div class="user-status" id="userStatusBadge">
-                                <span class="status-dot"></span>
-                                <span>Загрузка...</span>
+                        <div class="profile-info-main">
+                            <h2 id="userName">Пользователь</h2>
+                            <p id="userTelegram">@username</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-grid">
+                        <div class="info-card key-card">
+                            <div class="info-icon"><i class="fas fa-key"></i></div>
+                            <div class="info-content">
+                                <span class="info-label">Личный ключ</span>
+                                <span id="userKey" class="info-value">Загрузка...</span>
+                            </div>
+                            <button class="copy-btn-new" onclick="copyUserKey()">
+                                <i class="fas fa-copy" id="copyIcon"></i>
+                            </button>
+                        </div>
+
+                        <div class="info-card sub-card">
+                            <div class="info-icon gov-icon"><i class="fas fa-building-columns"></i></div>
+                            <div class="info-content">
+                                <span class="info-label">Подписка GOV Helper</span>
+                                <span id="govDays" class="info-value">Нет данных</span>
+                            </div>
+                        </div>
+
+                        <div class="info-card sub-card">
+                            <div class="info-icon admin-icon"><i class="fas fa-user-shield"></i></div>
+                            <div class="info-content">
+                                <span class="info-label">Подписка Admin Helper</span>
+                                <span id="adminDays" class="info-value">Нет данных</span>
                             </div>
                         </div>
                     </div>
-                    <div class="profile-stats">
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-title">Подписка GOV</span>
-                                <span class="stat-value" id="govDays">0 дней</span>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-key"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-title">Ключ активации</span>
-                                <span class="stat-value key-value" id="userKey">Загрузка...</span>
-                                <button class="copy-btn" data-copy="key">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="profile-actions">
-                        <button class="action-btn" id="supportBtn">
-                            <i class="fas fa-headset"></i>
-                            <span>Техподдержка</span>
-                        </button>
-                        <button class="action-btn" id="promoBtn">
-                            <i class="fas fa-gift"></i>
+
+                    <div class="profile-actions-new">
+                        <button id="promoBtn" class="action-item">
+                            <div class="action-icon"><i class="fas fa-ticket-alt"></i></div>
                             <span>Активировать промокод</span>
+                            <i class="fas fa-chevron-right arrow"></i>
+                        </button>                   
+                        <button id="supportBtn" class="action-item">
+                            <div class="action-icon"><i class="fas fa-headset"></i></div>
+                            <span>Служба поддержки</span>
+                            <i class="fas fa-chevron-right arrow"></i>
                         </button>
-                        <a href="#" class="action-btn" id="launcherBtn" style="display: none;">
-                            <i class="fas fa-download"></i>
+
+                        <button id="launcherBtn" class="action-item">
+                            <div class="action-icon"><i class="fas fa-download"></i></div>
                             <span>Скачать лаунчер</span>
-                        </a> 
+                            <i class="fas fa-chevron-right arrow"></i>
+                        </button>
                     </div>
                 </div>
             </section>
 
-            <section id="factions" class="page">
+
+            <section id="information" class="page">
                 <div class="factions-section">
-                    <div class="section-header">
-                        <h2>Доступные фракции</h2>
-                        <p>Выберите фракцию для просмотра функций</p>
-                    </div>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="factionSearch" placeholder="Поиск фракции...">
-                    </div>
-                    <div class="factions-grid" id="factionsList">
-                    </div>
-                </div>
-            </section>
-
-            <section id="contests" class="page">
-                <div class="contests-section">
-                    <div class="section-header">
-                        <h2>Текущие конкурсы</h2>
-                        <p>Участвуйте и получайте призы</p>
+                    <div class="section-header" style="margin-bottom: 10px;">
+                        <h2>Информация</h2>
+                        <p>Выберите продукт для просмотра возможностей</p>
                     </div>
 
-                    <div class="contests-list">
-                        <div class="contest-card">
-                            <div class="contest-header">
-                                <div class="contest-badge">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div class="contest-info">
-                                    <h3>GOV Helper</h3>
-                                    <p class="contest-subtitle">Получи подписку на 30 дней</p>
-                                </div>
-                            </div>
-                            <div class="contest-details">
-                                <div class="detail">
-                                    <i class="fas fa-clock"></i>
-                                    <span>До: <strong id="contestTimer">--:--:--</strong></span>
-                                </div>
-                                <div class="detail">
-                                    <i class="fas fa-users"></i>
-                                    <span>Участников: <strong id="contestParticipants">0</strong></span>
-                                </div>
-                            </div>
-                            <button class="btn-secondary btn-disabled" disabled>
-                                <i class="fas fa-calendar-check"></i>
-                                <span>Конкурс завершен</span>
+                    <div class="product-selector" style="margin-bottom: 20px;">
+                        <div class="product-tabs">
+                            <button class="product-tab info-tab active" data-info="gov">
+                                <i class="fas fa-shield-halved"></i>
+                                <span>GOV Helper</span>
+                            </button>
+                            <button class="product-tab info-tab" data-info="admin">
+                                <i class="fas fa-crown"></i>
+                                <span>Admin Helper</span>
                             </button>
                         </div>
                     </div>
+
+                    <div id="info-gov-content" class="info-content-block">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="factionSearch" placeholder="Поиск фракции...">
+                        </div>
+                        <div class="factions-grid" id="factionsList"></div>
+                    </div>
+
+                    <div id="info-admin-content" class="info-content-block" style="display: none;">
+                        <div class="admin-features-list">
+
+                            <div class="feature-card">
+                                <h4><i class="fas fa-star text-warning"></i> Основной функционал</h4>
+                                <ul>
+                                    <li>Подсчет нормы</li>
+                                </ul>
+                            </div>
+
+                            <div class="feature-card">
+                                <h4><i class="fas fa-layer-group" style="color: #60A5FA;"></i> Доступные меню</h4>
+                                <ul>
+                                    <li>Основное меню плагина</li>
+                                </ul>
+                            </div>
+
+                            <div class="feature-card">
+                                <h4><i class="fas fa-keyboard text-success"></i> Горячие клавиши</h4>
+                                <div class="hotkeys-grid">
+                                    <div class="hotkey-item"><kbd>ALT + F4</kbd> <span>Открыть меню</span></div> 
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
             </section>
+
+
+            <section id="admin-panel" class="page">
+                <div class="admin-panel-container">
+
+                    <div class="admin-new-header">
+                        <div class="admin-info-main">
+                            <h2 id="adminNick">Загрузка...</h2>
+                            <span class="admin-lvl-tag" id="adminLvl">LVL --</span>
+                        </div>
+                        <div class="admin-streak-badge">
+                            <i id="adminStreakIcon" class="fas fa-fire"></i>
+                            <span id="adminStreak">0</span>
+                        </div>
+                    </div>
+
+                    <p class="admin-date-sub" id="adminStatDate">Статистика за сегодня</p>
+
+                    <div class="admin-main-card">
+                        <div class="card-glow"></div>
+                        <div class="norma-status-box">
+                            <span class="status-label">Статус нормы</span>
+                            <div class="status-value" id="normaStatus">ПРОВЕРКА...</div>
+                        </div>
+                        <div class="points-box">
+                            <span class="points-count" id="adminPoints">0.0</span>
+                            <span class="points-label">баллов заработано</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-stats-grid">
+                        <div class="stat-mini-card">
+                            <span class="stat-num" id="statReports">0</span>
+                            <span class="stat-name">Report</span>
+                            <small class="stat-target" id="targetReports">цель: 245</small>
+                        </div>
+                        <div class="stat-mini-card">
+                            <span class="stat-num" id="statOnline">0ч 0м</span>
+                            <span class="stat-name">Online</span>
+                            <small class="stat-target" id="targetOnline">цель: 2ч 55м</small>
+                        </div>
+                        <div class="stat-mini-card">
+                            <span class="stat-num" id="statJails">0</span>
+                            <span class="stat-name">Jails</span>
+                            <small class="stat-target" id="targetJails" style="display: none;"></small>
+                        </div>
+                        <div class="stat-mini-card">
+                            <span class="stat-num" id="statBans">0</span>
+                            <span class="stat-name">Bans</span>
+                        </div>
+                        <div class="stat-mini-card">
+                            <span class="stat-num" id="statWarns">0</span>
+                            <span class="stat-name">Warns</span>
+                        </div>
+                        <div class="stat-mini-card">
+                            <span class="stat-num" id="statMutes">0</span>
+                            <span class="stat-name">Mutes</span>
+                        </div>
+                    </div>
+
+
+                    <div class="admin-compact-actions">
+                        <button class="action-btn-sm" id="btnAdminProfileMenu"><i class="fas fa-id-badge"></i><span>Профиль</span></button>
+                        <button class="action-btn-sm" id="btnAdminPunishments"><i class="fas fa-gavel"></i><span>Наказания</span></button>
+                        <button class="action-btn-sm" id="btnAdminOnline"><i class="fas fa-eye"></i><span>Онлайн</span></button>
+                        <button class="action-btn-sm" id="btnAdminLogs"><i class="fas fa-list"></i><span>Логи</span></button>
+                    </div>
+                </div>
+            </section>
+
+            <div id="contests" class="page"> 
+                <div class="page-header" style="padding: 24px 16px; text-align: center;">
+                    <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05)); width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; border: 1px solid rgba(245, 158, 11, 0.2);">
+                        <i class="fas fa-gift" style="color: var(--warning); font-size: 24px;"></i>
+                    </div>
+                    <h2 style="margin: 0; font-size: 22px; color: white; font-weight: 800; letter-spacing: 0.5px;">Розыгрыши</h2>
+                    <p style="color: var(--gray-400); font-size: 14px; margin-top: 6px;">Испытай удачу и получи подписку бесплатно</p>
+                </div>
+
+                <div class="contests-grid">
+                    <div class="contest-card premium gov">
+                    
+                        <div class="contest-header">
+                            <div class="contest-icon helper-gov"><i class="fas fa-shield-alt"></i></div>
+                            <div>
+                                <h3>Розыгрыш GOV Helper</h3>
+                                <span class="contest-date"><i class="far fa-calendar-alt"></i> 30 дней подписки</span>
+                            </div>
+                        </div>
+                        
+                        <div class="contest-footer">
+                            <button class="btn-primary contest-btn" onclick="participateContest('gov')">Участвовать</button>
+                        </div>
+                    </div>
+
+                    <div class="contest-card premium admin">
+                        
+                        <div class="contest-header">
+                            <div class="contest-icon helper-admin"><i class="fas fa-user-shield"></i></div>
+                            <div>
+                                <h3>Розыгрыш ADMIN Helper</h3>
+                                <span class="contest-date"><i class="far fa-calendar-alt"></i> 30 дней подписки</span>
+                            </div>
+                        </div>
+                        
+                        <div class="contest-footer">
+                            <button class="btn-primary contest-btn" style="background: var(--gradient-primary);" onclick="participateContest('admin')">Участвовать</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </main>
     </div>
 
     <div id="promoModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Активация промокода</h3>
+        <div class="modal-content promo-card-style">
+            <div class="modal-header-simple">
+                <h3>Промокод</h3>
                 <button class="modal-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <i class="fas fa-gift"></i>
-                    <input type="text" id="promoCode" placeholder="Введите промокод" maxlength="20">
+
+            <div class="modal-body-simple">
+                <div class="promo-input-wrapper">
+                    <i class="fas fa-ticket-alt"></i>
+                    <input type="text" id="promoCode" placeholder="Введите код..." maxlength="20">
                 </div>
-                <button class="btn-primary" id="activatePromoBtn">
-                    <i class="fas fa-check"></i>
+
+                <button class="promo-action-btn" id="activatePromoBtn">
                     <span>Активировать</span>
                 </button>
             </div>
         </div>
     </div>
+
+
 
     <div id="factionModal" class="modal">
         <div class="modal-content large">
@@ -379,12 +530,18 @@
             </button>
             <button class="tab-btn" data-tab="profile">
                 <i class="fas fa-user"></i>
-                <span>Профил</span>
+                <span>Профиль</span>
             </button>
-            <button class="tab-btn" data-tab="factions">
-                <i class="fas fa-building"></i>
-                <span>Фракции</span>
+            <button class="tab-btn admin-tab" data-tab="admin-panel" id="adminTabBtn" style="display: none;">
+                <i class="fas fa-user-shield"></i>
+                <span>Админка</span>
             </button>
+
+            <button class="tab-btn" data-tab="information">
+                <i class="fas fa-info-circle"></i>
+                <span>Информация</span>
+            </button>
+
             <button class="tab-btn" data-tab="contests">
                 <i class="fas fa-trophy"></i>
                 <span>Конкурсы</span>
@@ -393,56 +550,56 @@
     </footer>
 
     <div id="paymentMethodModal" class="modal">
-        <div class="modal-content medium">
-            <div class="modal-header">
+        <div class="modal-content medium payment-modal-style">
+            <div class="modal-header modal-header-simple">
                 <h3>Выберите способ оплаты</h3>
                 <button class="modal-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="payment-selected-plan">
+            <div class="modal-body modal-body-simple">
+                <div class="payment-selected-plan payment-selected-plan-new">
                     <span id="selectedPlanInfo">Выбранный тариф: 30 дней</span>
-                    <span id="selectedPlanPrice" class="plan-price-badge"></span>
+                    <span id="selectedPlanPrice" class="plan-price-badge plan-price-badge-new"></span>
                 </div>
                 <div class="payment-methods-list">
-                    <button class="payment-method-btn" data-method="stars">
-                        <div class="payment-method-icon stars-icon">
+                    <button class="payment-method-btn payment-option-card" data-method="stars">
+                        <div class="payment-method-icon stars-icon option-icon stars-bg">
                             <i class="fas fa-star"></i>
                         </div>
-                        <div class="payment-method-info">
-                            <span class="payment-method-title">Telegram Stars</span>
-                            <span class="payment-method-desc">Оплата звездами Telegram</span>
+                        <div class="payment-method-info option-info">
+                            <span class="payment-method-title option-title">Telegram Stars</span>
+                            <span class="payment-method-desc option-hint">Оплата звездами Telegram</span>
                         </div>
-                        <i class="fas fa-chevron-right"></i>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
                     </button>
-                    <button class="payment-method-btn" data-method="cryptobot">
-                        <div class="payment-method-icon crypto-icon">
+                    <button class="payment-method-btn payment-option-card" data-method="cryptobot">
+                        <div class="payment-method-icon crypto-icon option-icon crypto-bg">
                             <i class="fab fa-bitcoin"></i>
                         </div>
-                        <div class="payment-method-info">
-                            <span class="payment-method-title">Crypto Bot</span>
-                            <span class="payment-method-desc">Оплата криптовалютой</span>
+                        <div class="payment-method-info option-info">
+                            <span class="payment-method-title option-title">Crypto Bot</span>
+                            <span class="payment-method-desc option-hint">Оплата криптовалютой</span>
                         </div>
-                        <i class="fas fa-chevron-right"></i>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
                     </button>
-                    <button class="payment-method-btn" data-method="funpay">
-                        <div class="payment-method-icon funpay-icon">
+                    <button class="payment-method-btn payment-option-card" data-method="funpay">
+                        <div class="payment-method-icon funpay-icon option-icon funpay-bg">
                             <i class="fas fa-wallet"></i>
                         </div>
-                        <div class="payment-method-info">
-                            <span class="payment-method-title">FunPay</span>
-                            <span class="payment-method-desc">Оплата через FunPay</span>
+                        <div class="payment-method-info option-info">
+                            <span class="payment-method-title option-title">FunPay</span>
+                            <span class="payment-method-desc option-hint">Оплата через FunPay</span>
                         </div>
-                        <i class="fas fa-chevron-right"></i>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
                     </button>
-                    <button class="payment-method-btn" data-method="other">
-                        <div class="payment-method-icon other-icon">
+                    <button class="payment-method-btn payment-option-card" data-method="other">
+                        <div class="payment-method-icon other-icon option-icon other-bg">
                             <i class="fas fa-ellipsis-h"></i>
                         </div>
-                        <div class="payment-method-info">
-                            <span class="payment-method-title">Другое</span>
-                            <span class="payment-method-desc">Связаться с поддержкой</span>
+                        <div class="payment-method-info option-info">
+                            <span class="payment-method-title option-title">Другое</span>
+                            <span class="payment-method-desc option-hint">Связаться с поддержкой</span>
                         </div>
-                        <i class="fas fa-chevron-right"></i>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
                     </button>
                 </div>
                 <input type="hidden" id="paymentPlanDays">
@@ -452,45 +609,46 @@
     </div>
 
     <div id="starsPaymentModal" class="modal">
-        <div class="modal-content medium">
-            <div class="modal-header">
+        <div class="modal-content medium payment-modal-style">
+            <div class="modal-header modal-header-simple">
                 <h3>Оплата Telegram Stars</h3>
                 <button class="modal-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="stars-payment-container">
-                    <div class="stars-info-box">
-                        <div class="stars-big-icon">
+            <div class="modal-body modal-body-simple">
+                <div class="stars-payment-container stars-payment-container-new">
+                    <div class="stars-info-box stars-info-box-new">
+                        <div class="stars-big-icon stars-big-icon-new">
                             <i class="fas fa-star"></i>
                         </div>
                         <h4 id="starsPaymentTitle">Подписка на 30 дней</h4>
-                        <div class="stars-price">
-                            <span class="stars-amount" id="starsAmount">150</span>
-                            <span class="stars-label">Stars</span>
+                        <div class="stars-price stars-price-new">
+                            <span class="stars-amount stars-amount-new" id="starsAmount">150</span>
+                            <span class="stars-label stars-label-new">Stars</span>
                         </div>
                     </div>
-                    <div class="stars-benefits">
-                        <div class="benefit-item">
+                    <div class="stars-benefits benefits-list-new">
+                        <div class="benefit-item benefit-item-new">
                             <i class="fas fa-bolt"></i>
                             <span>Моментальная активация</span>
                         </div>
-                        <div class="benefit-item">
+                        <div class="benefit-item benefit-item-new">
                             <i class="fas fa-shield-alt"></i>
                             <span>Безопасная оплата через Telegram</span>
                         </div>
-                        <div class="benefit-item">
+                        <div class="benefit-item benefit-item-new">
                             <i class="fas fa-undo"></i>
                             <span>Возможность возврата</span>
                         </div>
                     </div>
-                    <button class="btn-primary stars-pay-btn" id="payWithStarsBtn">
-                        <i class="fas fa-star"></i>
-                        <span>Оплатить звездами</span>
-                    </button>
-                    <button class="btn-secondary" id="backToMethodsBtn">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>Назад к способам оплаты</span>
-                    </button>
+                    <div class="payment-actions-new">
+                        <button class="btn-primary stars-pay-btn btn-primary-new" id="payWithStarsBtn">
+                            <i class="fas fa-star"></i>
+                            <span>Оплатить</span>
+                        </button>
+                        <button class="btn-secondary btn-secondary-new" id="backToMethodsBtn">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
                 </div>
                 <input type="hidden" id="starsPlanDays">
                 <input type="hidden" id="starsIsRenewal">
@@ -499,34 +657,33 @@
     </div>
 
     <div id="supportPaymentModal" class="modal">
-        <div class="modal-content medium">
-            <div class="modal-header">
+        <div class="modal-content medium payment-modal-style">
+            <div class="modal-header modal-header-simple">
                 <h3>Оплата через поддержку</h3>
                 <button class="modal-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="support-payment-info">
-                    <div class="payment-instruction">
-                        <h5>Инструкция по оплате:</h5>
+            <div class="modal-body modal-body-simple">
+                <div class="support-payment-info support-payment-info-new">
+                    <div class="payment-instruction payment-instruction-new">
+                        <h5><i class="fas fa-info-circle"></i> Инструкция по оплате:</h5>
                         <ol>
-                            <li>Нажмите кнопку "Перейти в поддержку"</li>
-                            <li>Напишите боту /start</li>
-                            <li>Нажмите на кнопки: Написать в поддержку -> Оплата товара</li>
-                            <li>После чего свободный администратор возьмет ваше обращения</li>
+                            <li>Нажмите кнопку "В поддержку"</li>
+                            <li>Напишите боту <strong>/start</strong></li>
+                            <li>Выберите: <strong>Поддержка &rarr; Оплата</strong></li>
+                            <li>Дождитесь ответа администратора</li>
                         </ol>
                     </div>
 
-                    <div class="payment-actions">
-                        <a href="https://t.me/mr_helpers_bot" target="_blank" class="btn-primary support-action-btn">
+                    <div class="payment-actions payment-actions-new">
+                        <a href="https://t.me/mr_helpers_bot" target="_blank"
+                            class="btn-primary support-action-btn btn-primary-new" style="text-decoration: none;">
                             <i class="fab fa-telegram-plane"></i>
-                            <span>Перейти в поддержку</span>
+                            <span>В поддержку</span>
                         </a>
-                        <button class="btn-secondary" id="backToMethodsFromSupport">
+                        <button class="btn-secondary btn-secondary-new" id="backToMethodsFromSupport">
                             <i class="fas fa-arrow-left"></i>
-                            <span>Назад к способам оплаты</span>
                         </button>
                     </div>
-
                     <input type="hidden" id="supportPlanDays">
                     <input type="hidden" id="supportIsRenewal">
                 </div>
@@ -535,41 +692,40 @@
     </div>
 
     <div id="cryptoPaymentModal" class="modal">
-        <div class="modal-content medium">
-            <div class="modal-header">
-                <h3>Оплата через Crypto Bot</h3>
+        <div class="modal-content medium payment-modal-style">
+            <div class="modal-header modal-header-simple">
+                <h3>Оплата Crypto Bot</h3>
                 <button class="modal-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="stars-payment-container">
-                    <div class="stars-info-box" style="border-color: rgba(59, 130, 246, 0.3); background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));">
-                        <div class="stars-big-icon" style="background: linear-gradient(135deg, #3B82F6, #2563EB); box-shadow: 0 8px 32px rgba(37, 99, 235, 0.3);">
+            <div class="modal-body modal-body-simple">
+                <div class="crypto-payment-container-new">
+                    <div class="stars-info-box stars-info-box-new crypto-style">
+                        <div class="stars-big-icon stars-big-icon-new crypto-icon-style">
                             <i class="fab fa-bitcoin"></i>
                         </div>
                         <h4 id="cryptoPaymentTitle">Ожидание оплаты...</h4>
-                        <div class="stars-price">
-                            <span class="stars-amount" id="cryptoAmount" style="background: white; -webkit-background-clip: text; -webkit-text-fill-color: white;">0.00</span>
-                            <span class="stars-label" id="cryptoCurrencyLabel">USD</span>
+                        <div class="stars-price stars-price-new">
+                            <span class="stars-amount stars-amount-new" id="cryptoAmount">0.00</span>
+                            <span class="stars-label stars-label-new" id="cryptoCurrencyLabel">USD</span>
                         </div>
                     </div>
 
-                    <div class="payment-instruction">
-                        <p style="color: var(--gray-300); text-align: center; margin-bottom: 15px;">
-                            Нажмите кнопку ниже, чтобы перейти к оплате. После оплаты нажмите "Я оплатил".
-                        </p>
+                    <div class="payment-instruction payment-instruction-new text-center">
+                        <p>Нажмите "Перейти к оплате".<br>После успешного платежа нажмите "Я оплатил".</p>
                     </div>
-                    <div class="payment-actions" style="grid-template-columns: 1fr;">
-                        <a href="#" id="openCryptoLinkBtn" target="_blank" class="btn-primary" style="text-decoration: none;">
+
+                    <div class="payment-actions payment-actions-new vertical">
+                        <a href="#" id="openCryptoLinkBtn" target="_blank" class="btn-primary btn-primary-new"
+                            style="text-decoration: none;">
                             <i class="fas fa-external-link-alt"></i>
                             <span>Перейти к оплате</span>
                         </a>
-
-                        <button class="btn-secondary" id="checkCryptoPaymentBtn" style="margin-top: 10px; background: var(--success); color: white; border: none;">
+                        <button class="btn-secondary btn-success-new" id="checkCryptoPaymentBtn">
                             <i class="fas fa-check"></i>
                             <span>Я оплатил</span>
                         </button>
                     </div>
-                    <div id="cryptoStatusText" class="text-center text-muted" style="margin-top: 10px; font-size: 13px;"></div>
+                    <div id="cryptoStatusText" class="crypto-status-text"></div>
                 </div>
                 <input type="hidden" id="cryptoInvoiceId">
                 <input type="hidden" id="cryptoPlanDays">
@@ -578,9 +734,35 @@
         </div>
     </div>
 
+    <div id="adminProfileModal" class="modal modal-center">
+        <div class="modal-content payment-modal-style" style="max-width: 450px !important; width: 95% !important;">
+            <div class="modal-header modal-header-simple">
+                <h3>Профиль администратора</h3>
+                <button class="modal-close" onclick="closeAdminProfile()">&times;</button>
+            </div>
+            <div class="modal-body modal-body-simple" id="adminProfileBody">
+                </div>
+        </div>
+    </div>
+
+    <div id="adminOnlineModal" class="modal modal-center">
+        <div class="modal-content payment-modal-style" style="max-width: 500px !important; width: 95% !important;">
+            <div class="modal-header modal-header-simple">
+                <h3>Статистика</h3>
+                <button class="modal-close" onclick="closeAdminOnline()">&times;</button>
+            </div>
+            <div class="modal-body modal-body-simple" style="padding: 0 0 20px 0 !important;" id="adminOnlineBody">
+                </div>
+        </div>
+    </div>
+
+
+
+
     <div id="toastContainer"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
