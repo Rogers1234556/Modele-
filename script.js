@@ -112,36 +112,23 @@ const API_BASE = "https://normal-meadowlark-funtalingo-5c982800.koyeb.app";
 let userData = null;
 let currentProduct = 'gov'; 
 
+// ВАЖНО: GOV Helper использует ветку `new` в TG-боте, а ADM Helper — ветку `renew`.
+// Цены здесь должны полностью совпадать со STARS_PRICES / CRYPTO_PRICES в боте.
 const pricingData = {
-    gov: {
-        new: {
-            uah: { 15: 120, 30: 200, 365: 2100 },
-            rub: { 15: 220, 30: 349, 365: 3800 },
-            usd: { 15: 3,   30: 5,   365: 48   },
-            stars:{ 15: 225, 30: 375, 365: 3600 }
-        },
-        renew: {
-            uah: { 15: 120, 30: 200, 365: 2100 },
-            rub: { 15: 220, 30: 349, 365: 3800 },
-            usd: { 15: 3,   30: 5,   365: 48   },
-            stars:{ 15: 225, 30: 375, 365: 3600 }
-        }
+    gov: { // соответствует new в боте
+        stars: { 15: 117, 30: 294, 365: 2358 },
+        usd:   { 15: 2.30, 30: 5.90, 365: 47.30 }
     },
-    admin: {
-        new: {
-            uah: { 15: 170, 30: 250, 365: 2800 },
-            rub: { 15: 298, 30: 449, 365: 4900 },
-            usd: { 15: 3.99,30: 5.49,365: 65   },
-            stars:{ 15: 300, 30: 410, 365: 4900 }
-        },
-        renew: {
-            uah: { 15: 170, 30: 250, 365: 2800 },
-            rub: { 15: 298, 30: 449, 365: 4900 },
-            usd: { 15: 3.99,30: 5.49,365: 65   },
-            stars:{ 15: 300, 30: 410, 365: 4900 }
-        }
+    admin: { // соответствует renew в боте
+        stars: { 15: 176, 30: 352, 365: 4000 },
+        usd:   { 15: 3.50, 30: 7.00, 365: 59.00 }
     }
 };
+
+// Какое значение isRenewal нужно отправить в бота для текущего продукта.
+function getBotIsRenewal() {
+    return currentProduct === 'admin';
+}
 
 let pricingMode = 'new'; 
 let activeDiscount = null; 
@@ -344,8 +331,8 @@ class UIManager {
         document.querySelectorAll('.btn-buy').forEach(btn => {
             btn.addEventListener('click', () => {
                 const plan = parseInt(btn.dataset.plan);
-                const isRenewal = btn.dataset.for === 'renew';
-                UIManager.showPaymentMethodSelection(plan, isRenewal);
+                // isRenewal определяется текущим продуктом, чтобы цены совпадали с TG-ботом
+                UIManager.showPaymentMethodSelection(plan, getBotIsRenewal());
             });
         });
 
@@ -547,30 +534,22 @@ class UIManager {
     }
 
     static updatePrices() {
-        if (userData && userData.daysgov) {
-            const daysLeft = Utils.calculateDaysLeft(userData.daysgov);
-            pricingMode = daysLeft > 0 ? 'renew' : 'new';
-            document.querySelectorAll('.btn-buy').forEach(btn => {
-                btn.dataset.for = pricingMode;
-            });
-        }
-        const pricingType = pricingMode;
         document.querySelectorAll('.pricing-card').forEach(card => {
             const planStr = card.dataset.plan.replace('-renew', '');
             const plan = parseInt(planStr);
-            const starsAmount = pricingData[currentProduct]?.[pricingType]?.stars?.[plan];
+            const starsAmount = pricingData[currentProduct]?.stars?.[plan];
             if (starsAmount) {
                 const priceEl = card.querySelector('.price');
                 const currencyEl = card.querySelector('.currency');
-                const finalCurrency = '⭐';
+                const starIcon = '<i class="fas fa-star price-star-icon"></i>';
 
                 if (activeDiscount && activeDiscount.percent > 0) {
                     const discountedAmount = applyDiscount(starsAmount);
                     priceEl.innerHTML = `<span class="original-price">${starsAmount}</span> ${discountedAmount}`;
-                    currencyEl.innerHTML = `${finalCurrency} <span class="discount-badge">-${activeDiscount.percent}%</span>`;
+                    currencyEl.innerHTML = `${starIcon} <span class="discount-badge">-${activeDiscount.percent}%</span>`;
                 } else {
                     priceEl.textContent = starsAmount;
-                    currencyEl.textContent = finalCurrency;
+                    currencyEl.innerHTML = starIcon;
                 }
             }
         });
@@ -776,13 +755,12 @@ class UIManager {
                 subNotice.style = 'display:block;color:#10B981;font-size:0.9rem;margin-bottom:10px;text-align:center;';
             } else subNotice.style.display = 'none';
 
-            const priceType = isRenewal ? 'renew' : 'new';
-            const stars = pricingData[currentProduct]?.[priceType]?.stars?.[plan];
+            const stars = pricingData[currentProduct]?.stars?.[plan];
             const priceEl = document.getElementById('selectedPlanPrice');
             if (priceEl) {
                 if (stars) {
                     const finalStars = activeDiscount?.percent ? applyDiscount(stars) : stars;
-                    priceEl.textContent = `${finalStars} ⭐`;
+                    priceEl.innerHTML = `${finalStars} <i class="fas fa-star price-star-icon"></i>`;
                 } else {
                     priceEl.textContent = '';
                 }
@@ -803,9 +781,8 @@ class UIManager {
         }
     }
 
-    static getStarsPrice(plan, isRenewal) {
-        const priceType = isRenewal ? 'renew' : 'new';
-        let price = pricingData[currentProduct]?.[priceType]?.stars?.[plan] || 100;
+    static getStarsPrice(plan, _isRenewal) {
+        let price = pricingData[currentProduct]?.stars?.[plan] || 100;
         if (activeDiscount && activeDiscount.percent > 0) {
             price = Math.round(price * (1 - activeDiscount.percent / 100));
         }
