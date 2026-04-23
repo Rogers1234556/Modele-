@@ -115,26 +115,30 @@ let currentProduct = 'gov';
 const pricingData = {
     gov: {
         new: {
-            15: 99,
-            30: 249,
-            365: 1999
+            uah: { 15: 120, 30: 200, 365: 2100 },
+            rub: { 15: 220, 30: 349, 365: 3800 },
+            usd: { 15: 3,   30: 5,   365: 48   },
+            stars:{ 15: 225, 30: 375, 365: 3600 }
         },
         renew: {
-            15: 149,
-            30: 299,
-            365: 2499
+            uah: { 15: 120, 30: 200, 365: 2100 },
+            rub: { 15: 220, 30: 349, 365: 3800 },
+            usd: { 15: 3,   30: 5,   365: 48   },
+            stars:{ 15: 225, 30: 375, 365: 3600 }
         }
     },
     admin: {
         new: {
-            15: 250,
-            30: 600,
-            365: 5000
+            uah: { 15: 170, 30: 250, 365: 2800 },
+            rub: { 15: 298, 30: 449, 365: 4900 },
+            usd: { 15: 3.99,30: 5.49,365: 65   },
+            stars:{ 15: 300, 30: 410, 365: 4900 }
         },
         renew: {
-            15: 350,
-            30: 700,
-            365: 6000
+            uah: { 15: 170, 30: 250, 365: 2800 },
+            rub: { 15: 298, 30: 449, 365: 4900 },
+            usd: { 15: 3.99,30: 5.49,365: 65   },
+            stars:{ 15: 300, 30: 410, 365: 4900 }
         }
     }
 };
@@ -254,10 +258,12 @@ class UIManager {
     }
 
     static initProductSwitcher() {
-        const productTabs = document.querySelectorAll('.product-tab');
+        const productTabs = document.querySelectorAll('.product-tab[data-product]');
         productTabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                currentProduct = tab.dataset.product;
+                const product = tab.dataset.product;
+                if (!product) return;
+                currentProduct = product;
                 productTabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 const heroTitle = document.querySelector('.hero-title .gradient-text');
@@ -552,18 +558,18 @@ class UIManager {
         document.querySelectorAll('.pricing-card').forEach(card => {
             const planStr = card.dataset.plan.replace('-renew', '');
             const plan = parseInt(planStr);
-            if (pricingData[currentProduct]?.[pricingType]?.[plan]) {
+            const starsAmount = pricingData[currentProduct]?.[pricingType]?.stars?.[plan];
+            if (starsAmount) {
                 const priceEl = card.querySelector('.price');
                 const currencyEl = card.querySelector('.currency');
-                const originalAmount = pricingData[currentProduct][pricingType][plan];
-                const finalCurrency = 'грн'; 
+                const finalCurrency = '⭐';
 
                 if (activeDiscount && activeDiscount.percent > 0) {
-                    const discountedAmount = applyDiscount(originalAmount);
-                    priceEl.innerHTML = `<span class="original-price">${originalAmount}</span> ${discountedAmount}`;
+                    const discountedAmount = applyDiscount(starsAmount);
+                    priceEl.innerHTML = `<span class="original-price">${starsAmount}</span> ${discountedAmount}`;
                     currencyEl.innerHTML = `${finalCurrency} <span class="discount-badge">-${activeDiscount.percent}%</span>`;
                 } else {
-                    priceEl.textContent = originalAmount;
+                    priceEl.textContent = starsAmount;
                     currencyEl.textContent = finalCurrency;
                 }
             }
@@ -670,6 +676,15 @@ class UIManager {
     }
 
     static async loadContests() {
+        // Розыгрыши временно отключены — все карточки в состоянии "Завершён".
+        document.querySelectorAll('.contests-grid .contest-btn').forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('btn-disabled');
+            btn.innerHTML = '<i class="fas fa-flag-checkered"></i><span>Завершён</span>';
+            btn.onclick = null;
+        });
+        return;
+        // eslint-disable-next-line no-unreachable
         try {
             const { data: contest, error } = await supabaseClient
                 .from('contests')
@@ -762,10 +777,15 @@ class UIManager {
             } else subNotice.style.display = 'none';
 
             const priceType = isRenewal ? 'renew' : 'new';
-            const price = pricingData[currentProduct]?.[priceType]?.[plan];
-            if (price) {
-                const finalCurrency = 'грн';
-                document.getElementById('selectedPlanPrice').textContent = `${price} ${finalCurrency}`;
+            const stars = pricingData[currentProduct]?.[priceType]?.stars?.[plan];
+            const priceEl = document.getElementById('selectedPlanPrice');
+            if (priceEl) {
+                if (stars) {
+                    const finalStars = activeDiscount?.percent ? applyDiscount(stars) : stars;
+                    priceEl.textContent = `${finalStars} ⭐`;
+                } else {
+                    priceEl.textContent = '';
+                }
             }
             modal.classList.add('active');
         }
@@ -784,12 +804,8 @@ class UIManager {
     }
 
     static getStarsPrice(plan, isRenewal) {
-        const starsPrices = {
-            new: { 15: 117, 30: 294, 365: 2358 },
-            renew: { 15: 176, 30: 352, 365: 2948 }
-        };
         const priceType = isRenewal ? 'renew' : 'new';
-        let price = starsPrices[priceType]?.[plan] || 100;
+        let price = pricingData[currentProduct]?.[priceType]?.stars?.[plan] || 100;
         if (activeDiscount && activeDiscount.percent > 0) {
             price = Math.round(price * (1 - activeDiscount.percent / 100));
         }
