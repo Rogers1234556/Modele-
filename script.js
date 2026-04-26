@@ -437,7 +437,12 @@ class UIManager {
     }
 
     static downloadLauncher() {
-        Utils.showToast('Загрузка лаунчера временно недоступна', 'info');
+        const url = 'https://drive.google.com/file/d/1yuk0fBtFyAy8hMncdpg6o9CZOi0I4p2a/view?usp=sharing'; 
+        if (typeof tg !== 'undefined' && tg.openLink) {
+            tg.openLink(url);
+        } else {
+            window.open(url, '_blank'); // Запасной вариант для обычного браузера
+        }
     }
 
     static async activatePromoCode(code) {
