@@ -1148,7 +1148,6 @@ async function openAdminProfile(idtg, nickname, level) {
 
         body.innerHTML = `
             <div class="admin-profile-container">
-                <p class="settings-hint">Настройте свою личную норму. Эти значения используются для подсчёта баллов и статуса нормы за день.</p>
 
                 <div class="admin-info-row">
                     <span class="admin-info-label"><i class="fas fa-flag" style="color:var(--primary); margin-right:8px;"></i>Мин. репортов</span>
@@ -1687,6 +1686,7 @@ window.copyUserKey = function() {
     }
 
     function onSuccess() {
+        Utils.showToast('Ключ скопирован!', 'success');
 
         // Визуальный эффект: меняем иконку на галочку на 2 секунды
         if (icon) {
