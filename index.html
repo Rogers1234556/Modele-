@@ -282,10 +282,6 @@
                     </div>
 
                     <div id="info-gov-content" class="info-content-block">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="factionSearch" placeholder="Поиск фракции...">
-                        </div>
                         <div class="factions-grid" id="factionsList"></div>
                     </div>
 
@@ -379,10 +375,8 @@
 
 
                     <div class="admin-compact-actions">
-                        <button class="action-btn-sm" id="btnAdminProfileMenu"><i class="fas fa-id-badge"></i><span>Профиль</span></button>
-                        <button class="action-btn-sm" id="btnAdminPunishments"><i class="fas fa-gavel"></i><span>Наказания</span></button>
-                        <button class="action-btn-sm" id="btnAdminOnline"><i class="fas fa-eye"></i><span>Онлайн</span></button>
-                        <button class="action-btn-sm" id="btnAdminLogs"><i class="fas fa-list"></i><span>Логи</span></button>
+                        <button class="action-btn-sm" id="btnAdminProfileMenu"><i class="fas fa-sliders-h"></i><span>Настройки</span></button>
+                        <button class="action-btn-sm" id="btnAdminOnline"><i class="fas fa-chart-line"></i><span>Онлайн</span></button>
                     </div>
                 </div>
             </section>
@@ -684,9 +678,9 @@
     </div>
 
     <div id="adminProfileModal" class="modal modal-center">
-        <div class="modal-content payment-modal-style" style="max-width: 450px !important; width: 95% !important;">
+        <div class="modal-content payment-modal-style admin-settings-modal">
             <div class="modal-header modal-header-simple">
-                <h3>Профиль администратора</h3>
+                <h3>Настройка нормы</h3>
                 <button class="modal-close" onclick="closeAdminProfile()">&times;</button>
             </div>
             <div class="modal-body modal-body-simple" id="adminProfileBody">

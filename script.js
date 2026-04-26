@@ -316,22 +316,9 @@ class UIManager {
             document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
         }));
 
-        const copyBtn = document.querySelector('.copy-btn-new');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', () => {
-                const key = document.getElementById('userKey').textContent;
-                if (key && key !== 'Загрузка...' && key !== 'Не назначен') {
-                    Utils.copyToClipboard(key);
-                }
-            });
-        }
-
-        const factionSearch = document.getElementById('factionSearch');
-        if (factionSearch) {
-            factionSearch.addEventListener('input', (e) => {
-                UIManager.loadFactions(e.target.value);
-            });
-        }
+        // Кнопка копирования ключа использует inline-обработчик copyUserKey()
+        // (см. window.copyUserKey ниже), здесь повторный listener не вешаем,
+        // иначе всплывают два тоста одновременно.
 
         document.querySelectorAll('.btn-buy').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -448,32 +435,58 @@ class UIManager {
     static async activatePromoCode(code) {
         try {
             const userId = tg.initDataUnsafe?.user?.id;
-            const { data: promo, error } = await supabaseClient
+            if (!userId) {
+                Utils.showToast('Не удалось определить пользователя Telegram', 'error');
+                return;
+            }
+            const cleanCode = (code || '').trim().toUpperCase();
+            if (!cleanCode) {
+                Utils.showToast('Введите промокод', 'error');
+                return;
+            }
+
+            const { data: promo, error: promoError } = await supabaseClient
                 .from('promocodes')
                 .select('*')
-                .eq('code', code.toUpperCase())
-                .eq('is_active', true)
-                .single();
-            if (error || !promo) {
-                Utils.showToast('Промокод не найден или неактивен', 'error');
+                .eq('code', cleanCode)
+                .maybeSingle();
+
+            if (promoError) {
+                console.error('Supabase promo lookup error:', promoError);
+                Utils.showToast(`Ошибка базы данных: ${promoError.message || promoError.code || 'неизвестная'}`, 'error');
+                return;
+            }
+            if (!promo) {
+                Utils.showToast(`Промокод «${cleanCode}» не существует`, 'error');
+                return;
+            }
+            if (promo.is_active === false) {
+                Utils.showToast('Промокод деактивирован администратором', 'error');
                 return;
             }
             if (promo.expires_at && new Date(promo.expires_at) < new Date()) {
-                Utils.showToast('Срок действия промокода истек', 'error');
+                const expDate = new Date(promo.expires_at).toLocaleDateString('ru-RU');
+                Utils.showToast(`Срок действия промокода истёк ${expDate}`, 'error');
                 return;
             }
             if (promo.max_uses && promo.used_count >= promo.max_uses) {
-                Utils.showToast('Промокод больше недействителен', 'error');
+                Utils.showToast(`Лимит активаций исчерпан (${promo.used_count}/${promo.max_uses})`, 'error');
                 return;
             }
-            const { data: usage } = await supabaseClient
+
+            const { data: usage, error: usageError } = await supabaseClient
                 .from('promo_usages')
                 .select('*')
                 .eq('promo_id', promo.id)
                 .eq('user_idtg', userId)
-                .single();
+                .maybeSingle();
+            if (usageError) {
+                console.error('Supabase usage lookup error:', usageError);
+                Utils.showToast(`Ошибка проверки активации: ${usageError.message || usageError.code}`, 'error');
+                return;
+            }
             if (usage) {
-                Utils.showToast('Вы уже активировали этот промокод', 'error');
+                Utils.showToast('Вы уже активировали этот промокод ранее', 'error');
                 return;
             }
             if (promo.type === 'Gift' || promo.type === 'FunPay') {
@@ -523,7 +536,8 @@ class UIManager {
             await UIManager.updateProfileUI();
         } catch (e) {
             console.error('Promo activation error:', e);
-            Utils.showToast('Ошибка активации', 'error');
+            const reason = e?.message || e?.code || e?.details || 'неизвестная ошибка';
+            Utils.showToast(`Ошибка активации: ${reason}`, 'error');
         }
     }
 
@@ -1116,12 +1130,12 @@ async function openAdminProfile(idtg, nickname, level) {
     const body = document.getElementById('adminProfileBody');
     modal.classList.add('active');
 
-    body.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--gray-400);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Загрузка...</div>';
+    body.innerHTML = '<div style="text-align:center; padding: 32px 20px; color: var(--gray-400);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Загрузка...</div>';
 
     try {
         const { data, error } = await supabaseClient
             .from('administrator_radmir')
-            .select('nickname, admin_level, reportsGoal, onlineGoal, jailsGoal, jailsEnabled')
+            .select('reportsGoal, onlineGoal, jailsGoal, jailsEnabled')
             .eq('idtg', idtg)
             .single();
 
@@ -1130,54 +1144,31 @@ async function openAdminProfile(idtg, nickname, level) {
         const repGoal = data.reportsGoal !== null ? data.reportsGoal : 245;
         const onlGoal = data.onlineGoal || '02:55';
         const jGoal = data.jailsGoal !== null ? data.jailsGoal : 10;
-        const jEnabled = data.jailsEnabled !== false; 
-        const currentNick = data.nickname || nickname;
-        const currentLvl = data.admin_level || level;
+        const jEnabled = data.jailsEnabled !== false;
 
         body.innerHTML = `
             <div class="admin-profile-container">
-                <div class="admin-info-row">
-                    <span class="admin-info-label">N:</span>
-                    <div class="edit-group">
-                        <span class="admin-info-value" id="val-nickname">${currentNick}</span>
-                        <button class="edit-btn" onclick="editProfileField('nickname')"><i class="fas fa-pen"></i></button>
-                    </div>
-                </div>
+                <p class="settings-hint">Настройте свою личную норму. Эти значения используются для подсчёта баллов и статуса нормы за день.</p>
 
                 <div class="admin-info-row">
-                    <span class="admin-info-label">A-L:</span>
-                    <div class="edit-group">
-                        <span class="admin-info-value" style="color: var(--primary); margin-right: 10px;">${currentLvl}</span>
-                        <i class="fas fa-lock" style="color: var(--gray-600); font-size: 12px;" title="Нельзя изменить"></i>
-                    </div>
-                </div>
-
-                <div class="admin-info-row" style="background: transparent; border: none; margin-bottom: 5px;">
-                    <span class="admin-info-label">ID Telegram</span>
-                    <span class="admin-info-value" style="color: var(--gray-400);">${idtg}</span>
-                </div>
-
-                <div class="settings-divider">
-                    <i class="fas fa-sliders-h"></i> Настройки нормы
-                </div>
-
-                <div class="admin-info-row">
-                    <span class="admin-info-label">Мин. Репортов</span>
+                    <span class="admin-info-label"><i class="fas fa-flag" style="color:var(--primary); margin-right:8px;"></i>Мин. репортов</span>
                     <div class="edit-group">
                         <span class="admin-info-value" id="val-reports">${repGoal}</span>
                         <button class="edit-btn" onclick="editProfileField('reports')"><i class="fas fa-pen"></i></button>
                     </div>
                 </div>
+
                 <div class="admin-info-row">
-                    <span class="admin-info-label">Мин. Онлайн</span>
+                    <span class="admin-info-label"><i class="fas fa-clock" style="color:var(--success); margin-right:8px;"></i>Мин. онлайн</span>
                     <div class="edit-group">
                         <span class="admin-info-value" id="val-online">${onlGoal}</span>
                         <button class="edit-btn" onclick="editProfileField('online')"><i class="fas fa-pen"></i></button>
                     </div>
                 </div>
+
                 <div class="admin-info-row">
-                    <span class="admin-info-label">Мин. Джаилы</span>
-                    <div class="edit-group" style="gap: 15px;">
+                    <span class="admin-info-label"><i class="fas fa-gavel" style="color:var(--warning); margin-right:8px;"></i>Мин. джаилы</span>
+                    <div class="edit-group" style="gap: 12px;">
                         <label class="switch">
                             <input type="checkbox" id="jails-toggle" ${jEnabled ? 'checked' : ''} onchange="toggleJailsGoal(this)">
                             <span class="slider round"></span>
@@ -1190,7 +1181,7 @@ async function openAdminProfile(idtg, nickname, level) {
         `;
     } catch (e) {
         console.error('Ошибка профиля:', e);
-        body.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--danger);">Ошибка данных</div>`;
+        body.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--danger);">Не удалось загрузить настройки</div>`;
     }
 }
 
@@ -1264,10 +1255,9 @@ async function openAdminOnline(idtg, isDetailed = false) {
     const modal = document.getElementById('adminOnlineModal');
     const body = document.getElementById('adminOnlineBody');
     modal.classList.add('active');
-    body.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--gray-400);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Загрузка статистики...</div>';
+    body.innerHTML = '<div style="text-align:center; padding: 50px 20px; color: var(--gray-400);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Загрузка статистики...</div>';
 
     try {
-        // Подгружаем цели пользователя для точного подсчета баллов за всё время
         const { data: userSettings } = await supabaseClient
             .from('administrator_radmir')
             .select('reportsGoal, onlineGoal')
@@ -1296,9 +1286,13 @@ async function openAdminOnline(idtg, isDetailed = false) {
         if (error) throw error;
 
         let totalPoints = 0;
+        let totalOnlineMins = 0;
+        let totalReports = 0;
+        let totalJails = 0;
+        let normDays = 0;
+        let activeDays = 0;
         let tableRows = '';
 
-        // Вспомогательная функция подсчета баллов по новой системе (х1 = 11)
         const calculatePoints = (reports, onlineTimeStr) => {
             const rMult = (reports || 0) / repGoal;
             const oMult = timeToMinutes(onlineTimeStr) / onlGoalMins;
@@ -1306,16 +1300,30 @@ async function openAdminOnline(idtg, isDetailed = false) {
             return mult * 11;
         };
 
+        const isNormDone = (reports, onlineTimeStr) =>
+            (reports || 0) >= repGoal && timeToMinutes(onlineTimeStr) >= onlGoalMins;
+
+        const aggregate = (item) => {
+            const pts = calculatePoints(item.reports, item.online);
+            totalPoints += pts;
+            totalOnlineMins += timeToMinutes(item.online) || 0;
+            totalReports += item.reports || 0;
+            totalJails += item.jails || 0;
+            if ((item.reports || 0) > 0 || timeToMinutes(item.online) > 0) activeDays++;
+            if (isNormDone(item.reports, item.online)) normDays++;
+        };
+
         if (isDetailed) {
             const sortedData = (normaData || []).sort((a, b) => new Date(b.record_date) - new Date(a.record_date));
-
             sortedData.forEach(item => {
-                totalPoints += calculatePoints(item.reports, item.online);
+                aggregate(item);
                 const dateStr = item.record_date.split('-').reverse().join('.');
-
+                const normIcon = isNormDone(item.reports, item.online)
+                    ? `<i class="fas fa-circle-check" style="color:var(--success)" title="Норма выполнена"></i>`
+                    : `<i class="fas fa-circle-xmark" style="color:var(--gray-600)" title="Норма не выполнена"></i>`;
                 tableRows += `
                     <tr>
-                        <td class="date-col">${dateStr}</td>
+                        <td class="date-col">${normIcon} ${dateStr}</td>
                         <td>${formatOnlineFromTime(item.online)}</td>
                         <td><span class="val-num">${item.reports || 0}</span></td>
                         <td><span class="val-num">${item.jails || 0}</span></td>
@@ -1327,26 +1335,27 @@ async function openAdminOnline(idtg, isDetailed = false) {
             });
         } else {
             const normaMap = {};
-            if (normaData) {
-                normaData.forEach(item => {
-                    totalPoints += calculatePoints(item.reports, item.online);
-                    const day = parseInt(item.record_date.split('-')[2], 10);
-                    normaMap[day] = item;
-                });
-            }
+            (normaData || []).forEach(item => {
+                aggregate(item);
+                const day = parseInt(item.record_date.split('-')[2], 10);
+                normaMap[day] = item;
+            });
 
             for (let i = 1; i <= daysInMonth; i++) {
                 const dayData = normaMap[i];
-                const online = dayData && dayData.online ? formatOnlineFromTime(dayData.online) : `<span class="val-empty">-</span>`;
-                const reports = dayData && dayData.reports > 0 ? `<span class="val-num">${dayData.reports}</span>` : `<span class="val-empty">-</span>`;
-                const jails = dayData && dayData.jails > 0 ? `<span class="val-num">${dayData.jails}</span>` : `<span class="val-empty">-</span>`;
+                const online = dayData && dayData.online ? formatOnlineFromTime(dayData.online) : `<span class="val-empty">—</span>`;
+                const reports = dayData && dayData.reports > 0 ? `<span class="val-num">${dayData.reports}</span>` : `<span class="val-empty">—</span>`;
+                const jails = dayData && dayData.jails > 0 ? `<span class="val-num">${dayData.jails}</span>` : `<span class="val-empty">—</span>`;
+                const normIcon = dayData && isNormDone(dayData.reports, dayData.online)
+                    ? `<i class="fas fa-circle-check" style="color:var(--success); margin-right:4px;" title="Норма выполнена"></i>`
+                    : (dayData ? `<i class="fas fa-circle-xmark" style="color:var(--gray-600); margin-right:4px;" title="Норма не выполнена"></i>` : `<i class="far fa-circle" style="color:var(--gray-700); margin-right:4px;"></i>`);
 
-                const isToday = (i === date.getDate()) ? 'background: rgba(37, 99, 235, 0.1); border-left: 2px solid var(--primary);' : '';
-                const dateStr = `${String(i).padStart(2, '0')}.${String(month + 1).padStart(2, '0')}.${String(year).slice(-2)}`;
+                const isToday = (i === date.getDate()) ? 'class="row-today"' : '';
+                const dateStr = `${String(i).padStart(2, '0')}.${String(month + 1).padStart(2, '0')}`;
 
                 tableRows += `
-                    <tr style="${isToday}">
-                        <td class="date-col">${dateStr}</td>
+                    <tr ${isToday}>
+                        <td class="date-col">${normIcon}${dateStr}</td>
                         <td>${online}</td>
                         <td>${reports}</td>
                         <td>${jails}</td>
@@ -1355,41 +1364,73 @@ async function openAdminOnline(idtg, isDetailed = false) {
             }
         }
 
+        const totalOnlineFmt = `${Math.floor(totalOnlineMins / 60)}ч ${totalOnlineMins % 60}м`;
+        const periodLabel = isDetailed ? 'За всё время' : `За ${monthName}`;
+
         body.innerHTML = `
-            <div class="points-banner">
-                <i class="fas fa-star"></i>
-                <div>
-                    <span>Заработано баллов:</span>
-                    <strong>${totalPoints.toFixed(1)}</strong>
+            <div class="online-modal-content">
+                <div class="online-tab-switcher">
+                    <button class="online-tab ${!isDetailed ? 'active' : ''}" onclick="openAdminOnline('${idtg}', false)">
+                        <i class="fas fa-calendar-day"></i> За месяц
+                    </button>
+                    <button class="online-tab ${isDetailed ? 'active' : ''}" onclick="openAdminOnline('${idtg}', true)">
+                        <i class="fas fa-infinity"></i> За всё время
+                    </button>
                 </div>
-            </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h4 style="margin:0; color:white; font-size:15px; font-weight: 600;">
-                    ${isDetailed ? 'Норма за все время' : `Норма за ${monthName}`}
-                </h4>
-                <button class="btn-secondary-new" style="padding: 8px 16px; font-size:13px; height:auto; flex:none; border-radius:10px;" onclick="openAdminOnline('${idtg}', ${!isDetailed})">
-                    <i class="fas ${isDetailed ? 'fa-calendar-day' : 'fa-list-ul'}"></i>
-                    <span>${isDetailed ? 'За месяц' : 'За все время'}</span>
-                </button>
-            </div>
+                <div class="online-summary-grid">
+                    <div class="summary-card primary">
+                        <div class="summary-icon"><i class="fas fa-star"></i></div>
+                        <div class="summary-info">
+                            <span class="summary-num">${totalPoints.toFixed(1)}</span>
+                            <span class="summary-lbl">Баллов</span>
+                        </div>
+                    </div>
+                    <div class="summary-card success">
+                        <div class="summary-icon"><i class="fas fa-circle-check"></i></div>
+                        <div class="summary-info">
+                            <span class="summary-num">${normDays}<small>/${activeDays}</small></span>
+                            <span class="summary-lbl">Норма дней</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-clock"></i></div>
+                        <div class="summary-info">
+                            <span class="summary-num">${totalOnlineFmt}</span>
+                            <span class="summary-lbl">Онлайн</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-flag"></i></div>
+                        <div class="summary-info">
+                            <span class="summary-num">${totalReports}</span>
+                            <span class="summary-lbl">Репортов</span>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="norma-container">
-                <div class="norma-table-wrapper">
-                    <table class="norma-table ${isDetailed ? 'detailed-view' : ''}">
-                        <thead>
-                            <tr>
-                                <th class="date-col">Дата</th>
-                                <th>Online</th>
-                                <th>Report</th>
-                                <th>Jail</th>
-                                ${isDetailed ? '<th>Mute</th><th>Warn</th><th>Ban</th>' : ''}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows || '<tr><td colspan="7">Нет данных</td></tr>'}
-                        </tbody>
-                    </table>
+                <div class="online-section-header">
+                    <h4>${periodLabel}</h4>
+                    <span class="period-meta">${isDetailed ? activeDays + ' активных дней' : monthName + ' ' + year}</span>
+                </div>
+
+                <div class="norma-container">
+                    <div class="norma-table-wrapper">
+                        <table class="norma-table ${isDetailed ? 'detailed-view' : ''}">
+                            <thead>
+                                <tr>
+                                    <th class="date-col">Дата</th>
+                                    <th>Online</th>
+                                    <th>Report</th>
+                                    <th>Jail</th>
+                                    ${isDetailed ? '<th>Mute</th><th>Warn</th><th>Ban</th>' : ''}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows || `<tr><td colspan="${isDetailed ? 7 : 4}" style="text-align:center; padding:20px; color:var(--gray-500);">Нет данных за период</td></tr>`}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         `;
@@ -1397,9 +1438,10 @@ async function openAdminOnline(idtg, isDetailed = false) {
     } catch (e) {
         console.error('Ошибка при загрузке онлайна:', e);
         body.innerHTML = `
-            <div style="text-align:center; padding: 20px;">
+            <div style="text-align:center; padding: 30px 20px;">
                 <i class="fas fa-exclamation-triangle" style="color: var(--danger); font-size: 30px; margin-bottom: 10px;"></i>
                 <div style="color: var(--gray-400);">Не удалось загрузить данные</div>
+                <div style="color: var(--gray-600); font-size:12px; margin-top:6px;">${e?.message || ''}</div>
             </div>
         `;
     }
