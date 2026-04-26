@@ -6,7 +6,7 @@ function getMSKDate() {
     const mskString = new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow" });
     return new Date(mskString);
 }
-// Функция для получения вчерашней даты по МСК (в формате YYYY-MM-DD)
+// Функция для получения вчерашней даты по МСК (в формате YYYY-MM-DD
 function getMSKYesterdayString() {
     const d = getMSKDate(); // Используем твою существующую функцию
     d.setDate(d.getDate() - 1);
