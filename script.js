@@ -191,7 +191,7 @@ class Utils {
     static async copyToClipboard(text) {
         try {
             await navigator.clipboard.writeText(text);
-            this.showToast('Скопировано в буфер обмена', 'success');
+            this.showToast('Ключ скопирован', 'success');
             return true;
         } catch (err) {
             this.showToast('Ошибка копирования', 'error');
@@ -1687,7 +1687,6 @@ window.copyUserKey = function() {
     }
 
     function onSuccess() {
-        Utils.showToast('Ключ скопирован!', 'success');
 
         // Визуальный эффект: меняем иконку на галочку на 2 секунды
         if (icon) {
