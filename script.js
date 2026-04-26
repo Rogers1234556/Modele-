@@ -151,6 +151,11 @@ class Utils {
             container.id = 'toastContainer';
             container.className = 'toast-container';
             document.body.appendChild(container);
+        } else if (!container.classList.contains('toast-container')) {
+            container.classList.add('toast-container');
+        }
+        if (container.parentElement !== document.body) {
+            document.body.appendChild(container);
         }
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
@@ -437,12 +442,7 @@ class UIManager {
     }
 
     static downloadLauncher() {
-        const url = 'https://drive.google.com/file/d/1yuk0fBtFyAy8hMncdpg6o9CZOi0I4p2a/view?usp=sharing'; 
-        if (typeof tg !== 'undefined' && tg.openLink) {
-            tg.openLink(url);
-        } else {
-            window.open(url, '_blank'); // Запасной вариант для обычного браузера
-        }
+        Utils.showToast('Загрузка лаунчера временно недоступна', 'info');
     }
 
     static async activatePromoCode(code) {
@@ -481,6 +481,7 @@ class UIManager {
                     await UIManager.addDaysToUser(userId, promo.days, `Активация промокода ${promo.code} (${promo.type})`);
                     await supabaseClient.from('promo_usages').insert([{ user_idtg: userId, promo_id: promo.id }]);
                     await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
+                    await UIManager.logPromoActivation(promo.days, 'GOV Helper');
                     Utils.showToast(`Промокод активирован! Добавлено ${promo.days} ${Utils.getDaysWord(promo.days)}`, 'success');
                 } else {
                     Utils.showToast('Ошибка: промокод не содержит дней', 'error');
@@ -494,6 +495,7 @@ class UIManager {
                 await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
                 activeDiscount = { percent: promo.discount_percent, promoId: promo.id, code: promo.code };
                 const currentDays = Utils.calculateDaysLeft(userData.daysgov);
+                let bonusDaysAdded = 0;
                 if (currentDays <= 0) {
                     let bonusDays = 0;
                     const p = promo.discount_percent;
@@ -505,6 +507,7 @@ class UIManager {
                     else if (p >= 1) bonusDays = 5;
                     if (bonusDays > 0) {
                         await UIManager.addDaysToUser(userId, bonusDays, `Бонус за промокод ${promo.type}`);
+                        bonusDaysAdded = bonusDays;
                         Utils.showToast(`Скидка ${p}% + ${bonusDays} дней в подарок!`, 'success');
                     } else {
                         Utils.showToast(`Скидка ${p}% активирована!`, 'success');
@@ -512,6 +515,7 @@ class UIManager {
                 } else {
                     Utils.showToast(`Скидка ${promo.discount_percent}% активирована!`, 'success');
                 }
+                await UIManager.logPromoActivation(bonusDaysAdded, 'GOV Helper', promo.discount_percent);
                 UIManager.updatePrices();
             }
             UIManager.closeModals();
@@ -520,6 +524,31 @@ class UIManager {
         } catch (e) {
             console.error('Promo activation error:', e);
             Utils.showToast('Ошибка активации', 'error');
+        }
+    }
+
+    static async logPromoActivation(days, productLabel, discountPercent = 0) {
+        try {
+            const userId = tg.initDataUnsafe?.user?.id;
+            const nick = userData?.name || tg.initDataUnsafe?.user?.first_name || 'Пользователь';
+            const dbId = userData?.id ?? '—';
+            let content = `Пользователь ${nick} (ID: ${dbId} | ${userId}) активировал промокод на ${productLabel}`;
+            if (days > 0) {
+                content += ` на ${days} ${Utils.getDaysWord(days)}.`;
+            } else if (discountPercent > 0) {
+                content += ` (скидка ${discountPercent}%).`;
+            } else {
+                content += '.';
+            }
+            await supabaseClient.from('logs').insert([{
+                title: 'Активировал промокод',
+                content,
+                admin: 'system',
+                type: 'promo',
+                created_at: new Date().toISOString()
+            }]);
+        } catch (e) {
+            console.error('Ошибка записи лога промокода:', e);
         }
     }
 

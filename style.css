@@ -1846,172 +1846,209 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 6px;
+    gap: 12px;
+}
+
+.admin-info-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
 }
 
 .admin-info-main h2 {
     margin: 0;
-    font-size: 24px;
+    font-size: 22px;
     letter-spacing: -0.5px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .admin-lvl-tag {
-    font-size: 12px;
-    color: var(--warning);
-    font-weight: 700;
+    font-size: 11px;
+    color: var(--gray-300);
+    font-weight: 600;
     text-transform: uppercase;
-    background: rgba(245, 158, 11, 0.1);
-    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 3px 8px;
     border-radius: 6px;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
 }
 
 .admin-streak-badge {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(135deg, #FF4D4D, #F59E0B);
-    padding: 6px 14px;
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 5px 11px;
+    border-radius: 14px;
+    box-shadow: none;
+    flex-shrink: 0;
 }
 
-.admin-streak-badge i { color: white; }
-.admin-streak-badge span { font-weight: 800; color: white; }
+.admin-streak-badge i { color: var(--warning); font-size: 12px; }
+.admin-streak-badge span { font-weight: 700; color: white; font-size: 13px; }
 
 .admin-date-sub {
     color: var(--gray-500);
-    font-size: 13px;
-    margin-top: -5px;
+    font-size: 12px;
+    margin: -4px 0 2px 0;
+    font-weight: 500;
 }
 
 /* Главная карточка (Баллы и Статус) */
 .admin-main-card {
     position: relative;
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.025);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 24px;
-    padding: 24px;
+    border-radius: 18px;
+    padding: 18px 20px;
     overflow: hidden;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
 }
 
 .card-glow {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
-    pointer-events: none;
+    display: none;
 }
 
 .status-label, .points-label {
     display: block;
-    font-size: 12px;
-    color: var(--gray-400);
+    font-size: 10px;
+    color: var(--gray-500);
     text-transform: uppercase;
     margin-bottom: 4px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .status-value {
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-200);
 }
 
 .status-value.success { color: var(--success); }
 
 .multiplier {
-    font-size: 12px;
-    background: rgba(16, 185, 129, 0.15);
+    font-size: 11px;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--success);
     padding: 2px 6px;
     border-radius: 4px;
     margin-left: 5px;
+    font-weight: 700;
 }
 
 .points-count {
-    font-size: 28px;
-    font-weight: 900;
+    font-size: 26px;
+    font-weight: 800;
     display: block;
     text-align: right;
     color: white;
+    line-height: 1;
+}
+
+.points-box {
+    text-align: right;
 }
 
 /* Сетка статистики */
 .admin-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    gap: 8px;
 }
 
 .stat-mini-card {
-    background: rgba(30, 41, 59, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    padding: 12px;
-    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 12px 8px;
+    border-radius: 14px;
     text-align: center;
+    transition: background 0.18s;
+}
+
+.stat-mini-card:active {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .stat-num {
     display: block;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     color: white;
+    margin-bottom: 2px;
 }
 
 .stat-name {
     display: block;
-    font-size: 11px;
-    color: var(--gray-400);
+    font-size: 10px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-weight: 600;
 }
 
 .stat-target {
     font-size: 9px;
     color: var(--gray-600);
+    display: block;
+    margin-top: 3px;
 }
 
 /* Компактные кнопки внизу */
 .admin-compact-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 6px;
 }
 
 .action-btn-sm {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.025);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 14px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 10px 12px;
     color: white;
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.18s, transform 0.12s;
+    font-family: inherit;
 }
 
 .action-btn-sm i {
-    width: 30px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--gray-300);
-    font-size: 14px;
+    font-size: 12px;
+    flex-shrink: 0;
 }
 
 .action-btn-sm span {
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
+    color: var(--gray-200);
 }
 
 .action-btn-sm:active {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(0.96);
+    background: rgba(255, 255, 255, 0.06);
+    transform: scale(0.97);
 }
 
 /* Streak — цвет иконки огонька по уровню */
@@ -2058,42 +2095,42 @@ body {
     text-shadow: none !important;
 }
 
-/* Streak — фон бейджа по уровню */
+/* Streak — минималистичные тинты по уровню (только иконка цветная) */
 .admin-streak-badge.streak-tier-0 {
-    background: #374151;
-    box-shadow: none;
+    background: rgba(107, 114, 128, 0.10);
+    border-color: rgba(107, 114, 128, 0.20);
 }
 .admin-streak-badge.streak-tier-1 {
-    background: linear-gradient(135deg, #4B5563, #6B7280);
-    box-shadow: none;
+    background: rgba(156, 163, 175, 0.10);
+    border-color: rgba(156, 163, 175, 0.20);
 }
 .admin-streak-badge.streak-tier-3 {
-    background: linear-gradient(135deg, #D97706, #F59E0B);
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+    background: rgba(245, 158, 11, 0.10);
+    border-color: rgba(245, 158, 11, 0.25);
 }
 .admin-streak-badge.streak-tier-10 {
-    background: linear-gradient(135deg, #C2410C, #F97316);
-    box-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
+    background: rgba(249, 115, 22, 0.10);
+    border-color: rgba(249, 115, 22, 0.25);
 }
 .admin-streak-badge.streak-tier-30 {
-    background: linear-gradient(135deg, #1D4ED8, #3B82F6);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.10);
+    border-color: rgba(59, 130, 246, 0.25);
 }
 .admin-streak-badge.streak-tier-60 {
-    background: linear-gradient(135deg, #7E22CE, #A855F7);
-    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    background: rgba(168, 85, 247, 0.10);
+    border-color: rgba(168, 85, 247, 0.28);
 }
 .admin-streak-badge.streak-tier-100 {
-    background: linear-gradient(135deg, #B91C1C, #EF4444);
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.45);
+    background: rgba(239, 68, 68, 0.10);
+    border-color: rgba(239, 68, 68, 0.28);
 }
 .admin-streak-badge.streak-tier-200 {
-    background: linear-gradient(135deg, #15803D, #22C55E);
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.45);
+    background: rgba(34, 197, 94, 0.10);
+    border-color: rgba(34, 197, 94, 0.28);
 }
 .admin-streak-badge.streak-tier-1000 {
-    background: linear-gradient(135deg, #374151, #6B7280);
-    box-shadow: 0 0 14px rgba(209, 213, 219, 0.5);
+    background: rgba(209, 213, 219, 0.08);
+    border-color: rgba(209, 213, 219, 0.30);
 }
 
 /* Модальное окно профиля админа */
@@ -2393,12 +2430,12 @@ input:checked + .slider:before { transform: translateX(18px); }
 }
 
 .settings-divider {
-    color: var(--primary);
-    font-size: 13px;
+    color: var(--gray-400);
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 10px 0 5px 0;
+    letter-spacing: 0.6px;
+    margin: 14px 0 4px 0;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
@@ -2406,57 +2443,65 @@ input:checked + .slider:before { transform: translateX(18px); }
     gap: 8px;
 }
 
+.settings-divider i {
+    color: var(--primary);
+    font-size: 12px;
+}
+
 .admin-info-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.02); /* Более прозрачный фон */
-    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     border-radius: 12px;
-    padding: 10px 14px;
-    transition: background 0.2s;
+    padding: 11px 14px;
+    transition: background 0.18s, border-color 0.18s;
+    min-height: 48px;
 }
 
 .admin-info-row:hover {
     background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.07);
 }
 
 .admin-info-label {
     color: var(--gray-400);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 }
 
 .admin-info-value {
     color: white;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .edit-group {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .edit-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     color: var(--gray-300);
-    border-radius: 10px;
-    width: 32px;
-    height: 32px;
+    border-radius: 9px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.18s, transform 0.12s, color 0.18s;
+    font-size: 12px;
 }
 
 .edit-btn:hover:not(:disabled) {
-    background: var(--gradient-primary);
-    border-color: transparent;
-    color: white;
+    background: rgba(37, 99, 235, 0.18);
+    color: var(--primary);
+    border-color: rgba(37, 99, 235, 0.35);
 }
 
 .edit-btn:active:not(:disabled) {
@@ -2464,7 +2509,7 @@ input:checked + .slider:before { transform: translateX(18px); }
 }
 
 .edit-btn:disabled {
-    opacity: 0.2;
+    opacity: 0.25;
     cursor: not-allowed;
 }
 
