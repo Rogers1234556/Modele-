@@ -319,13 +319,18 @@
                 <div class="admin-panel-container">
 
                     <div class="admin-new-header">
-                        <div class="admin-streak-badge">
+                        <div class="admin-header-title">
+                            <div class="admin-header-icon"><i class="fas fa-user-shield"></i></div>
+                            <div class="admin-header-text">
+                                <span class="admin-header-name">Admin Helper</span>
+                                <span class="admin-header-sub" id="adminStatDate">Статистика за сегодня</span>
+                            </div>
+                        </div>
+                        <div class="admin-streak-badge" title="Серия выполненных норм">
                             <i id="adminStreakIcon" class="fas fa-fire"></i>
                             <span id="adminStreak">0</span>
                         </div>
                     </div>
-
-                    <p class="admin-date-sub" id="adminStatDate">Статистика за сегодня</p>
 
                     <div class="admin-main-card">
                         <div class="card-glow"></div>
@@ -371,8 +376,20 @@
 
 
                     <div class="admin-compact-actions">
-                        <button class="action-btn-sm" id="btnAdminProfileMenu"><i class="fas fa-sliders-h"></i><span>Настройки</span></button>
-                        <button class="action-btn-sm" id="btnAdminOnline"><i class="fas fa-chart-line"></i><span>Онлайн</span></button>
+                        <button class="action-btn-sm" id="btnAdminProfileMenu">
+                            <i class="fas fa-sliders-h"></i>
+                            <div class="action-btn-text">
+                                <span class="action-btn-title">Настройки</span>
+                                <span class="action-btn-sub">Цели нормы</span>
+                            </div>
+                        </button>
+                        <button class="action-btn-sm" id="btnAdminOnline">
+                            <i class="fas fa-chart-line"></i>
+                            <div class="action-btn-text">
+                                <span class="action-btn-title">Статистика</span>
+                                <span class="action-btn-sub">Месяц / всё время</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </section>
