@@ -104,7 +104,7 @@ tg.setHeaderColor('bg_color');
 tg.setBackgroundColor('bg_color');
 
 const SUPABASE_URL = 'https://eyzqpngvggmlxozsqekb.supabase.co/';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5enFwbmd2Z2dtbHhvenNxZWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTY3MjYsImV4cCI6MjA5Mjc5MjcyNn0.AFbEmaHG1xaw7PQuxGtg_9uQmiS_gS6eWwenGGBeeeU';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5enFwbmd2Z2dtbHhvenNxZWtiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzIxNjcyNiwiZXhwIjoyMDkyNzkyNzI2fQ.9KSD58VZPuBSVJkpG2Bk8qakQ_ESjt9HicTuSNlr6y0';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const API_BASE = "https://normal-meadowlark-funtalingo-5c982800.koyeb.app";
