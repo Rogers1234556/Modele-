@@ -104,7 +104,7 @@ tg.setHeaderColor('bg_color');
 tg.setBackgroundColor('bg_color');
 
 const SUPABASE_URL = 'https://eyzqpngvggmlxozsqekb.supabase.co/';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5enFwbmd2Z2dtbHhvenNxZWtiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzIxNjcyNiwiZXhwIjoyMDkyNzkyNzI2fQ.9KSD58VZPuBSVJkpG2Bk8qakQ_ESjt9HicTuSNlr6y0';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5enFwbmd2Z2dtbHhvenNxZWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTY3MjYsImV4cCI6MjA5Mjc5MjcyNn0.AFbEmaHG1xaw7PQuxGtg_9uQmiS_gS6eWwenGGBeeeU';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const API_BASE = "https://normal-meadowlark-funtalingo-5c982800.koyeb.app";
@@ -412,11 +412,8 @@ class UIManager {
         if (btnAdminProfileMenu) {
             btnAdminProfileMenu.addEventListener('click', () => {
                 const userId = tg.initDataUnsafe?.user?.id;
-                const nickname = document.getElementById('adminNick').textContent;
-                let levelText = document.getElementById('adminLvl').textContent;
-                const level = levelText.replace('LVL ', '').replace('Level ', '').trim();
-
-                openAdminProfile(userId, nickname, level);
+                const nickname = userData?.name || tg.initDataUnsafe?.user?.first_name || '';
+                openAdminProfile(userId, nickname, null);
             });
         }
         const btnAdminOnline = document.getElementById('btnAdminOnline');
@@ -478,7 +475,7 @@ class UIManager {
                 .from('promo_usages')
                 .select('*')
                 .eq('promo_id', promo.id)
-                .eq('user_idtg', userId)
+                .eq('user_idtg', String(userId))
                 .maybeSingle();
             if (usageError) {
                 console.error('Supabase usage lookup error:', usageError);
@@ -489,48 +486,45 @@ class UIManager {
                 Utils.showToast('Вы уже активировали этот промокод ранее', 'error');
                 return;
             }
-            if (promo.type === 'Gift' || promo.type === 'FunPay') {
-                if (promo.days > 0) {
-                    await UIManager.addDaysToUser(userId, promo.days, `Активация промокода ${promo.code} (${promo.type})`);
-                    await supabaseClient.from('promo_usages').insert([{ user_idtg: userId, promo_id: promo.id }]);
-                    await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
-                    await UIManager.logPromoActivation(promo.days, 'GOV Helper');
-                    Utils.showToast(`Промокод активирован! Добавлено ${promo.days} ${Utils.getDaysWord(promo.days)}`, 'success');
-                } else {
-                    Utils.showToast('Ошибка: промокод не содержит дней', 'error');
-                }
-            } else if (promo.type === 'Price') {
+            const hasDays = promo.days && promo.days > 0;
+            const hasDiscount = promo.discount_percent && promo.discount_percent > 0;
+
+            if (!hasDays && !hasDiscount) {
+                Utils.showToast('Ошибка: промокод не содержит ни дней, ни скидки', 'error');
+                return;
+            }
+
+            if (hasDiscount) {
                 const { error: discountError } = await supabaseClient
                     .from('user_discounts')
-                    .insert([{ user_idtg: userId, promo_id: promo.id, discount_percent: promo.discount_percent, promo_type: promo.type, is_used: false }]);
+                    .insert([{ user_idtg: String(userId), promo_id: promo.id, discount_percent: promo.discount_percent, is_used: false }]);
                 if (discountError) throw discountError;
-                await supabaseClient.from('promo_usages').insert([{ user_idtg: userId, promo_id: promo.id }]);
-                await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
                 activeDiscount = { percent: promo.discount_percent, promoId: promo.id, code: promo.code };
-                const currentDays = Utils.calculateDaysLeft(userData.govhelper_days);
-                let bonusDaysAdded = 0;
-                if (currentDays <= 0) {
-                    let bonusDays = 0;
-                    const p = promo.discount_percent;
-                    if (p >= 50) bonusDays = 10;
-                    else if (p >= 40) bonusDays = 9;
-                    else if (p >= 30) bonusDays = 8;
-                    else if (p >= 20) bonusDays = 7;
-                    else if (p >= 10) bonusDays = 6;
-                    else if (p >= 1) bonusDays = 5;
-                    if (bonusDays > 0) {
-                        await UIManager.addDaysToUser(userId, bonusDays, `Бонус за промокод ${promo.type}`);
-                        bonusDaysAdded = bonusDays;
-                        Utils.showToast(`Скидка ${p}% + ${bonusDays} дней в подарок!`, 'success');
-                    } else {
-                        Utils.showToast(`Скидка ${p}% активирована!`, 'success');
-                    }
-                } else {
-                    Utils.showToast(`Скидка ${promo.discount_percent}% активирована!`, 'success');
-                }
-                await UIManager.logPromoActivation(bonusDaysAdded, 'GOV Helper', promo.discount_percent);
-                UIManager.updatePrices();
             }
+
+            let bonusDaysAdded = 0;
+            if (hasDays) {
+                await UIManager.addDaysToUser(userId, promo.days, `Активация промокода ${promo.code} (${promo.type})`);
+                bonusDaysAdded = promo.days;
+            }
+
+            await supabaseClient.from('promo_usages').insert([{ user_idtg: String(userId), promo_id: promo.id }]);
+            await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id }).then(() => {}).catch(err => {
+                console.warn('increment_promo_uses RPC недоступен, обновим напрямую', err);
+                supabaseClient.from('promocodes').update({ used_count: (promo.used_count || 0) + 1 }).eq('id', promo.id);
+            });
+
+            await UIManager.logPromoActivation(bonusDaysAdded, 'GOV Helper', hasDiscount ? promo.discount_percent : 0);
+
+            if (hasDiscount && hasDays) {
+                Utils.showToast(`Промокод активирован! Скидка ${promo.discount_percent}% + ${promo.days} ${Utils.getDaysWord(promo.days)}`, 'success');
+            } else if (hasDiscount) {
+                Utils.showToast(`Скидка ${promo.discount_percent}% активирована!`, 'success');
+            } else {
+                Utils.showToast(`Промокод активирован! Добавлено ${promo.days} ${Utils.getDaysWord(promo.days)}`, 'success');
+            }
+
+            if (hasDiscount) UIManager.updatePrices();
             UIManager.closeModals();
             document.getElementById('promoCode').value = '';
             await UIManager.updateProfileUI();
@@ -751,8 +745,8 @@ class UIManager {
                     .from('contest_participants')
                     .select('*')
                     .eq('contest_id', contest.id)
-                    .eq('user_idtg', tg.initDataUnsafe?.user?.id)
-                    .single();
+                    .eq('user_idtg', String(tg.initDataUnsafe?.user?.id))
+                    .maybeSingle();
                 if (participation) {
                     contestBtn.innerHTML = '<i class="fas fa-check"></i><span>Вы участвуете</span>';
                     contestBtn.classList.add('btn-disabled');
@@ -769,7 +763,7 @@ class UIManager {
 
     static async joinContest(contestId) {
         try {
-            const { error } = await supabaseClient.from('contest_participants').insert([{ contest_id: contestId, user_idtg: tg.initDataUnsafe?.user?.id }]);
+            const { error } = await supabaseClient.from('contest_participants').insert([{ contest_id: contestId, user_idtg: String(tg.initDataUnsafe?.user?.id) }]);
             if (error) throw error;
             Utils.showToast('Вы успешно зарегистрированы в конкурсе!', 'success');
             UIManager.loadContests();
@@ -920,7 +914,7 @@ class UIManager {
             const fee = paidAmount * 0.05;
             await supabaseClient.from('payments').insert([{ user_id: userId, user_name: userName, amount: paidAmount, fee: fee, net_amount: paidAmount - fee, method: method, status: 'completed', description: `Подписка на ${plan} дней (${isRenewalForce ? 'Продление' : 'Новая'})`, created_at: new Date().toISOString() }]);
             if (activeDiscount) {
-                await supabaseClient.from('user_discounts').update({ is_used: true }).eq('user_idtg', userId).eq('promo_id', activeDiscount.promoId);
+                await supabaseClient.from('user_discounts').update({ is_used: true }).eq('user_idtg', String(userId)).eq('promo_id', activeDiscount.promoId);
                 activeDiscount = null;
             }
             pricingMode = 'renew';
@@ -1146,7 +1140,7 @@ async function loadAdminRadmirList() {
 async function loadActiveDiscount() {
     try {
         const userId = tg.initDataUnsafe.user.id;
-        const { data: discountData, error } = await supabaseClient.from('user_discounts').select('*, promocodes!inner(discount_percent, code)').eq('user_idtg', userId).eq('is_used', false).single();
+        const { data: discountData, error } = await supabaseClient.from('user_discounts').select('*, promocodes!inner(discount_percent, code)').eq('user_idtg', String(userId)).eq('is_used', false).maybeSingle();
         if (!error && discountData) activeDiscount = { percent: discountData.promocodes.discount_percent, promoId: discountData.promo_id, code: discountData.promocodes.code };
     } catch (e) { console.error('Error loading discount:', e); }
 }
@@ -1267,7 +1261,6 @@ window.editProfileField = async function(field) {
         if (error) throw error;
 
         valSpan.innerText = newVal;
-        if (field === 'nickname') document.getElementById('adminNick').textContent = newVal;
         Utils.showToast('Данные обновлены', 'success');
     } catch (e) {
         console.error('Ошибка сохранения:', e);
@@ -1501,9 +1494,6 @@ async function loadAdminPanelData() {
         let jailsEnabled = true;
 
         if (adminInfo) {
-            document.getElementById('adminNick').textContent = adminInfo.nickname || "Без ника";
-            document.getElementById('adminLvl').textContent = `Level ${adminInfo.admin_level || 1}`;
-
             if (adminInfo.reportsGoal) reportGoal = adminInfo.reportsGoal;
             if (adminInfo.onlineGoal) onlineGoalStr = adminInfo.onlineGoal;
             if (adminInfo.jailsGoal !== null) jailsGoal = adminInfo.jailsGoal;

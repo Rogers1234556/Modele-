@@ -1844,7 +1844,7 @@ body {
 /* Header */
 .admin-new-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     margin-top: 6px;
     gap: 12px;
