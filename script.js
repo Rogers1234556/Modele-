@@ -507,7 +507,7 @@ class UIManager {
                 await supabaseClient.from('promo_usages').insert([{ user_idtg: userId, promo_id: promo.id }]);
                 await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
                 activeDiscount = { percent: promo.discount_percent, promoId: promo.id, code: promo.code };
-                const currentDays = Utils.calculateDaysLeft(userData.daysgov);
+                const currentDays = Utils.calculateDaysLeft(userData.govhelper_days);
                 let bonusDaysAdded = 0;
                 if (currentDays <= 0) {
                     let bonusDays = 0;
@@ -570,15 +570,20 @@ class UIManager {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         let startDate = today;
-        if (userData.daysgov) {
-            const currentExpiry = new Date(userData.daysgov);
+        if (userData.govhelper_days) {
+            const currentExpiry = new Date(userData.govhelper_days);
             if (currentExpiry > today) startDate = currentExpiry;
         }
         const newDate = new Date(startDate);
         newDate.setDate(newDate.getDate() + days);
         const newExpiryString = newDate.toISOString().split('T')[0];
-        userData.daysgov = newExpiryString;
-        await supabaseClient.from('users').update({ daysgov: userData.daysgov, notes: note }).eq('idtg', userId);
+        userData.govhelper_days = newExpiryString;
+        const updatePayload = {
+            govhelper_days: userData.govhelper_days,
+            notes: note,
+            govhelper_issued: 'Promo'
+        };
+        await supabaseClient.from('users').update(updatePayload).eq('idtg', userId);
     }
 
     static updatePrices() {
@@ -889,16 +894,28 @@ class UIManager {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             let startDate = today;
-            if (userData?.daysgov) {
-                const currentExpiry = new Date(userData.daysgov);
+            if (userData?.govhelper_days) {
+                const currentExpiry = new Date(userData.govhelper_days);
                 if (currentExpiry > today) startDate = currentExpiry;
             }
             const newDate = new Date(startDate);
             newDate.setDate(newDate.getDate() + parseInt(plan));
             const newExpiryString = newDate.toISOString().split('T')[0];
-            const { error: updateError } = await supabaseClient.from('users').update({ daysgov: newExpiryString, updated_at: new Date().toISOString() }).eq('idtg', userId);
+            const newPurchasesCount = (userData?.total_purchases || 0) + 1;
+            const { error: updateError } = await supabaseClient
+                .from('users')
+                .update({
+                    govhelper_days: newExpiryString,
+                    govhelper_issued: method,
+                    total_purchases: newPurchasesCount
+                })
+                .eq('idtg', userId);
             if (updateError) throw updateError;
-            if (userData) userData.daysgov = newExpiryString;
+            if (userData) {
+                userData.govhelper_days = newExpiryString;
+                userData.govhelper_issued = method;
+                userData.total_purchases = newPurchasesCount;
+            }
             await supabaseClient.from('logs').insert([{ title: `Выдача подписки`, content: `Пользователю ${userName} (ID: ${userId}) выдана подписка на ${plan} дней через ${method}`, admin: 'system', created_at: new Date().toISOString() }]);
             const fee = paidAmount * 0.05;
             await supabaseClient.from('payments').insert([{ user_id: userId, user_name: userName, amount: paidAmount, fee: fee, net_amount: paidAmount - fee, method: method, status: 'completed', description: `Подписка на ${plan} дней (${isRenewalForce ? 'Продление' : 'Новая'})`, created_at: new Date().toISOString() }]);
@@ -924,7 +941,8 @@ class UIManager {
         if (!userData) return;
 
         document.getElementById('userName').textContent = userData.name || tg.initDataUnsafe.user.first_name || 'Пользователь';
-        document.getElementById('userTelegram').textContent = userData.telegram || `@${tg.initDataUnsafe.user.username}` || `ID: ${tg.initDataUnsafe.user.id}`;
+        const tgUsername = userData.user_name_tg || tg.initDataUnsafe.user.username;
+        document.getElementById('userTelegram').textContent = tgUsername ? `@${tgUsername.replace(/^@/, '')}` : `ID: ${tg.initDataUnsafe.user.id}`;
 
         const userAvatar = document.getElementById('userAvatar');
         if (tg.initDataUnsafe.user.photo_url) {
@@ -933,8 +951,8 @@ class UIManager {
             userAvatar.innerHTML = '';
         }
 
-        const daysGov = Utils.calculateDaysLeft(userData.daysgov);
-        const daysAdmin = Utils.calculateDaysLeft(userData.daysadmin); 
+        const daysGov = Utils.calculateDaysLeft(userData.govhelper_days);
+        const daysAdmin = Utils.calculateDaysLeft(userData.admhelper_days);
 
         document.getElementById('userKey').textContent = userData.key || 'Не назначен';
 
@@ -993,7 +1011,15 @@ class UIManager {
 async function saveUserData() {
     if (!userData || !tg.initDataUnsafe.user.id) return;
     try {
-        await supabaseClient.from('users').upsert({ idtg: tg.initDataUnsafe.user.id, name: userData.name, telegram: userData.telegram, status: userData.status, key: userData.key, daysgov: userData.daysgov, updated_at: new Date().toISOString() });
+        await supabaseClient.from('users').upsert({
+            idtg: tg.initDataUnsafe.user.id,
+            name: userData.name,
+            user_name_tg: userData.user_name_tg,
+            role: userData.role,
+            key: userData.key,
+            govhelper_days: userData.govhelper_days,
+            admhelper_days: userData.admhelper_days
+        }, { onConflict: 'idtg' });
     } catch (error) { console.error('Error saving user data:', error); }
 }
 
@@ -1006,21 +1032,27 @@ async function initApp() {
         if (error && error.code !== 'PGRST116') throw error;
 
         if (!data) {
-            const { data: newUser, error: createError } = await supabaseClient.from('users').insert([{ 
-                idtg: user.id, 
-                name: user.first_name || 'User', 
-                telegram: user.username || '', 
-                status: 'active', 
-                created_at: new Date().toISOString() 
+            const { data: newUser, error: createError } = await supabaseClient.from('users').insert([{
+                idtg: user.id,
+                name: user.first_name || 'User',
+                user_name_tg: user.username || '',
+                role: 'user',
+                total_purchases: 0,
+                created_at: new Date().toISOString()
             }]).select().single();
 
             if (createError) throw createError;
             userData = newUser;
         } else {
             userData = data;
+            // Подтянуть @username из Telegram, если ранее не сохранён
+            if (!userData.user_name_tg && user.username) {
+                await supabaseClient.from('users').update({ user_name_tg: user.username }).eq('idtg', user.id);
+                userData.user_name_tg = user.username;
+            }
         }
 
-        pricingMode = (userData && userData.daysgov) ? 'renew' : 'new';
+        pricingMode = (userData && userData.govhelper_days) ? 'renew' : 'new';
         await loadActiveDiscount();
         UIManager.init();
         await UIManager.updateProfileUI();
@@ -1034,7 +1066,7 @@ async function initApp() {
             UIManager.updateProfileUI();
         }
 
-        if (userData && Utils.calculateDaysLeft(userData.daysadmin) > 0) {
+        if (userData && Utils.calculateDaysLeft(userData.admhelper_days) > 0) {
             loadAdminPanelData();
         }
 
