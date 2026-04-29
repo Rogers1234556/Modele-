@@ -283,14 +283,6 @@
 
                     <!-- ====== GOV HELPER INFO ====== -->
                     <div id="info-gov-content" class="info-content-block">
-                        <div class="info-hero info-hero-gov">
-                            <div class="info-hero-icon"><i class="fas fa-shield-halved"></i></div>
-                            <div class="info-hero-text">
-                                <h3>GOV Helper</h3>
-                                <p>Помощник для государственных фракций. Ускоряет рутину и автоматизирует ключевые действия.</p>
-                            </div>
-                        </div>
-
                         <div class="info-video-card" data-youtube="dQw4w9WgXcQ">
                             <div class="info-video-thumb">
                                 <img loading="lazy" alt="GOV Helper preview" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg">
@@ -315,14 +307,6 @@
 
                     <!-- ====== ADMIN HELPER INFO ====== -->
                     <div id="info-admin-content" class="info-content-block" style="display: none;">
-                        <div class="info-hero info-hero-admin">
-                            <div class="info-hero-icon"><i class="fas fa-crown"></i></div>
-                            <div class="info-hero-text">
-                                <h3>Admin Helper</h3>
-                                <p>Инструмент для администраторов: автоматизация подсчёта нормы и удобные горячие клавиши.</p>
-                            </div>
-                        </div>
-
                         <div class="info-video-card" data-youtube="dQw4w9WgXcQ">
                             <div class="info-video-thumb">
                                 <img loading="lazy" alt="Admin Helper preview" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg">
@@ -379,17 +363,18 @@
                 <div class="admin-panel-container">
 
                     <div class="admin-new-header">
-                        <div class="admin-info-main">
-                            <h2 id="adminNick">Загрузка...</h2>
-                            <span class="admin-lvl-tag" id="adminLvl">LVL --</span>
+                        <div class="admin-header-title">
+                            <div class="admin-header-icon"><i class="fas fa-user-shield"></i></div>
+                            <div class="admin-header-text">
+                                <span class="admin-header-name">Admin Helper</span>
+                                <span class="admin-header-sub" id="adminStatDate">Статистика за сегодня</span>
+                            </div>
                         </div>
-                        <div class="admin-streak-badge">
+                        <div class="admin-streak-badge" title="Серия выполненных норм">
                             <i id="adminStreakIcon" class="fas fa-fire"></i>
                             <span id="adminStreak">0</span>
                         </div>
                     </div>
-
-                    <p class="admin-date-sub" id="adminStatDate">Статистика за сегодня</p>
 
                     <div class="admin-main-card">
                         <div class="card-glow"></div>
@@ -435,8 +420,20 @@
 
 
                     <div class="admin-compact-actions">
-                        <button class="action-btn-sm" id="btnAdminProfileMenu"><i class="fas fa-sliders-h"></i><span>Настройки</span></button>
-                        <button class="action-btn-sm" id="btnAdminOnline"><i class="fas fa-chart-line"></i><span>Онлайн</span></button>
+                        <button class="action-btn-sm" id="btnAdminProfileMenu">
+                            <i class="fas fa-sliders-h"></i>
+                            <div class="action-btn-text">
+                                <span class="action-btn-title">Настройки</span>
+                                <span class="action-btn-sub">Цели нормы</span>
+                            </div>
+                        </button>
+                        <button class="action-btn-sm" id="btnAdminOnline">
+                            <i class="fas fa-chart-line"></i>
+                            <div class="action-btn-text">
+                                <span class="action-btn-title">Статистика</span>
+                                <span class="action-btn-sub">Месяц / всё время</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </section>

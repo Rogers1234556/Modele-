@@ -463,11 +463,8 @@ class UIManager {
         if (btnAdminProfileMenu) {
             btnAdminProfileMenu.addEventListener('click', () => {
                 const userId = tg.initDataUnsafe?.user?.id;
-                const nickname = document.getElementById('adminNick').textContent;
-                let levelText = document.getElementById('adminLvl').textContent;
-                const level = levelText.replace('LVL ', '').replace('Level ', '').trim();
-
-                openAdminProfile(userId, nickname, level);
+                const nickname = userData?.name || tg.initDataUnsafe?.user?.first_name || '';
+                openAdminProfile(userId, nickname, null);
             });
         }
         const btnAdminOnline = document.getElementById('btnAdminOnline');
@@ -531,6 +528,9 @@ class UIManager {
                 Utils.showToast(`Срок действия промокода истёк ${expDate}`, 'error');
                 return;
             }
+
+            // Глобальная проверка лимита активаций по таблице promo_usages
+            // (учитываем все аккаунты, а не только локальный счётчик used_count)
             const { count: totalUsages, error: totalUsagesError } = await supabaseClient
                 .from('promo_usages')
                 .select('id', { count: 'exact', head: true })
@@ -540,7 +540,6 @@ class UIManager {
                 Utils.showToast(`Ошибка проверки лимита: ${totalUsagesError.message || totalUsagesError.code}`, 'error');
                 return;
             }
-
             const realUsedCount = totalUsages || 0;
             if (promo.max_uses && realUsedCount >= promo.max_uses) {
                 Utils.showToast(`Лимит активаций исчерпан (${realUsedCount}/${promo.max_uses})`, 'error');
@@ -549,7 +548,7 @@ class UIManager {
 
             const { data: usage, error: usageError } = await supabaseClient
                 .from('promo_usages')
-                .select('id')
+                .select('*')
                 .eq('promo_id', promo.id)
                 .eq('user_idtg', String(userId))
                 .maybeSingle();
@@ -562,51 +561,47 @@ class UIManager {
                 Utils.showToast('Вы уже активировали этот промокод ранее', 'error');
                 return;
             }
-            const productLabel = currentProduct === 'admin' ? 'Admin Helper' : 'GOV Helper';
-            const userIdStr = String(userId);
-            if (promo.type === 'Gift' || promo.type === 'FunPay') {
-                if (promo.days > 0) {
-                    await UIManager.addDaysToUser(userId, promo.days);
-                    await supabaseClient.from('promo_usages').insert([{ user_idtg: userIdStr, promo_id: promo.id }]);
-                    await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
-                    await UIManager.logPromoActivation(promo.days, productLabel);
-                    Utils.showToast(`Промокод активирован! Добавлено ${promo.days} ${Utils.getDaysWord(promo.days)}`, 'success');
-                } else {
-                    Utils.showToast('Ошибка: промокод не содержит дней', 'error');
-                }
-            } else if (promo.type === 'Price') {
+            const hasDays = promo.days && promo.days > 0;
+            const hasDiscount = promo.discount_percent && promo.discount_percent > 0;
+
+            if (!hasDays && !hasDiscount) {
+                Utils.showToast('Ошибка: промокод не содержит ни дней, ни скидки', 'error');
+                return;
+            }
+
+            if (hasDiscount) {
                 const { error: discountError } = await supabaseClient
                     .from('user_discounts')
-                    .insert([{ user_idtg: userIdStr, promo_id: promo.id, discount_percent: promo.discount_percent, promo_type: promo.type, is_used: false }]);
+                    .insert([{ user_idtg: String(userId), promo_id: promo.id, discount_percent: promo.discount_percent, is_used: false }]);
                 if (discountError) throw discountError;
-                await supabaseClient.from('promo_usages').insert([{ user_idtg: userIdStr, promo_id: promo.id }]);
-                await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id });
                 activeDiscount = { percent: promo.discount_percent, promoId: promo.id, code: promo.code };
-                const daysFieldForCurrent = currentProduct === 'admin' ? 'admhelper_days' : 'govhelper_days';
-                const currentDays = Utils.calculateDaysLeft(userData?.[daysFieldForCurrent]);
-                let bonusDaysAdded = 0;
-                if (currentDays <= 0) {
-                    let bonusDays = 0;
-                    const p = promo.discount_percent;
-                    if (p >= 50) bonusDays = 10;
-                    else if (p >= 40) bonusDays = 9;
-                    else if (p >= 30) bonusDays = 8;
-                    else if (p >= 20) bonusDays = 7;
-                    else if (p >= 10) bonusDays = 6;
-                    else if (p >= 1) bonusDays = 5;
-                    if (bonusDays > 0) {
-                        await UIManager.addDaysToUser(userId, bonusDays);
-                        bonusDaysAdded = bonusDays;
-                        Utils.showToast(`Скидка ${p}% + ${bonusDays} дней в подарок!`, 'success');
-                    } else {
-                        Utils.showToast(`Скидка ${p}% активирована!`, 'success');
-                    }
-                } else {
-                    Utils.showToast(`Скидка ${promo.discount_percent}% активирована!`, 'success');
-                }
-                await UIManager.logPromoActivation(bonusDaysAdded, productLabel, promo.discount_percent);
-                UIManager.updatePrices();
             }
+
+            let bonusDaysAdded = 0;
+            const promoProduct = (promo.product || 'GOV').toUpperCase();
+            if (hasDays) {
+                await UIManager.addDaysToUser(userId, promo.days, `Активация промокода ${promo.code} (${promo.type})`, promoProduct);
+                bonusDaysAdded = promo.days;
+            }
+
+            await supabaseClient.from('promo_usages').insert([{ user_idtg: String(userId), promo_id: promo.id }]);
+            await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id }).then(() => {}).catch(err => {
+                console.warn('increment_promo_uses RPC недоступен, обновим напрямую', err);
+                supabaseClient.from('promocodes').update({ used_count: (promo.used_count || 0) + 1 }).eq('id', promo.id);
+            });
+
+            const productLabel = promoProduct === 'ADM' ? 'ADM Helper' : 'GOV Helper';
+            await UIManager.logPromoActivation(bonusDaysAdded, productLabel, hasDiscount ? promo.discount_percent : 0);
+
+            if (hasDiscount && hasDays) {
+                Utils.showToast(`Промокод активирован! Скидка ${promo.discount_percent}% + ${promo.days} ${Utils.getDaysWord(promo.days)} (${productLabel})`, 'success');
+            } else if (hasDiscount) {
+                Utils.showToast(`Скидка ${promo.discount_percent}% активирована!`, 'success');
+            } else {
+                Utils.showToast(`Промокод активирован! Добавлено ${promo.days} ${Utils.getDaysWord(promo.days)} (${productLabel})`, 'success');
+            }
+
+            if (hasDiscount) UIManager.updatePrices();
             UIManager.closeModals();
             document.getElementById('promoCode').value = '';
             await UIManager.updateProfileUI();
@@ -642,30 +637,32 @@ class UIManager {
         }
     }
 
-    static async addDaysToUser(userId, days, _note = '') {
+    static async addDaysToUser(userId, days, note = '', product = 'GOV') {
+        const isAdm = (product || 'GOV').toUpperCase() === 'ADM';
+        const dateField = isAdm ? 'admhelper_days' : 'govhelper_days';
+        const issuedField = isAdm ? 'admhelper_issued' : 'govhelper_issued';
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const product = currentProduct === 'admin' ? 'admin' : 'gov';
-        const daysField = product === 'admin' ? 'admhelper_days' : 'govhelper_days';
-        const issuedField = product === 'admin' ? 'admhelper_issued' : 'govhelper_issued';
-
         let startDate = today;
-        const currentVal = userData ? userData[daysField] : null;
-        if (currentVal) {
-            const currentExpiry = new Date(currentVal);
+        if (userData && userData[dateField]) {
+            const currentExpiry = new Date(userData[dateField]);
             if (currentExpiry > today) startDate = currentExpiry;
         }
         const newDate = new Date(startDate);
         newDate.setDate(newDate.getDate() + days);
         const newExpiryString = newDate.toISOString().split('T')[0];
+
         if (userData) {
-            userData[daysField] = newExpiryString;
+            userData[dateField] = newExpiryString;
             userData[issuedField] = 'Promo';
         }
+
         const updatePayload = {
-            [daysField]: newExpiryString,
+            [dateField]: newExpiryString,
             [issuedField]: 'Promo'
         };
+        if (note) updatePayload.notes = note;
         await supabaseClient.from('users').update(updatePayload).eq('idtg', userId);
     }
 
@@ -1189,54 +1186,14 @@ async function initApp() {
 }
 
 async function loadAdminRadmirList() {
-    try {
-        const { data: admins, error } = await supabaseClient
-            .from('administrator_radmir')
-            .select('*')
-            .order('admin_level', { ascending: false });
-
-        if (error) throw error;
-
-        const listContainer = document.getElementById('adminRadmirList');
-        listContainer.innerHTML = ''; 
-
-        if (!admins || admins.length === 0) {
-            listContainer.innerHTML = '<div style="text-align:center; color: var(--gray-400);">Состав пуст</div>';
-            return;
-        }
-
-        admins.forEach(admin => {
-            const card = document.createElement('div');
-            card.className = 'admin-card';
-
-            const nickname = admin.nickname && admin.nickname !== 'Неизвестно' 
-                ? admin.nickname 
-                : `User ${admin.idtg}`;
-
-            card.innerHTML = `
-                <div class="admin-info">
-                    <span class="admin-nickname">${nickname}</span>
-                    <span class="admin-id">ID: ${admin.idtg}</span>
-                </div>
-                <div class="admin-level-badge">
-                    ${admin.admin_level} lvl
-                </div>
-            `;
-
-            listContainer.appendChild(card);
-        });
-
-    } catch (e) {
-        console.error('Ошибка загрузки админ-состава:', e);
-        document.getElementById('adminRadmirList').innerHTML = 
-            '<div style="text-align:center; color: var(--danger);">Ошибка загрузки данных</div>';
-    }
+    const listContainer = document.getElementById('adminRadmirList');
+    if (!listContainer) return;
 }
 
 async function loadActiveDiscount() {
     try {
         const userId = tg.initDataUnsafe.user.id;
-        const { data: discountData, error } = await supabaseClient.from('user_discounts').select('*, promocodes!inner(discount_percent, code)').eq('user_idtg', userId).eq('is_used', false).single();
+        const { data: discountData, error } = await supabaseClient.from('user_discounts').select('*, promocodes!inner(discount_percent, code)').eq('user_idtg', String(userId)).eq('is_used', false).maybeSingle();
         if (!error && discountData) activeDiscount = { percent: discountData.promocodes.discount_percent, promoId: discountData.promo_id, code: discountData.promocodes.code };
     } catch (e) { console.error('Error loading discount:', e); }
 }
@@ -1246,7 +1203,7 @@ function applyDiscount(price) {
     return Math.round(price * (1 - activeDiscount.percent / 100));
 }
 
-// ================= ОБНОВЛЕННЫЙ ПРОФИЛЬ (БЕЗ РЕДАКТИРОВАНИЯ УРОВНЯ) =================
+// ================= НАСТРОЙКИ ИЗ admhelper_settings =================
 async function openAdminProfile(idtg, nickname, level) {
     const modal = document.getElementById('adminProfileModal');
     const body = document.getElementById('adminProfileBody');
@@ -1255,18 +1212,31 @@ async function openAdminProfile(idtg, nickname, level) {
     body.innerHTML = '<div style="text-align:center; padding: 32px 20px; color: var(--gray-400);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Загрузка...</div>';
 
     try {
-        const { data, error } = await supabaseClient
-            .from('administrator_radmir')
-            .select('reportsGoal, onlineGoal, jailsGoal, jailsEnabled')
-            .eq('idtg', idtg)
-            .single();
+        const userKey = userData?.key;
+        if (!userKey) {
+            body.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--gray-400);">Ключ пользователя не найден.<br>Сначала купите подписку.</div>`;
+            return;
+        }
 
-        if (error) throw error;
+        let { data, error } = await supabaseClient
+            .from('admhelper_settings')
+            .select('min_report, min_online, min_jail, enable_jail')
+            .eq('key', userKey)
+            .maybeSingle();
 
-        const repGoal = data.reportsGoal !== null ? data.reportsGoal : 245;
-        const onlGoal = data.onlineGoal || '02:55';
-        const jGoal = data.jailsGoal !== null ? data.jailsGoal : 10;
-        const jEnabled = data.jailsEnabled !== false;
+        if (error && error.code !== 'PGRST116') throw error;
+
+        if (!data) {
+            const defaults = { key: userKey, min_report: 245, min_online: '02:55', min_jail: 10, enable_jail: true };
+            const { error: insertError } = await supabaseClient.from('admhelper_settings').insert([defaults]);
+            if (insertError) console.warn('Не удалось создать настройки по умолчанию:', insertError);
+            data = defaults;
+        }
+
+        const repGoal = data.min_report !== null && data.min_report !== undefined ? data.min_report : 245;
+        const onlGoal = data.min_online || '02:55';
+        const jGoal = data.min_jail !== null && data.min_jail !== undefined ? data.min_jail : 10;
+        const jEnabled = data.enable_jail !== false;
 
         body.innerHTML = `
             <div class="admin-profile-container">
@@ -1308,61 +1278,78 @@ async function openAdminProfile(idtg, nickname, level) {
 
 // ================= ФУНКЦИЯ РЕДАКТИРОВАНИЯ С ПРОВЕРКОЙ ФОРМАТА =================
 window.editProfileField = async function(field) {
-    const userId = tg.initDataUnsafe?.user?.id;
-    if (!userId) return;
+    const userKey = userData?.key;
+    if (!userKey) {
+        Utils.showToast('Ключ пользователя не найден', 'error');
+        return;
+    }
 
     const valSpan = document.getElementById(`val-${field}`);
     const currentVal = valSpan.innerText;
 
     const prompts = {
-        'nickname': 'Введите новый никнейм:',
         'reports': 'Введите цель по репортам (число):',
         'online': 'Введите время в формате ЧЧ:ММ (например, 02:30):',
         'jails': 'Введите цель по джаилам (число):'
     };
 
     let newVal = prompt(prompts[field], currentVal);
-
-    // Если нажали "Отмена" или ничего не ввели
     if (newVal === null || newVal.trim() === "" || newVal === currentVal) return;
-
     newVal = newVal.trim();
 
-    // --- ПРОВЕРКА ФОРМАТА ВРЕМЕНИ ДЛЯ ОНЛАЙНА ---
     if (field === 'online') {
-        // Регулярное выражение: от 1 до 2 цифр часов : ровно 2 цифры минут (00-59)
         const timeRegex = /^([0-9]{1,2}):([0-5][0-9])$/;
-
         if (!timeRegex.test(newVal)) {
             Utils.showToast('Ошибка! Формат должен быть ЧЧ:ММ (напр. 03:15)', 'error');
-            return; // Прекращаем выполнение
+            return;
         }
     }
 
-    // Подготовка данных
     let updateData = {};
-    if (field === 'nickname') updateData.nickname = newVal;
-    if (field === 'reports') updateData.reportsGoal = parseInt(newVal);
-    if (field === 'online') updateData.onlineGoal = newVal;
-    if (field === 'jails') updateData.jailsGoal = parseInt(newVal);
+    if (field === 'reports') updateData.min_report = parseInt(newVal);
+    if (field === 'online') updateData.min_online = newVal;
+    if (field === 'jails') updateData.min_jail = parseInt(newVal);
 
     valSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
         const { error } = await supabaseClient
-            .from('administrator_radmir')
+            .from('admhelper_settings')
             .update(updateData)
-            .eq('idtg', userId);
+            .eq('key', userKey);
 
         if (error) throw error;
 
         valSpan.innerText = newVal;
-        if (field === 'nickname') document.getElementById('adminNick').textContent = newVal;
         Utils.showToast('Данные обновлены', 'success');
     } catch (e) {
         console.error('Ошибка сохранения:', e);
         valSpan.innerText = currentVal;
         Utils.showToast('Ошибка при сохранении', 'error');
+    }
+}
+
+window.toggleJailsGoal = async function(checkbox) {
+    const userKey = userData?.key;
+    if (!userKey) return;
+    const enabled = checkbox.checked;
+    const valSpan = document.getElementById('val-jails');
+    const editBtn = document.getElementById('btn-edit-jails');
+    if (valSpan) valSpan.style.opacity = enabled ? 1 : 0.4;
+    if (editBtn) editBtn.disabled = !enabled;
+
+    try {
+        const { error } = await supabaseClient
+            .from('admhelper_settings')
+            .update({ enable_jail: enabled })
+            .eq('key', userKey);
+        if (error) throw error;
+    } catch (e) {
+        console.error('Ошибка переключения джаилов:', e);
+        checkbox.checked = !enabled;
+        if (valSpan) valSpan.style.opacity = !enabled ? 1 : 0.4;
+        if (editBtn) editBtn.disabled = enabled;
+        Utils.showToast('Не удалось обновить настройку', 'error');
     }
 }
 
@@ -1379,16 +1366,22 @@ async function openAdminOnline(idtg, isDetailed = false) {
     body.innerHTML = '<div style="text-align:center; padding: 50px 20px; color: var(--gray-400);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Загрузка статистики...</div>';
 
     try {
+        const userKey = userData?.key;
+        if (!userKey) {
+            body.innerHTML = `<div style="text-align:center; padding: 30px 20px; color: var(--gray-400);">Ключ пользователя не найден.<br>Сначала купите подписку.</div>`;
+            return;
+        }
+
         const { data: userSettings } = await supabaseClient
-            .from('administrator_radmir')
-            .select('reportsGoal, onlineGoal')
-            .eq('idtg', idtg)
-            .single();
+            .from('admhelper_settings')
+            .select('min_report, min_online')
+            .eq('key', userKey)
+            .maybeSingle();
 
-        const repGoal = userSettings?.reportsGoal || 245;
-        const onlGoalMins = timeToMinutes(userSettings?.onlineGoal || "02:55") || 1;
+        const repGoal = userSettings?.min_report || 245;
+        const onlGoalMins = timeToMinutes(userSettings?.min_online || "02:55") || 1;
 
-        let query = supabaseClient.from('administration_radmir_norma').select('*').eq('idtg', idtg);
+        let query = supabaseClient.from('admhelper_norma').select('*').eq('key', userKey);
 
         const date = getMSKDate();
         const year = date.getFullYear();
@@ -1400,11 +1393,21 @@ async function openAdminOnline(idtg, isDetailed = false) {
         if (!isDetailed) {
             const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
             const lastDay = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
-            query = query.gte('record_date', firstDay).lte('record_date', lastDay);
+            query = query.gte('date', firstDay).lte('date', lastDay);
         }
 
-        const { data: normaData, error } = await query;
+        const { data: rawNormaData, error } = await query;
         if (error) throw error;
+
+        const normaData = (rawNormaData || []).map(item => ({
+            record_date: item.date,
+            online: item.online,
+            reports: item.report,
+            jails: item.jail,
+            mutes: item.mute,
+            warns: item.warn,
+            bans: item.ban
+        }));
 
         let totalPoints = 0;
         let totalOnlineMins = 0;
@@ -1577,30 +1580,29 @@ async function loadAdminPanelData() {
     try {
         const userId = tg.initDataUnsafe?.user?.id;
         if (!userId) return;
-
-        // 1. Загружаем профиль вместе с индивидуальными целями
-        const { data: adminInfo, error: infoError } = await supabaseClient
-            .from('administrator_radmir')
-            .select('nickname, admin_level, reportsGoal, onlineGoal, jailsGoal, jailsEnabled')
-            .eq('idtg', userId)
-            .single();
+        const userKey = userData?.key;
 
         let reportGoal = 245;
         let onlineGoalStr = "02:55";
         let jailsGoal = 10;
         let jailsEnabled = true;
 
-        if (adminInfo) {
-            document.getElementById('adminNick').textContent = adminInfo.nickname || "Без ника";
-            document.getElementById('adminLvl').textContent = `Level ${adminInfo.admin_level || 1}`;
+        if (userKey) {
+            const { data: adminInfo } = await supabaseClient
+                .from('admhelper_settings')
+                .select('min_report, min_online, min_jail, enable_jail')
+                .eq('key', userKey)
+                .maybeSingle();
 
-            if (adminInfo.reportsGoal) reportGoal = adminInfo.reportsGoal;
-            if (adminInfo.onlineGoal) onlineGoalStr = adminInfo.onlineGoal;
-            if (adminInfo.jailsGoal !== null) jailsGoal = adminInfo.jailsGoal;
-            if (adminInfo.jailsEnabled !== null) jailsEnabled = adminInfo.jailsEnabled;
+            if (adminInfo) {
+                if (adminInfo.min_report) reportGoal = adminInfo.min_report;
+                if (adminInfo.min_online) onlineGoalStr = adminInfo.min_online;
+                if (adminInfo.min_jail !== null && adminInfo.min_jail !== undefined) jailsGoal = adminInfo.min_jail;
+                if (adminInfo.enable_jail !== null && adminInfo.enable_jail !== undefined) jailsEnabled = adminInfo.enable_jail;
+            }
         }
 
-        // 2. Обновляем текст целей в интерфейсе
+        // Обновляем текст целей в интерфейсе
         const targetReports = document.getElementById('targetReports');
         const targetOnline = document.getElementById('targetOnline');
         const targetJails = document.getElementById('targetJails');
@@ -1619,13 +1621,24 @@ async function loadAdminPanelData() {
             }
         }
 
+        if (!userKey) { resetAdminStats(); return; }
+
         const today = getMSKDateString();
-        const { data: stats } = await supabaseClient
-            .from('administration_radmir_norma')
+        const { data: rawStats } = await supabaseClient
+            .from('admhelper_norma')
             .select('*')
-            .eq('idtg', userId)
-            .eq('record_date', today)
-            .single();
+            .eq('key', userKey)
+            .eq('date', today)
+            .maybeSingle();
+
+        const stats = rawStats ? {
+            reports: rawStats.report,
+            jails: rawStats.jail,
+            mutes: rawStats.mute,
+            warns: rawStats.warn,
+            bans: rawStats.ban,
+            online: rawStats.online
+        } : null;
 
         if (stats) {
             document.getElementById('statReports').textContent = stats.reports || 0;
@@ -1670,7 +1683,7 @@ async function loadAdminPanelData() {
             resetAdminStats();
         }
 
-        await updateStreakUI(userId, reportGoal, onlineGoalStr);
+        await updateStreakUI(userKey, reportGoal, onlineGoalStr);
 
         const mskNow = getMSKDate();
         document.getElementById('adminStatDate').textContent = `Статистика за ${mskNow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}`;
@@ -1695,27 +1708,30 @@ function timeToMinutes(timeStr) {
     return (parseInt(parts[0]) * 60) + parseInt(parts[1]);
 }
 
-async function updateStreakUI(userId, reportGoal, onlineGoalStr) {
+async function updateStreakUI(userKey, reportGoal, onlineGoalStr) {
     reportGoal = reportGoal || 245;
     onlineGoalStr = onlineGoalStr || "02:55";
 
-    const { data: allNormaData } = await supabaseClient
-        .from('administration_radmir_norma')
-        .select('record_date, reports, online')
-        .eq('idtg', userId);
-
-    const onlineGoalMinutes = Math.max(1, timeToMinutes(onlineGoalStr));
     const completedDates = [];
 
-    if (allNormaData) {
-        allNormaData.forEach(item => {
-            const reportMult = (item.reports || 0) / reportGoal;
-            const onlineMult = timeToMinutes(item.online) / onlineGoalMinutes;
-            const normMultiplier = Math.floor(Math.min(reportMult, onlineMult) * 2) / 2;
-            if (normMultiplier >= 1) {
-                completedDates.push(item.record_date);
-            }
-        });
+    if (userKey) {
+        const { data: allNormaData } = await supabaseClient
+            .from('admhelper_norma')
+            .select('date, report, online')
+            .eq('key', userKey);
+
+        const onlineGoalMinutes = Math.max(1, timeToMinutes(onlineGoalStr));
+
+        if (allNormaData) {
+            allNormaData.forEach(item => {
+                const reportMult = (item.report || 0) / reportGoal;
+                const onlineMult = timeToMinutes(item.online) / onlineGoalMinutes;
+                const normMultiplier = Math.floor(Math.min(reportMult, onlineMult) * 2) / 2;
+                if (normMultiplier >= 1) {
+                    completedDates.push(item.date);
+                }
+            });
+        }
     }
 
     const streakResult = calculateStreak(completedDates);
