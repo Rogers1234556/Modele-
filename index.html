@@ -262,7 +262,7 @@
 
 
             <section id="information" class="page">
-                <div class="factions-section">
+                <div class="info-section">
                     <div class="section-header" style="margin-bottom: 10px;">
                         <h2>Информация</h2>
                         <p>Выберите продукт для просмотра возможностей</p>
@@ -281,34 +281,94 @@
                         </div>
                     </div>
 
+                    <!-- ====== GOV HELPER INFO ====== -->
                     <div id="info-gov-content" class="info-content-block">
+                        <div class="info-hero info-hero-gov">
+                            <div class="info-hero-icon"><i class="fas fa-shield-halved"></i></div>
+                            <div class="info-hero-text">
+                                <h3>GOV Helper</h3>
+                                <p>Помощник для государственных фракций. Ускоряет рутину и автоматизирует ключевые действия.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-video-card" data-youtube="dQw4w9WgXcQ">
+                            <div class="info-video-thumb">
+                                <img loading="lazy" alt="GOV Helper preview" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg">
+                                <button type="button" class="info-video-play" aria-label="Воспроизвести видео">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="info-video-badge"><i class="fab fa-youtube"></i> YouTube</span>
+                            </div>
+                            <div class="info-video-meta">
+                                <span class="info-video-title">Обзор GOV Helper</span>
+                                <a class="info-video-link" target="_blank" rel="noopener" href="https://youtu.be/dQw4w9WgXcQ">
+                                    Открыть на YouTube <i class="fas fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="info-section-title">
+                            <span><i class="fas fa-sitemap"></i> Поддерживаемые фракции</span>
+                        </div>
                         <div class="factions-grid" id="factionsList"></div>
                     </div>
 
+                    <!-- ====== ADMIN HELPER INFO ====== -->
                     <div id="info-admin-content" class="info-content-block" style="display: none;">
-                        <div class="admin-features-list">
+                        <div class="info-hero info-hero-admin">
+                            <div class="info-hero-icon"><i class="fas fa-crown"></i></div>
+                            <div class="info-hero-text">
+                                <h3>Admin Helper</h3>
+                                <p>Инструмент для администраторов: автоматизация подсчёта нормы и удобные горячие клавиши.</p>
+                            </div>
+                        </div>
 
-                            <div class="feature-card">
-                                <h4><i class="fas fa-star text-warning"></i> Основной функционал</h4>
-                                <ul>
-                                    <li>Подсчет нормы</li>
+                        <div class="info-video-card" data-youtube="dQw4w9WgXcQ">
+                            <div class="info-video-thumb">
+                                <img loading="lazy" alt="Admin Helper preview" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg">
+                                <button type="button" class="info-video-play" aria-label="Воспроизвести видео">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="info-video-badge"><i class="fab fa-youtube"></i> YouTube</span>
+                            </div>
+                            <div class="info-video-meta">
+                                <span class="info-video-title">Обзор Admin Helper</span>
+                                <a class="info-video-link" target="_blank" rel="noopener" href="https://youtu.be/dQw4w9WgXcQ">
+                                    Открыть на YouTube <i class="fas fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="info-cards-stack">
+                            <div class="info-card-modern">
+                                <div class="info-card-head">
+                                    <div class="info-card-icon" style="background:rgba(245,158,11,0.15);color:#F59E0B;"><i class="fas fa-star"></i></div>
+                                    <h4>Основной функционал</h4>
+                                </div>
+                                <ul class="info-card-list">
+                                    <li><i class="fas fa-check"></i> Подсчёт нормы</li>
                                 </ul>
                             </div>
 
-                            <div class="feature-card">
-                                <h4><i class="fas fa-layer-group" style="color: #60A5FA;"></i> Доступные меню</h4>
-                                <ul>
-                                    <li>Основное меню плагина</li>
+                            <div class="info-card-modern">
+                                <div class="info-card-head">
+                                    <div class="info-card-icon" style="background:rgba(96,165,250,0.15);color:#60A5FA;"><i class="fas fa-layer-group"></i></div>
+                                    <h4>Доступные меню</h4>
+                                </div>
+                                <ul class="info-card-list">
+                                    <li><i class="fas fa-check"></i> Основное меню плагина</li>
                                 </ul>
                             </div>
 
-                            <div class="feature-card">
-                                <h4><i class="fas fa-keyboard text-success"></i> Горячие клавиши</h4>
+                            <div class="info-card-modern">
+                                <div class="info-card-head">
+                                    <div class="info-card-icon" style="background:rgba(16,185,129,0.15);color:#10B981;"><i class="fas fa-keyboard"></i></div>
+                                    <h4>Горячие клавиши</h4>
+                                </div>
                                 <div class="hotkeys-grid">
-                                    <div class="hotkey-item"><kbd>ALT + F4</kbd> <span>Открыть меню</span></div> 
+                                    <div class="hotkey-item"><kbd>ALT + F4</kbd><span>Открыть меню</span></div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -319,18 +379,17 @@
                 <div class="admin-panel-container">
 
                     <div class="admin-new-header">
-                        <div class="admin-header-title">
-                            <div class="admin-header-icon"><i class="fas fa-user-shield"></i></div>
-                            <div class="admin-header-text">
-                                <span class="admin-header-name">Admin Helper</span>
-                                <span class="admin-header-sub" id="adminStatDate">Статистика за сегодня</span>
-                            </div>
+                        <div class="admin-info-main">
+                            <h2 id="adminNick">Загрузка...</h2>
+                            <span class="admin-lvl-tag" id="adminLvl">LVL --</span>
                         </div>
-                        <div class="admin-streak-badge" title="Серия выполненных норм">
+                        <div class="admin-streak-badge">
                             <i id="adminStreakIcon" class="fas fa-fire"></i>
                             <span id="adminStreak">0</span>
                         </div>
                     </div>
+
+                    <p class="admin-date-sub" id="adminStatDate">Статистика за сегодня</p>
 
                     <div class="admin-main-card">
                         <div class="card-glow"></div>
@@ -376,20 +435,8 @@
 
 
                     <div class="admin-compact-actions">
-                        <button class="action-btn-sm" id="btnAdminProfileMenu">
-                            <i class="fas fa-sliders-h"></i>
-                            <div class="action-btn-text">
-                                <span class="action-btn-title">Настройки</span>
-                                <span class="action-btn-sub">Цели нормы</span>
-                            </div>
-                        </button>
-                        <button class="action-btn-sm" id="btnAdminOnline">
-                            <i class="fas fa-chart-line"></i>
-                            <div class="action-btn-text">
-                                <span class="action-btn-title">Статистика</span>
-                                <span class="action-btn-sub">Месяц / всё время</span>
-                            </div>
-                        </button>
+                        <button class="action-btn-sm" id="btnAdminProfileMenu"><i class="fas fa-sliders-h"></i><span>Настройки</span></button>
+                        <button class="action-btn-sm" id="btnAdminOnline"><i class="fas fa-chart-line"></i><span>Онлайн</span></button>
                     </div>
                 </div>
             </section>
