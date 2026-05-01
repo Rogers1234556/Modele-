@@ -198,44 +198,45 @@
 
             <section id="profile" class="page">
                 <div class="profile-container">
-                    <div class="profile-header-new">
-                        <div class="avatar-container">
-                            <div id="userAvatar" class="user-avatar-new">
+
+                    <div class="profile-hero-card">
+                        <div class="profile-avatar-wrap">
+                            <div id="userAvatar" class="user-avatar-circle">
                                 <i class="fas fa-user"></i>
                             </div>
                         </div>
-                        <div class="profile-info-main">
-                            <h2 id="userName">Пользователь</h2>
-                            <p id="userTelegram">@username</p>
-                        </div>
-                    </div>
+                        <h2 id="userName" class="profile-hero-name">Пользователь</h2>
+                        <p id="userTelegram" class="profile-hero-tag">@username</p>
 
-                    <div class="profile-grid">
-                        <div class="info-card key-card">
-                            <div class="info-icon"><i class="fas fa-key"></i></div>
-                            <div class="info-content">
-                                <span class="info-label">Личный ключ</span>
-                                <span id="userKey" class="info-value">Загрузка...</span>
+                        <div class="profile-subs">
+                            <div class="profile-sub-card profile-anim-item" style="--anim-delay:0.06s">
+                                <div class="psc-icon gov-color"><i class="fas fa-building-columns"></i></div>
+                                <div class="psc-body">
+                                    <span class="psc-label">GOV Helper</span>
+                                    <span id="govDays" class="psc-value">Нет данных</span>
+                                </div>
+                                <div class="psc-badge gov-badge"><i class="fas fa-shield-halved"></i></div>
                             </div>
-                            <button class="copy-btn-new" onclick="copyUserKey()">
+
+                            <div class="profile-sub-card profile-anim-item" style="--anim-delay:0.13s">
+                                <div class="psc-icon adm-color"><i class="fas fa-user-shield"></i></div>
+                                <div class="psc-body">
+                                    <span class="psc-label">Admin Helper</span>
+                                    <span id="adminDays" class="psc-value">Нет данных</span>
+                                </div>
+                                <div class="psc-badge adm-badge"><i class="fas fa-crown"></i></div>
+                            </div>
+                        </div>
+
+                        <div class="profile-key-card profile-anim-item" style="--anim-delay:0.20s">
+                            <div class="psc-icon key-color"><i class="fas fa-key"></i></div>
+                            <div class="psc-body">
+                                <span class="psc-label">Личный ключ</span>
+                                <span id="userKey" class="psc-value psc-key-val">Загрузка...</span>
+                            </div>
+                            <button class="key-copy-btn" onclick="copyUserKey()">
                                 <i class="fas fa-copy" id="copyIcon"></i>
                             </button>
-                        </div>
-
-                        <div class="info-card sub-card">
-                            <div class="info-icon gov-icon"><i class="fas fa-building-columns"></i></div>
-                            <div class="info-content">
-                                <span class="info-label">Подписка GOV Helper</span>
-                                <span id="govDays" class="info-value">Нет данных</span>
-                            </div>
-                        </div>
-
-                        <div class="info-card sub-card">
-                            <div class="info-icon admin-icon"><i class="fas fa-user-shield"></i></div>
-                            <div class="info-content">
-                                <span class="info-label">Подписка Admin Helper</span>
-                                <span id="adminDays" class="info-value">Нет данных</span>
-                            </div>
                         </div>
                     </div>
 
@@ -244,19 +245,19 @@
                             <div class="action-icon"><i class="fas fa-ticket-alt"></i></div>
                             <span>Активировать промокод</span>
                             <i class="fas fa-chevron-right arrow"></i>
-                        </button>                   
+                        </button>
                         <button id="supportBtn" class="action-item">
                             <div class="action-icon"><i class="fas fa-headset"></i></div>
                             <span>Служба поддержки</span>
                             <i class="fas fa-chevron-right arrow"></i>
                         </button>
-
                         <button id="launcherBtn" class="action-item">
                             <div class="action-icon"><i class="fas fa-download"></i></div>
                             <span>Скачать лаунчер</span>
                             <i class="fas fa-chevron-right arrow"></i>
                         </button>
                     </div>
+
                 </div>
             </section>
 
