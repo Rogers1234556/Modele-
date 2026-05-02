@@ -1,5 +1,9 @@
 const tg = window.Telegram.WebApp;
 
+// --- PAYMENT SWITCH ---
+// false = оплата недоступна (показывает сообщение о разработке)
+const paymentOnthebuy = false;
+
 // --- GIFT MODE ---
 let giftMode = false;
 let giftRecipientIdtg = null;
@@ -394,6 +398,13 @@ class UIManager {
                 const plan = parseInt(document.getElementById('paymentPlanDays').value);
                 const isRenewal = document.getElementById('paymentIsRenewal').value === 'true';
 
+                if (!paymentOnthebuy) {
+                    const productKey = giftMode ? giftSelectedProduct : currentProduct;
+                    const productName = productKey === 'gov' ? 'GOV Helper' : 'Admin Helper';
+                    Utils.showToast(`В данный момент нельзя оплатить подписку на ${productName}, поскольку он находится на стадии разработки`, 'error');
+                    return;
+                }
+
                 document.getElementById('paymentMethodModal').classList.remove('active');
 
                 switch(method) {
@@ -522,12 +533,12 @@ class UIManager {
                 try {
                     const { data: found, error } = await supabaseClient
                         .from('users')
-                        .select('idtg, name, user_name_tg, key')
-                        .eq('key', val)
+                        .select('idtg, name, user_name_tg')
+                        .eq('idtg', val)
                         .maybeSingle();
                     if (error) throw error;
                     if (!found) {
-                        Utils.showToast('Ключ не найден. Проверьте правильность ключа', 'error');
+                        Utils.showToast('Пользователь не найден. Проверьте правильность Telegram ID', 'error');
                         document.getElementById('giftBtnIcon').className = 'fas fa-gift';
                         document.getElementById('giftBtnText').textContent = 'Оплатить';
                         confirmGiftBtn.style.opacity = '1';
@@ -1878,6 +1889,14 @@ async function loadAdminPanelData() {
 
         const mskNow = getMSKDate();
         document.getElementById('adminStatDate').textContent = `Статистика за ${mskNow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}`;
+        const topDateEl = document.getElementById('adminTopDate');
+        if (topDateEl) {
+            const d = mskNow;
+            const dd = String(d.getDate()).padStart(2,'0');
+            const mm = String(d.getMonth()+1).padStart(2,'0');
+            const yyyy = d.getFullYear();
+            topDateEl.textContent = `${dd}.${mm}.${yyyy}`;
+        }
 
     } catch (e) {
         console.error('Ошибка loadAdminPanelData:', e);

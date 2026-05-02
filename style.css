@@ -49,19 +49,20 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: #010B1E;
     background-image:
+        linear-gradient(180deg, rgba(4, 18, 58, 0.55) 0%, rgba(0, 2, 10, 0.55) 100%),
         repeating-linear-gradient(
             0deg,
             transparent,
             transparent 38px,
-            rgba(59, 130, 246, 0.05) 38px,
-            rgba(59, 130, 246, 0.05) 39px
+            rgba(59, 130, 246, 0.03) 38px,
+            rgba(59, 130, 246, 0.03) 39px
         ),
         repeating-linear-gradient(
             90deg,
             transparent,
             transparent 38px,
-            rgba(59, 130, 246, 0.05) 38px,
-            rgba(59, 130, 246, 0.05) 39px
+            rgba(59, 130, 246, 0.03) 38px,
+            rgba(59, 130, 246, 0.03) 39px
         );
     color: var(--gray-100);
     line-height: 1.5;
@@ -511,15 +512,7 @@ body {
 }
 
 .profile-hero-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 220px;
-    height: 130px;
-    background: radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.16) 0%, transparent 70%);
-    pointer-events: none;
+    display: none;
 }
 
 /* Аватарка — круглая с кольцом */
@@ -2237,10 +2230,57 @@ body {
 
 /* Контейнер админки */
 .admin-panel-container {
-    padding: 16px 16px 20px;
+    padding: 64px 16px 20px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+/* Верхняя полоска */
+.admin-top-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2px;
+    margin-bottom: 2px;
+}
+
+.admin-top-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.4px;
+}
+
+.admin-top-right {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.admin-top-box {
+    background: rgba(5, 10, 30, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.18);
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+}
+
+.admin-fire-box {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.admin-fire-box .fa-fire {
+    color: #f97316;
+    font-size: 13px;
+}
+.admin-fire-box .fa-fire-flame-curved {
+    color: #f97316;
+    font-size: 13px;
 }
 
 /* Header */
