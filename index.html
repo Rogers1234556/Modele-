@@ -271,15 +271,6 @@
                                 <span>Скачать лаунчер</span>
                                 <i class="fas fa-chevron-right arrow"></i>
                             </button>
-                            <div class="gift-section-sep"></div>
-                            <button id="giftBtn" class="action-item gift-item">
-                                <div class="action-icon gift-icon-c"><i class="fas fa-gift"></i></div>
-                                <div class="action-text-wrap">
-                                    <span>Подарить</span>
-                                    <span class="action-subtitle">Подарить другу подписку</span>
-                                </div>
-                                <i class="fas fa-chevron-right arrow"></i>
-                            </button>
                         </div>
                     </div>
 
@@ -586,6 +577,13 @@
                     <span id="selectedPlanInfo">Выбранный тариф: 30 дней</span>
                     <span id="selectedPlanPrice" class="plan-price-badge plan-price-badge-new"></span>
                 </div>
+                <div id="paymentGiftRecipientBox" class="payment-gift-recipient-box">
+                    <i class="fas fa-gift"></i>
+                    <div>
+                        <span class="payment-gift-recipient-label">Для</span>
+                        <span class="payment-gift-recipient-name" id="paymentGiftRecipientName">—</span>
+                    </div>
+                </div>
                 <div class="payment-methods-list">
                     <button class="payment-method-btn payment-option-card" data-method="stars">
                         <div class="payment-method-icon stars-icon option-icon stars-bg">
@@ -624,6 +622,17 @@
                         <div class="payment-method-info option-info">
                             <span class="payment-method-title option-title">Другое</span>
                             <span class="payment-method-desc option-hint">Связаться с поддержкой</span>
+                        </div>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
+                    </button>
+                    <div class="payment-gift-sep"></div>
+                    <button class="payment-method-btn payment-option-card" data-method="gift">
+                        <div class="payment-method-icon option-icon gift-bg">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="payment-method-info option-info">
+                            <span class="payment-method-title option-title">Подарить другу</span>
+                            <span class="payment-method-desc option-hint">Подарить подписку другому игроку</span>
                         </div>
                         <i class="fas fa-chevron-right arrow-icon"></i>
                     </button>

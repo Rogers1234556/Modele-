@@ -392,6 +392,12 @@ class UIManager {
                 const plan = parseInt(document.getElementById('paymentPlanDays').value);
                 const isRenewal = document.getElementById('paymentIsRenewal').value === 'true';
 
+                if (method === 'gift') {
+                    document.getElementById('paymentMethodModal').classList.remove('active');
+                    UIManager.openGiftModalFromPayment(plan);
+                    return;
+                }
+
                 document.getElementById('paymentMethodModal').classList.remove('active');
 
                 switch(method) {
@@ -469,27 +475,24 @@ class UIManager {
         const giftBtn = document.getElementById('giftBtn');
         if (giftBtn) {
             giftBtn.addEventListener('click', () => {
-                giftMode = false;
-                giftRecipientIdtg = null;
-                giftRecipientNameStr = '';
-                giftSelectedProduct = 'gov';
-                giftSelectedPlan = 30;
-                const inp = document.getElementById('giftRecipientInput');
-                if (inp) inp.value = '';
-                const foundBox = document.getElementById('giftRecipientFound');
-                if (foundBox) foundBox.style.display = 'none';
-                const confirmBtn = document.getElementById('confirmGiftBtn');
-                if (confirmBtn) {
-                    confirmBtn.style.opacity = '0.5';
-                    confirmBtn.style.pointerEvents = 'none';
-                    document.getElementById('giftBtnIcon').className = 'fas fa-search';
-                    document.getElementById('giftBtnText').textContent = 'Найти получателя';
-                }
-                document.querySelectorAll('.gift-product-btn').forEach(b => b.classList.toggle('active', b.dataset.gproduct === 'gov'));
-                document.querySelectorAll('.gift-plan-btn').forEach(b => b.classList.toggle('active', b.dataset.gplan === '30'));
-                document.getElementById('giftModal').classList.add('active');
+                UIManager.openGiftModalFromPayment(giftSelectedPlan || 30);
             });
         }
+
+        tg.onEvent('contactRequested', (result) => {
+            if (result.status === 'sent' && result.contact) {
+                const contactId = String(result.contact.user_id || '');
+                if (contactId) {
+                    const inp = document.getElementById('giftRecipientInput');
+                    if (inp) inp.value = contactId;
+                    const confirmBtn = document.getElementById('confirmGiftBtn');
+                    if (confirmBtn) {
+                        confirmBtn.style.opacity = '1';
+                        confirmBtn.style.pointerEvents = 'auto';
+                    }
+                }
+            }
+        });
 
         const giftRecipientInput = document.getElementById('giftRecipientInput');
         if (giftRecipientInput) {
@@ -533,10 +536,7 @@ class UIManager {
             confirmGiftBtn.addEventListener('click', async () => {
                 if (giftMode && giftRecipientIdtg) {
                     document.getElementById('giftModal').classList.remove('active');
-                    const savedProduct = currentProduct;
-                    currentProduct = giftSelectedProduct;
                     UIManager.showPaymentMethodSelection(giftSelectedPlan, false);
-                    currentProduct = savedProduct;
                     return;
                 }
                 const val = (document.getElementById('giftRecipientInput').value || '').trim();
@@ -840,10 +840,16 @@ class UIManager {
     static async createCryptoInvoice(plan, isRenewal) {
       try {
         const userId = tg.initDataUnsafe?.user?.id;
+        const productForPayment = giftMode ? giftSelectedProduct : currentProduct;
+        const body = { plan, isRenewal, userId, product: productForPayment };
+        if (giftMode && giftRecipientIdtg) {
+            body.giftRecipientId = giftRecipientIdtg;
+            body.giftRecipientName = giftRecipientNameStr;
+        }
         const response = await fetch(`${API_BASE}/api/create-crypto-invoice`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan, isRenewal, userId, product: currentProduct })
+          body: JSON.stringify(body)
         });
         const data = await response.json();
         if (!data.ok) throw new Error(data.description || 'Ошибка создания счета');
@@ -1002,6 +1008,31 @@ class UIManager {
         } catch (e) { console.error('Determine winner error:', e); }
     }
 
+    static openGiftModalFromPayment(plan) {
+        giftMode = false;
+        giftRecipientIdtg = null;
+        giftRecipientNameStr = '';
+        if (plan) {
+            giftSelectedPlan = plan;
+        } else {
+            giftSelectedPlan = 30;
+        }
+        const inp = document.getElementById('giftRecipientInput');
+        if (inp) inp.value = '';
+        const foundBox = document.getElementById('giftRecipientFound');
+        if (foundBox) foundBox.style.display = 'none';
+        const confirmBtn = document.getElementById('confirmGiftBtn');
+        if (confirmBtn) {
+            confirmBtn.style.opacity = '0.5';
+            confirmBtn.style.pointerEvents = 'none';
+            document.getElementById('giftBtnIcon').className = 'fas fa-search';
+            document.getElementById('giftBtnText').textContent = 'Найти получателя';
+        }
+        document.querySelectorAll('.gift-product-btn').forEach(b => b.classList.toggle('active', b.dataset.gproduct === 'gov'));
+        document.querySelectorAll('.gift-plan-btn').forEach(b => b.classList.toggle('active', b.dataset.gplan === String(giftSelectedPlan)));
+        document.getElementById('giftModal').classList.add('active');
+    }
+
     static showPaymentMethodSelection(plan, isRenewal) {
         const modal = document.getElementById('paymentMethodModal');
         if (modal) {
@@ -1010,20 +1041,15 @@ class UIManager {
             const planNames = { 15: '15 дней', 30: '30 дней', 365: '365 дней' };
             document.getElementById('selectedPlanInfo').textContent = `${planNames[plan] || plan + ' дней'}`;
 
-            let subNotice = modal.querySelector('.active-sub-notice');
-            if (!subNotice) {
-                subNotice = document.createElement('div');
-                subNotice.className = 'active-sub-notice';
-                modal.querySelector('.modal-body').prepend(subNotice);
-            }
+            const giftBox = document.getElementById('paymentGiftRecipientBox');
+            const giftNameEl = document.getElementById('paymentGiftRecipientName');
             if (giftMode && giftRecipientIdtg) {
-                subNotice.style.cssText = 'display:flex;align-items:center;gap:8px;color:#60A5FA;font-size:0.88rem;margin-bottom:10px;text-align:center;justify-content:center;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:8px 12px;';
-                subNotice.innerHTML = `<i class="fas fa-gift"></i> Подарок для: <strong>${giftRecipientNameStr}</strong>`;
-            } else if (isRenewal) {
-                subNotice.style.cssText = 'display:block;color:#10B981;font-size:0.9rem;margin-bottom:10px;text-align:center;';
-                subNotice.innerHTML = '<i class="fas fa-sync-alt"></i> Продление подписки';
+                if (giftBox) {
+                    giftBox.classList.add('visible');
+                    if (giftNameEl) giftNameEl.textContent = giftRecipientNameStr;
+                }
             } else {
-                subNotice.style.display = 'none';
+                if (giftBox) giftBox.classList.remove('visible');
             }
 
             const productForPrice = giftMode ? giftSelectedProduct : currentProduct;
@@ -1071,10 +1097,16 @@ class UIManager {
         }
         try {
             const userId = tg.initDataUnsafe.user.id;
+            const productForPayment = giftMode ? giftSelectedProduct : currentProduct;
+            const body = { plan, isRenewal, userId, product: productForPayment };
+            if (giftMode && giftRecipientIdtg) {
+                body.giftRecipientId = giftRecipientIdtg;
+                body.giftRecipientName = giftRecipientNameStr;
+            }
             const response = await fetch(`${API_BASE}/api/create-stars-invoice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plan, isRenewal, userId, product: currentProduct })
+                body: JSON.stringify(body)
             });
             const payload = await response.json();
             const invoiceUrl = payload?.invoiceUrl || payload?.result?.invoiceUrl || payload?.result?.url;
