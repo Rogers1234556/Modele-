@@ -55,6 +55,43 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* ========== ФОНОВЫЕ КОРОНЫ ========== */
+@keyframes crownFloat {
+    0%   { transform: translateY(0px)   rotate(var(--cr, 0deg))  scale(1);    opacity: var(--co, 0.13); }
+    40%  { transform: translateY(-18px) rotate(calc(var(--cr, 0deg) + 6deg))  scale(1.04); opacity: calc(var(--co, 0.13) + 0.04); }
+    70%  { transform: translateY(-8px)  rotate(calc(var(--cr, 0deg) - 4deg))  scale(0.97); }
+    100% { transform: translateY(0px)   rotate(var(--cr, 0deg))  scale(1);    opacity: var(--co, 0.13); }
+}
+
+.bg-crowns {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.bg-crowns i {
+    position: absolute;
+    color: rgba(59, 130, 246, 0.22);
+    animation: crownFloat linear infinite;
+}
+
+.bc-1  { font-size: 22px; top: 8%;  left: 7%;  --cr:-12deg; --co:0.14; animation-duration: 7.2s;  animation-delay: 0s; }
+.bc-2  { font-size: 30px; top: 15%; left: 72%; --cr: 15deg; --co:0.11; animation-duration: 9.0s;  animation-delay: -2.1s; }
+.bc-3  { font-size: 18px; top: 28%; left: 20%; --cr:  8deg; --co:0.16; animation-duration: 8.3s;  animation-delay: -4.4s; }
+.bc-4  { font-size: 26px; top: 38%; left: 85%; --cr:-20deg; --co:0.12; animation-duration: 10.1s; animation-delay: -1.7s; }
+.bc-5  { font-size: 34px; top: 12%; left: 45%; --cr:  5deg; --co:0.09; animation-duration: 11.5s; animation-delay: -6.0s; }
+.bc-6  { font-size: 20px; top: 52%; left: 10%; --cr:-10deg; --co:0.15; animation-duration: 8.7s;  animation-delay: -3.3s; }
+.bc-7  { font-size: 28px; top: 60%; left: 60%; --cr: 18deg; --co:0.12; animation-duration: 9.8s;  animation-delay: -5.1s; }
+.bc-8  { font-size: 16px; top: 72%; left: 30%; --cr:-15deg; --co:0.17; animation-duration: 7.6s;  animation-delay: -0.8s; }
+.bc-9  { font-size: 24px; top: 80%; left: 78%; --cr:  3deg; --co:0.13; animation-duration: 10.4s; animation-delay: -7.2s; }
+.bc-10 { font-size: 32px; top: 44%; left: 50%; --cr:-22deg; --co:0.10; animation-duration: 12.0s; animation-delay: -4.9s; }
+.bc-11 { font-size: 19px; top: 90%; left: 18%; --cr: 11deg; --co:0.14; animation-duration: 8.1s;  animation-delay: -2.6s; }
+.bc-12 { font-size: 22px; top: 68%; left: 90%; --cr: -8deg; --co:0.12; animation-duration: 9.3s;  animation-delay: -1.4s; }
+
 .app-container {
     max-width: 480px;
     margin: 0 auto;
@@ -304,49 +341,34 @@ body {
 }
 
 .pricing-card {
-    background: rgba(8, 14, 32, 0.80);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(160deg, rgba(10, 20, 55, 0.92) 0%, rgba(15, 30, 80, 0.75) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.22);
     border-radius: 24px;
-    padding: 32px 22px 22px;
+    padding: 22px 22px 22px;
     position: relative;
     transition: all var(--transition-normal);
     text-align: center;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.08), 0 8px 28px rgba(37,99,235,0.12);
 }
 
 .pricing-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(59, 130, 246, 0.35);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    border-color: rgba(59, 130, 246, 0.45);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.15), 0 14px 36px rgba(37,99,235,0.22);
 }
 
 .pricing-card.popular {
-    border: 1.5px solid rgba(59, 130, 246, 0.45);
-    background: linear-gradient(160deg, rgba(8, 16, 42, 0.88) 0%, rgba(20, 40, 90, 0.60) 100%);
-    box-shadow: 0 0 0 1px rgba(59,130,246,0.12), 0 8px 24px rgba(37,99,235,0.15);
+    border: 1.5px solid rgba(59, 130, 246, 0.55);
+    background: linear-gradient(160deg, rgba(12, 24, 65, 0.95) 0%, rgba(22, 45, 110, 0.80) 100%);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.18), 0 10px 32px rgba(37,99,235,0.28);
 }
 
 .pricing-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--gradient-primary);
-    color: white;
-    padding: 6px 16px;
-    border-radius: var(--radius-full);
-    font-size: 12px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
+    display: none;
 }
 
-.pricing-badge.popular-badge {
-    background: linear-gradient(135deg, #FF9F0A, #FFD60A);
-}
 
 .pricing-header {
     margin-bottom: 24px;
@@ -491,8 +513,8 @@ body {
 
 /* Главная карточка с аватаркой */
 .profile-hero-card {
-    background: rgba(8, 16, 42, 0.72);
-    border: 1px solid rgba(59, 130, 246, 0.12);
+    background: linear-gradient(175deg, rgba(30, 55, 120, 0.55) 0%, rgba(6, 12, 35, 0.88) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.18);
     border-radius: 28px;
     padding: 26px 16px 16px;
     display: flex;
@@ -507,12 +529,28 @@ body {
 .profile-hero-card::before {
     content: '';
     position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(
+            -55deg,
+            transparent,
+            transparent 28px,
+            rgba(255,255,255,0.018) 28px,
+            rgba(255,255,255,0.018) 29px
+        );
+    pointer-events: none;
+    border-radius: 28px;
+}
+
+.profile-hero-card::after {
+    content: '';
+    position: absolute;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 200px;
-    height: 140px;
-    background: radial-gradient(ellipse at 50% 10%, rgba(59, 130, 246, 0.13) 0%, transparent 68%);
+    width: 220px;
+    height: 130px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.16) 0%, transparent 70%);
     pointer-events: none;
 }
 
