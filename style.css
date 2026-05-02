@@ -304,24 +304,27 @@ body {
 }
 
 .pricing-card {
-    background: #0D1321;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-lg);
-    padding: 30px 24px 24px;
+    background: rgba(8, 14, 32, 0.80);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 32px 22px 22px;
     position: relative;
     transition: all var(--transition-normal);
     text-align: center;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .pricing-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(37, 99, 235, 0.4);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+    border-color: rgba(59, 130, 246, 0.35);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 
 .pricing-card.popular {
-    border: 2px solid rgba(37, 99, 235, 0.5);
-    background: linear-gradient(145deg, #0D1321, rgba(37, 99, 235, 0.05));
+    border: 1.5px solid rgba(59, 130, 246, 0.45);
+    background: linear-gradient(160deg, rgba(8, 16, 42, 0.88) 0%, rgba(20, 40, 90, 0.60) 100%);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.12), 0 8px 24px rgba(37,99,235,0.15);
 }
 
 .pricing-badge {
@@ -496,20 +499,20 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 0;
-    overflow: visible;
+    overflow: hidden;
     position: relative;
-    margin-top: 4px;
+    margin-top: 10px;
 }
 
 .profile-hero-card::before {
     content: '';
     position: absolute;
-    top: -50px;
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 180px;
-    height: 160px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.10) 0%, transparent 70%);
+    width: 200px;
+    height: 140px;
+    background: radial-gradient(ellipse at 50% 10%, rgba(59, 130, 246, 0.13) 0%, transparent 68%);
     pointer-events: none;
 }
 
@@ -930,9 +933,9 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -956,13 +959,17 @@ body {
 }
 
 .modal-content {
-    background: var(--bg-secondary);
+    background: rgba(8, 12, 26, 0.82);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.13);
     border-radius: var(--radius-xl);
     width: 100%;
     max-width: 520px;
     animation: modalSlideUp var(--transition-normal);
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 0.5px rgba(255,255,255,0.06);
 }
 
 @keyframes modalSlideUp {
@@ -1021,13 +1028,15 @@ body {
 
 /* Стили для конкретных модалок */
 .promo-card-style {
-    background: rgba(15, 23, 42, 0.95) !important;
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px !important;
-    padding: 28px !important;
+    background: rgba(8, 12, 26, 0.82) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-radius: 26px !important;
+    padding: 26px !important;
     width: 100% !important;
     max-width: 460px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important;
 }
 
 .modal-header-simple {
@@ -1100,13 +1109,15 @@ body {
 
 /* Модалка выбора оплаты */
 .payment-modal-style {
-    background: rgba(15, 23, 42, 0.95) !important;
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(8, 12, 26, 0.82) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
     border-radius: 28px !important;
-    padding: 28px !important;
+    padding: 26px !important;
     width: 100% !important;
     max-width: 500px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important;
 }
 
 .modal-body-simple {
@@ -1117,16 +1128,16 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 10px 15px;
-    border-radius: 18px;
-    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin-bottom: 14px;
     font-size: 14px;
 }
 
 .payment-selected-plan-new span:first-child {
-    color: var(--gray-300);
+    color: rgba(255,255,255,0.55);
     font-size: 14px;
     font-weight: 500;
 }
@@ -1138,88 +1149,98 @@ body {
     color: white;
     font-weight: 700;
     font-size: 14px;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
 }
 
 .payment-methods-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 9px;
 }
 
 .payment-option-card {
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
-    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 13px 14px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.18s, border-color 0.18s, transform 0.12s;
     width: 100%;
     text-align: left;
     font-family: inherit;
     outline: none;
+    color: white;
 }
 
 .payment-option-card:active {
     transform: scale(0.97);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(59, 130, 246, 0.10);
+    border-color: rgba(59, 130, 246, 0.25);
 }
 
 .option-icon {
-    width: 38px !important;
-    height: 38px !important;
+    width: 44px !important;
+    height: 44px !important;
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px !important;
+    font-size: 20px !important;
+    flex-shrink: 0;
 }
 
 .stars-bg {
-    background: rgba(245, 158, 11, 0.15);
-    color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.10));
+    border: 1px solid rgba(245, 158, 11, 0.20);
+    color: #F59E0B;
 }
 
 .crypto-bg {
-    background: rgba(37, 99, 235, 0.15);
-    color: #3b82f6;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0.10));
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    color: #60A5FA;
 }
 
 .funpay-bg {
-    background: rgba(168, 85, 247, 0.15);
-    color: #a855f7;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(168, 85, 247, 0.10));
+    border: 1px solid rgba(168, 85, 247, 0.22);
+    color: #C084FC;
 }
 
 .other-bg {
-    background: rgba(156, 163, 175, 0.15);
-    color: #9ca3af;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: rgba(255,255,255,0.55);
 }
 
 .option-info {
     display: flex;
     flex-direction: column;
     flex: 1;
+    min-width: 0;
 }
 
 .option-title {
     color: white;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
+    line-height: 1.2;
 }
 
 .option-hint {
-    color: var(--gray-400);
-    font-size: 12px;
+    color: rgba(255,255,255,0.38);
+    font-size: 11.5px;
     margin-top: 2px;
+    font-weight: 500;
 }
 
 .arrow-icon {
-    color: rgba(255, 255, 255, 0.2);
-    font-size: 14px;
+    color: rgba(255,255,255,0.22);
+    font-size: 12px;
+    flex-shrink: 0;
 }
 
 /* Модалка Stars */
