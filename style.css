@@ -125,7 +125,7 @@ body {
 /* ========== НИЖНИЕ ВКЛАДКИ ========== */
 .app-footer {
     position: fixed;
-    bottom: 14px;
+    bottom: 6px;
     left: 14px;
     right: 14px;
     background: rgba(10, 10, 16, 0.80);
@@ -341,8 +341,8 @@ body {
 }
 
 .pricing-card {
-    background: linear-gradient(160deg, rgba(10, 20, 55, 0.92) 0%, rgba(15, 30, 80, 0.75) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.22);
+    background: linear-gradient(160deg, rgba(12, 24, 65, 0.95) 0%, rgba(22, 45, 110, 0.80) 100%);
+    border: 1.5px solid rgba(59, 130, 246, 0.55);
     border-radius: 24px;
     padding: 22px 22px 22px;
     position: relative;
@@ -350,13 +350,13 @@ body {
     text-align: center;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 0 0 1px rgba(59,130,246,0.08), 0 8px 28px rgba(37,99,235,0.12);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.18), 0 10px 32px rgba(37,99,235,0.28);
 }
 
 .pricing-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(59, 130, 246, 0.45);
-    box-shadow: 0 0 0 1px rgba(59,130,246,0.15), 0 14px 36px rgba(37,99,235,0.22);
+    border-color: rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 14px 36px rgba(37,99,235,0.38);
 }
 
 .pricing-card.popular {

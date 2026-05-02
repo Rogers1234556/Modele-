@@ -392,12 +392,6 @@ class UIManager {
                 const plan = parseInt(document.getElementById('paymentPlanDays').value);
                 const isRenewal = document.getElementById('paymentIsRenewal').value === 'true';
 
-                if (method === 'gift') {
-                    document.getElementById('paymentMethodModal').classList.remove('active');
-                    UIManager.openGiftModalFromPayment(plan);
-                    return;
-                }
-
                 document.getElementById('paymentMethodModal').classList.remove('active');
 
                 switch(method) {
@@ -479,21 +473,6 @@ class UIManager {
             });
         }
 
-        tg.onEvent('contactRequested', (result) => {
-            if (result.status === 'sent' && result.contact) {
-                const contactId = String(result.contact.user_id || '');
-                if (contactId) {
-                    const inp = document.getElementById('giftRecipientInput');
-                    if (inp) inp.value = contactId;
-                    const confirmBtn = document.getElementById('confirmGiftBtn');
-                    if (confirmBtn) {
-                        confirmBtn.style.opacity = '1';
-                        confirmBtn.style.pointerEvents = 'auto';
-                    }
-                }
-            }
-        });
-
         const giftRecipientInput = document.getElementById('giftRecipientInput');
         if (giftRecipientInput) {
             giftRecipientInput.addEventListener('input', () => {
@@ -506,8 +485,6 @@ class UIManager {
                 if (val.length >= 3) {
                     confirmBtn.style.opacity = '1';
                     confirmBtn.style.pointerEvents = 'auto';
-                    document.getElementById('giftBtnIcon').className = 'fas fa-search';
-                    document.getElementById('giftBtnText').textContent = 'Найти получателя';
                 } else {
                     confirmBtn.style.opacity = '0.5';
                     confirmBtn.style.pointerEvents = 'none';
@@ -534,58 +511,52 @@ class UIManager {
         const confirmGiftBtn = document.getElementById('confirmGiftBtn');
         if (confirmGiftBtn) {
             confirmGiftBtn.addEventListener('click', async () => {
-                if (giftMode && giftRecipientIdtg) {
-                    document.getElementById('giftModal').classList.remove('active');
-                    UIManager.showPaymentMethodSelection(giftSelectedPlan, false);
-                    return;
-                }
                 const val = (document.getElementById('giftRecipientInput').value || '').trim();
                 if (!val) return;
+                confirmGiftBtn.disabled = true;
                 confirmGiftBtn.style.opacity = '0.6';
                 document.getElementById('giftBtnIcon').className = 'fas fa-spinner fa-spin';
                 document.getElementById('giftBtnText').textContent = 'Поиск...';
                 try {
-                    const cleanVal = val.replace(/^@/, '');
-                    const isNumeric = /^\d+$/.test(cleanVal);
-                    let query = supabaseClient.from('users').select('idtg, name, user_name_tg');
-                    if (isNumeric) {
-                        query = query.eq('idtg', cleanVal);
-                    } else {
-                        query = query.ilike('user_name_tg', cleanVal);
-                    }
-                    const { data: found, error } = await query.maybeSingle();
+                    const { data: found, error } = await supabaseClient
+                        .from('users')
+                        .select('idtg, name, user_name_tg, key')
+                        .eq('key', val)
+                        .maybeSingle();
                     if (error) throw error;
                     if (!found) {
-                        Utils.showToast('Пользователь не найден в базе данных', 'error');
-                        document.getElementById('giftBtnIcon').className = 'fas fa-search';
-                        document.getElementById('giftBtnText').textContent = 'Найти получателя';
+                        Utils.showToast('Ключ не найден. Проверьте правильность ключа', 'error');
+                        document.getElementById('giftBtnIcon').className = 'fas fa-gift';
+                        document.getElementById('giftBtnText').textContent = 'Оплатить';
                         confirmGiftBtn.style.opacity = '1';
+                        confirmGiftBtn.disabled = false;
                         return;
                     }
                     const myId = String(tg.initDataUnsafe?.user?.id);
                     if (String(found.idtg) === myId) {
                         Utils.showToast('Нельзя подарить подписку самому себе', 'error');
-                        document.getElementById('giftBtnIcon').className = 'fas fa-search';
-                        document.getElementById('giftBtnText').textContent = 'Найти получателя';
+                        document.getElementById('giftBtnIcon').className = 'fas fa-gift';
+                        document.getElementById('giftBtnText').textContent = 'Оплатить';
                         confirmGiftBtn.style.opacity = '1';
+                        confirmGiftBtn.disabled = false;
                         return;
                     }
                     giftMode = true;
                     giftRecipientIdtg = String(found.idtg);
                     giftRecipientNameStr = found.name || found.user_name_tg || `ID: ${found.idtg}`;
-                    const foundBox = document.getElementById('giftRecipientFound');
-                    document.getElementById('giftRecipientFoundName').textContent = `Получатель: ${giftRecipientNameStr}`;
-                    foundBox.style.display = 'flex';
-                    document.getElementById('giftBtnIcon').className = 'fas fa-gift';
-                    document.getElementById('giftBtnText').textContent = 'Перейти к оплате';
+                    document.getElementById('giftModal').classList.remove('active');
+                    UIManager.showPaymentMethodSelection(giftSelectedPlan, false);
                     confirmGiftBtn.style.opacity = '1';
-                    confirmGiftBtn.style.pointerEvents = 'auto';
+                    confirmGiftBtn.disabled = false;
+                    document.getElementById('giftBtnIcon').className = 'fas fa-gift';
+                    document.getElementById('giftBtnText').textContent = 'Оплатить';
                 } catch (e) {
                     console.error('Gift search error:', e);
                     Utils.showToast('Ошибка поиска пользователя', 'error');
-                    document.getElementById('giftBtnIcon').className = 'fas fa-search';
-                    document.getElementById('giftBtnText').textContent = 'Найти получателя';
+                    document.getElementById('giftBtnIcon').className = 'fas fa-gift';
+                    document.getElementById('giftBtnText').textContent = 'Оплатить';
                     confirmGiftBtn.style.opacity = '1';
+                    confirmGiftBtn.disabled = false;
                 }
             });
         }
@@ -1012,21 +983,17 @@ class UIManager {
         giftMode = false;
         giftRecipientIdtg = null;
         giftRecipientNameStr = '';
-        if (plan) {
-            giftSelectedPlan = plan;
-        } else {
-            giftSelectedPlan = 30;
-        }
+        giftSelectedPlan = plan || 30;
+        giftSelectedProduct = 'gov';
         const inp = document.getElementById('giftRecipientInput');
         if (inp) inp.value = '';
-        const foundBox = document.getElementById('giftRecipientFound');
-        if (foundBox) foundBox.style.display = 'none';
         const confirmBtn = document.getElementById('confirmGiftBtn');
         if (confirmBtn) {
             confirmBtn.style.opacity = '0.5';
             confirmBtn.style.pointerEvents = 'none';
-            document.getElementById('giftBtnIcon').className = 'fas fa-search';
-            document.getElementById('giftBtnText').textContent = 'Найти получателя';
+            confirmBtn.disabled = false;
+            document.getElementById('giftBtnIcon').className = 'fas fa-gift';
+            document.getElementById('giftBtnText').textContent = 'Оплатить';
         }
         document.querySelectorAll('.gift-product-btn').forEach(b => b.classList.toggle('active', b.dataset.gproduct === 'gov'));
         document.querySelectorAll('.gift-plan-btn').forEach(b => b.classList.toggle('active', b.dataset.gplan === String(giftSelectedPlan)));
