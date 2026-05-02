@@ -47,7 +47,22 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg-primary);
+    background-color: #010B1E;
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 38px,
+            rgba(59, 130, 246, 0.05) 38px,
+            rgba(59, 130, 246, 0.05) 39px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 38px,
+            rgba(59, 130, 246, 0.05) 38px,
+            rgba(59, 130, 246, 0.05) 39px
+        );
     color: var(--gray-100);
     line-height: 1.5;
     overflow-x: hidden;
@@ -60,7 +75,7 @@ body {
     max-width: 480px;
     margin: 0 auto;
     min-height: 100vh;
-    background: var(--bg-primary);
+    background: transparent;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -305,28 +320,28 @@ body {
 }
 
 .pricing-card {
-    background: linear-gradient(160deg, rgba(12, 24, 65, 0.95) 0%, rgba(22, 45, 110, 0.80) 100%);
-    border: 1.5px solid rgba(59, 130, 246, 0.55);
+    background: rgba(5, 10, 28, 0.60);
+    border: 1.5px solid rgba(59, 130, 246, 0.45);
     border-radius: 24px;
     padding: 22px 22px 22px;
     position: relative;
     transition: all var(--transition-normal);
     text-align: center;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 0 0 1px rgba(59,130,246,0.18), 0 10px 32px rgba(37,99,235,0.28);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 .pricing-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(59, 130, 246, 0.7);
-    box-shadow: 0 0 0 1px rgba(59,130,246,0.25), 0 14px 36px rgba(37,99,235,0.38);
+    border-color: rgba(59, 130, 246, 0.65);
+    box-shadow: 0 8px 28px rgba(37,99,235,0.20);
 }
 
 .pricing-card.popular {
-    border: 1.5px solid rgba(59, 130, 246, 0.55);
-    background: linear-gradient(160deg, rgba(12, 24, 65, 0.95) 0%, rgba(22, 45, 110, 0.80) 100%);
-    box-shadow: 0 0 0 1px rgba(59,130,246,0.18), 0 10px 32px rgba(37,99,235,0.28);
+    border: 1.5px solid rgba(59, 130, 246, 0.45);
+    background: rgba(5, 10, 28, 0.60);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 .pricing-badge {
@@ -477,7 +492,7 @@ body {
 
 /* Главная карточка с аватаркой */
 .profile-hero-card {
-    background: linear-gradient(175deg, rgba(30, 55, 120, 0.55) 0%, rgba(6, 12, 35, 0.88) 100%);
+    background: rgba(5, 10, 30, 0.52);
     border: 1px solid rgba(59, 130, 246, 0.18);
     border-radius: 24px;
     padding: 26px 14px 18px;
@@ -492,26 +507,7 @@ body {
 }
 
 .profile-hero-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-        repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 30px,
-            rgba(255,255,255,0.015) 30px,
-            rgba(255,255,255,0.015) 31px
-        ),
-        repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 30px,
-            rgba(255,255,255,0.015) 30px,
-            rgba(255,255,255,0.015) 31px
-        );
-    pointer-events: none;
-    border-radius: 28px;
+    display: none;
 }
 
 .profile-hero-card::after {
@@ -2241,10 +2237,10 @@ body {
 
 /* Контейнер админки */
 .admin-panel-container {
-    padding: 16px;
+    padding: 16px 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 /* Header */
@@ -2357,15 +2353,33 @@ body {
 /* Главная карточка (Баллы и Статус) */
 .admin-main-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 18px;
-    padding: 18px 20px;
+    background: rgba(5, 10, 30, 0.55);
+    border: 1px solid rgba(99, 102, 241, 0.22);
+    border-radius: 20px;
+    padding: 20px;
     overflow: hidden;
+}
+
+.admin-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
+}
+
+.admin-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.admin-date-label {
+    display: block;
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-top: 4px;
 }
 
 .card-glow {
@@ -2417,16 +2431,16 @@ body {
 .admin-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 10px;
 }
 
 .stat-mini-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    padding: 12px 8px;
-    border-radius: 14px;
+    background: rgba(5, 10, 30, 0.55);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    padding: 14px 8px;
+    border-radius: 16px;
     text-align: center;
-    transition: background 0.18s;
+    transition: background 0.18s, border-color 0.18s;
 }
 
 .stat-mini-card:active {
@@ -2435,24 +2449,25 @@ body {
 
 .stat-num {
     display: block;
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 800;
     color: white;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+    letter-spacing: -0.5px;
 }
 
 .stat-name {
     display: block;
     font-size: 10px;
-    color: var(--gray-500);
+    color: rgba(255,255,255,0.38);
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.5px;
     font-weight: 600;
 }
 
 .stat-target {
     font-size: 9px;
-    color: var(--gray-600);
+    color: rgba(255,255,255,0.22);
     display: block;
     margin-top: 3px;
 }
@@ -2466,9 +2481,9 @@ body {
 }
 
 .action-btn-sm {
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 14px;
+    background: rgba(5, 10, 30, 0.55);
+    border: 1px solid rgba(99, 102, 241, 0.18);
+    border-radius: 16px;
     padding: 12px 14px;
     color: white;
     display: flex;
