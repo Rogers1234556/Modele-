@@ -532,11 +532,18 @@ body {
     inset: 0;
     background:
         repeating-linear-gradient(
-            -55deg,
+            0deg,
             transparent,
-            transparent 28px,
-            rgba(255,255,255,0.018) 28px,
-            rgba(255,255,255,0.018) 29px
+            transparent 30px,
+            rgba(255,255,255,0.015) 30px,
+            rgba(255,255,255,0.015) 31px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 30px,
+            rgba(255,255,255,0.015) 30px,
+            rgba(255,255,255,0.015) 31px
         );
     pointer-events: none;
     border-radius: 28px;
@@ -736,30 +743,47 @@ body {
     transform: scale(0.9);
 }
 
+.profile-hero-divider {
+    width: calc(100% - 8px);
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(30, 80, 180, 0.40) 15%,
+        rgba(59, 130, 246, 0.55) 50%,
+        rgba(30, 80, 180, 0.40) 85%,
+        transparent 100%);
+    margin: 14px 0 12px;
+    align-self: center;
+    flex-shrink: 0;
+}
+
 .profile-actions-new {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+    padding-bottom: 4px;
 }
 
 .action-item {
-    background: rgba(8, 16, 40, 0.70);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 16px;
-    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 12px 14px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 13px;
     color: white;
     text-align: left;
     transition: all 0.2s;
     cursor: pointer;
+    width: 100%;
 }
 
 .action-item:active {
     transform: scale(0.98);
     background: rgba(59, 130, 246, 0.10);
-    border-color: rgba(59,130,246,0.2);
+    border-color: rgba(59,130,246,0.22);
 }
 
 .action-item.primary {
@@ -768,21 +792,161 @@ body {
 }
 
 .action-icon {
-    font-size: 18px;
-    width: 24px;
+    font-size: 17px;
+    width: 22px;
     display: flex;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-.action-item span {
+.action-item > span {
     flex: 1;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
+}
+
+.action-text-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+}
+
+.action-text-wrap > span:first-child {
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+}
+
+.action-subtitle {
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.38);
+    line-height: 1.3;
+}
+
+.gift-section-sep {
+    width: calc(100% - 16px);
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(30, 80, 180, 0.35) 15%,
+        rgba(59, 130, 246, 0.45) 50%,
+        rgba(30, 80, 180, 0.35) 85%,
+        transparent 100%);
+    margin: 4px auto;
+    flex-shrink: 0;
+}
+
+.gift-item {
+    border-color: rgba(59, 130, 246, 0.15);
+}
+
+.gift-icon-c {
+    font-size: 17px;
+    width: 22px;
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #60A5FA;
 }
 
 .arrow {
+    font-size: 11px;
+    opacity: 0.4;
+    flex-shrink: 0;
+}
+
+/* Gift modal styles */
+.gift-hint {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.gift-recipient-found {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    color: #10B981;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.gift-recipient-found i {
+    font-size: 16px;
+}
+
+.gift-plan-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    width: 100%;
+}
+
+.gift-plan-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    padding: 10px 4px;
+    color: rgba(255,255,255,0.6);
     font-size: 12px;
-    opacity: 0.5;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.gift-plan-btn.active {
+    background: rgba(59,130,246,0.18);
+    border-color: rgba(59,130,246,0.45);
+    color: #fff;
+}
+
+.gift-plan-days {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.gift-product-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    width: 100%;
+}
+
+.gift-product-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 8px 6px;
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+}
+
+.gift-product-btn.active {
+    background: rgba(59,130,246,0.18);
+    border-color: rgba(59,130,246,0.45);
+    color: #fff;
 }
 
 /* ========== ФРАКЦИИ ========== */

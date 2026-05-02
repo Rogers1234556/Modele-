@@ -252,24 +252,35 @@
                                 <i class="fas fa-copy" id="copyIcon"></i>
                             </button>
                         </div>
-                    </div>
 
-                    <div class="profile-actions-new">
-                        <button id="promoBtn" class="action-item">
-                            <div class="action-icon"><i class="fas fa-ticket-alt"></i></div>
-                            <span>Активировать промокод</span>
-                            <i class="fas fa-chevron-right arrow"></i>
-                        </button>
-                        <button id="supportBtn" class="action-item">
-                            <div class="action-icon"><i class="fas fa-headset"></i></div>
-                            <span>Служба поддержки</span>
-                            <i class="fas fa-chevron-right arrow"></i>
-                        </button>
-                        <button id="launcherBtn" class="action-item">
-                            <div class="action-icon"><i class="fas fa-download"></i></div>
-                            <span>Скачать лаунчер</span>
-                            <i class="fas fa-chevron-right arrow"></i>
-                        </button>
+                        <div class="profile-hero-divider"></div>
+
+                        <div class="profile-actions-new">
+                            <button id="promoBtn" class="action-item">
+                                <div class="action-icon"><i class="fas fa-ticket-alt"></i></div>
+                                <span>Активировать промокод</span>
+                                <i class="fas fa-chevron-right arrow"></i>
+                            </button>
+                            <button id="supportBtn" class="action-item">
+                                <div class="action-icon"><i class="fas fa-headset"></i></div>
+                                <span>Служба поддержки</span>
+                                <i class="fas fa-chevron-right arrow"></i>
+                            </button>
+                            <button id="launcherBtn" class="action-item">
+                                <div class="action-icon"><i class="fas fa-download"></i></div>
+                                <span>Скачать лаунчер</span>
+                                <i class="fas fa-chevron-right arrow"></i>
+                            </button>
+                            <div class="gift-section-sep"></div>
+                            <button id="giftBtn" class="action-item gift-item">
+                                <div class="action-icon gift-icon-c"><i class="fas fa-gift"></i></div>
+                                <div class="action-text-wrap">
+                                    <span>Подарить</span>
+                                    <span class="action-subtitle">Подарить другу подписку</span>
+                                </div>
+                                <i class="fas fa-chevron-right arrow"></i>
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -773,6 +784,50 @@
 
 
 
+
+    <div id="giftModal" class="modal">
+        <div class="modal-content promo-card-style">
+            <div class="modal-header-simple">
+                <h3><i class="fas fa-gift" style="color:#60A5FA;margin-right:8px"></i>Подарить подписку</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body-simple">
+                <p class="gift-hint">Введите @username или Telegram ID получателя</p>
+                <div class="promo-input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="giftRecipientInput" placeholder="@username или ID..." maxlength="60">
+                </div>
+                <div id="giftRecipientFound" class="gift-recipient-found" style="display:none">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="giftRecipientFoundName">Пользователь найден</span>
+                </div>
+                <p style="font-size:12px;color:rgba(255,255,255,0.38);text-align:center;margin-bottom:10px">Продукт</p>
+                <div class="gift-product-selector" id="giftProductSelector">
+                    <button class="gift-product-btn active" data-gproduct="gov"><i class="fas fa-shield-halved"></i> GOV Helper</button>
+                    <button class="gift-product-btn" data-gproduct="admin"><i class="fas fa-crown"></i> Admin Helper</button>
+                </div>
+                <p style="font-size:12px;color:rgba(255,255,255,0.38);text-align:center;margin-bottom:10px">Тариф</p>
+                <div class="gift-plan-selector" id="giftPlanSelector">
+                    <button class="gift-plan-btn" data-gplan="15">
+                        <span class="gift-plan-days">15</span>
+                        <span>дней</span>
+                    </button>
+                    <button class="gift-plan-btn active" data-gplan="30">
+                        <span class="gift-plan-days">30</span>
+                        <span>дней</span>
+                    </button>
+                    <button class="gift-plan-btn" data-gplan="365">
+                        <span class="gift-plan-days">365</span>
+                        <span>дней</span>
+                    </button>
+                </div>
+                <button class="promo-action-btn" id="confirmGiftBtn" style="opacity:0.5;pointer-events:none">
+                    <i class="fas fa-search" id="giftBtnIcon"></i>
+                    <span id="giftBtnText">Найти получателя</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="toastContainer" class="toast-container"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

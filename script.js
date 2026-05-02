@@ -1,5 +1,12 @@
 const tg = window.Telegram.WebApp;
 
+// --- GIFT MODE ---
+let giftMode = false;
+let giftRecipientIdtg = null;
+let giftRecipientNameStr = '';
+let giftSelectedProduct = 'gov';
+let giftSelectedPlan = 30;
+
 // --- ФУНКЦИИ ВРЕМЕНИ МСК ---
 function getMSKDate() {
     // Получаем текущую дату и время по Москве
@@ -459,6 +466,130 @@ class UIManager {
             });
         }
 
+        const giftBtn = document.getElementById('giftBtn');
+        if (giftBtn) {
+            giftBtn.addEventListener('click', () => {
+                giftMode = false;
+                giftRecipientIdtg = null;
+                giftRecipientNameStr = '';
+                giftSelectedProduct = 'gov';
+                giftSelectedPlan = 30;
+                const inp = document.getElementById('giftRecipientInput');
+                if (inp) inp.value = '';
+                const foundBox = document.getElementById('giftRecipientFound');
+                if (foundBox) foundBox.style.display = 'none';
+                const confirmBtn = document.getElementById('confirmGiftBtn');
+                if (confirmBtn) {
+                    confirmBtn.style.opacity = '0.5';
+                    confirmBtn.style.pointerEvents = 'none';
+                    document.getElementById('giftBtnIcon').className = 'fas fa-search';
+                    document.getElementById('giftBtnText').textContent = 'Найти получателя';
+                }
+                document.querySelectorAll('.gift-product-btn').forEach(b => b.classList.toggle('active', b.dataset.gproduct === 'gov'));
+                document.querySelectorAll('.gift-plan-btn').forEach(b => b.classList.toggle('active', b.dataset.gplan === '30'));
+                document.getElementById('giftModal').classList.add('active');
+            });
+        }
+
+        const giftRecipientInput = document.getElementById('giftRecipientInput');
+        if (giftRecipientInput) {
+            giftRecipientInput.addEventListener('input', () => {
+                giftMode = false;
+                giftRecipientIdtg = null;
+                const foundBox = document.getElementById('giftRecipientFound');
+                if (foundBox) foundBox.style.display = 'none';
+                const confirmBtn = document.getElementById('confirmGiftBtn');
+                const val = giftRecipientInput.value.trim();
+                if (val.length >= 3) {
+                    confirmBtn.style.opacity = '1';
+                    confirmBtn.style.pointerEvents = 'auto';
+                    document.getElementById('giftBtnIcon').className = 'fas fa-search';
+                    document.getElementById('giftBtnText').textContent = 'Найти получателя';
+                } else {
+                    confirmBtn.style.opacity = '0.5';
+                    confirmBtn.style.pointerEvents = 'none';
+                }
+            });
+        }
+
+        document.querySelectorAll('.gift-product-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.gift-product-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                giftSelectedProduct = btn.dataset.gproduct;
+            });
+        });
+
+        document.querySelectorAll('.gift-plan-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.gift-plan-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                giftSelectedPlan = parseInt(btn.dataset.gplan);
+            });
+        });
+
+        const confirmGiftBtn = document.getElementById('confirmGiftBtn');
+        if (confirmGiftBtn) {
+            confirmGiftBtn.addEventListener('click', async () => {
+                if (giftMode && giftRecipientIdtg) {
+                    document.getElementById('giftModal').classList.remove('active');
+                    const savedProduct = currentProduct;
+                    currentProduct = giftSelectedProduct;
+                    UIManager.showPaymentMethodSelection(giftSelectedPlan, false);
+                    currentProduct = savedProduct;
+                    return;
+                }
+                const val = (document.getElementById('giftRecipientInput').value || '').trim();
+                if (!val) return;
+                confirmGiftBtn.style.opacity = '0.6';
+                document.getElementById('giftBtnIcon').className = 'fas fa-spinner fa-spin';
+                document.getElementById('giftBtnText').textContent = 'Поиск...';
+                try {
+                    const cleanVal = val.replace(/^@/, '');
+                    const isNumeric = /^\d+$/.test(cleanVal);
+                    let query = supabaseClient.from('users').select('idtg, name, user_name_tg');
+                    if (isNumeric) {
+                        query = query.eq('idtg', cleanVal);
+                    } else {
+                        query = query.ilike('user_name_tg', cleanVal);
+                    }
+                    const { data: found, error } = await query.maybeSingle();
+                    if (error) throw error;
+                    if (!found) {
+                        Utils.showToast('Пользователь не найден в базе данных', 'error');
+                        document.getElementById('giftBtnIcon').className = 'fas fa-search';
+                        document.getElementById('giftBtnText').textContent = 'Найти получателя';
+                        confirmGiftBtn.style.opacity = '1';
+                        return;
+                    }
+                    const myId = String(tg.initDataUnsafe?.user?.id);
+                    if (String(found.idtg) === myId) {
+                        Utils.showToast('Нельзя подарить подписку самому себе', 'error');
+                        document.getElementById('giftBtnIcon').className = 'fas fa-search';
+                        document.getElementById('giftBtnText').textContent = 'Найти получателя';
+                        confirmGiftBtn.style.opacity = '1';
+                        return;
+                    }
+                    giftMode = true;
+                    giftRecipientIdtg = String(found.idtg);
+                    giftRecipientNameStr = found.name || found.user_name_tg || `ID: ${found.idtg}`;
+                    const foundBox = document.getElementById('giftRecipientFound');
+                    document.getElementById('giftRecipientFoundName').textContent = `Получатель: ${giftRecipientNameStr}`;
+                    foundBox.style.display = 'flex';
+                    document.getElementById('giftBtnIcon').className = 'fas fa-gift';
+                    document.getElementById('giftBtnText').textContent = 'Перейти к оплате';
+                    confirmGiftBtn.style.opacity = '1';
+                    confirmGiftBtn.style.pointerEvents = 'auto';
+                } catch (e) {
+                    console.error('Gift search error:', e);
+                    Utils.showToast('Ошибка поиска пользователя', 'error');
+                    document.getElementById('giftBtnIcon').className = 'fas fa-search';
+                    document.getElementById('giftBtnText').textContent = 'Найти получателя';
+                    confirmGiftBtn.style.opacity = '1';
+                }
+            });
+        }
+
         const btnAdminProfileMenu = document.getElementById('btnAdminProfileMenu');
         if (btnAdminProfileMenu) {
             btnAdminProfileMenu.addEventListener('click', () => {
@@ -878,21 +1009,29 @@ class UIManager {
             document.getElementById('paymentIsRenewal').value = isRenewal;
             const planNames = { 15: '15 дней', 30: '30 дней', 365: '365 дней' };
             document.getElementById('selectedPlanInfo').textContent = `${planNames[plan] || plan + ' дней'}`;
+
             let subNotice = modal.querySelector('.active-sub-notice');
             if (!subNotice) {
                 subNotice = document.createElement('div');
                 subNotice.className = 'active-sub-notice';
                 modal.querySelector('.modal-body').prepend(subNotice);
             }
-            if (isRenewal) {
-                subNotice.style = 'display:block;color:#10B981;font-size:0.9rem;margin-bottom:10px;text-align:center;';
-            } else subNotice.style.display = 'none';
+            if (giftMode && giftRecipientIdtg) {
+                subNotice.style.cssText = 'display:flex;align-items:center;gap:8px;color:#60A5FA;font-size:0.88rem;margin-bottom:10px;text-align:center;justify-content:center;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:8px 12px;';
+                subNotice.innerHTML = `<i class="fas fa-gift"></i> Подарок для: <strong>${giftRecipientNameStr}</strong>`;
+            } else if (isRenewal) {
+                subNotice.style.cssText = 'display:block;color:#10B981;font-size:0.9rem;margin-bottom:10px;text-align:center;';
+                subNotice.innerHTML = '<i class="fas fa-sync-alt"></i> Продление подписки';
+            } else {
+                subNotice.style.display = 'none';
+            }
 
-            const stars = pricingData[currentProduct]?.stars?.[plan];
+            const productForPrice = giftMode ? giftSelectedProduct : currentProduct;
+            const stars = pricingData[productForPrice]?.stars?.[plan];
             const priceEl = document.getElementById('selectedPlanPrice');
             if (priceEl) {
                 if (stars) {
-                    const finalStars = activeDiscount?.percent ? applyDiscount(stars) : stars;
+                    const finalStars = (!giftMode && activeDiscount?.percent) ? applyDiscount(stars) : stars;
                     priceEl.innerHTML = `${finalStars} <i class="fas fa-star price-star-icon"></i>`;
                 } else {
                     priceEl.textContent = '';
@@ -969,48 +1108,99 @@ class UIManager {
 
     static async activateSubscription(plan, isRenewalForce, method = 'Unknown', paidAmount = 0) {
         try {
-            const userId = tg.initDataUnsafe.user.id;
-            const userName = tg.initDataUnsafe.user.first_name || 'User';
-            const product = currentProduct === 'admin' ? 'admin' : 'gov';
+            const buyerId = tg.initDataUnsafe.user.id;
+            const buyerName = tg.initDataUnsafe.user.first_name || 'User';
+
+            // Gift mode: give subscription to recipient, log the gifter
+            const isGift = giftMode && giftRecipientIdtg;
+            const targetIdtg = isGift ? giftRecipientIdtg : String(buyerId);
+            const targetName = isGift ? giftRecipientNameStr : buyerName;
+            const activateProduct = isGift ? giftSelectedProduct : (currentProduct === 'admin' ? 'admin' : 'gov');
+
+            const product = activateProduct === 'admin' ? 'admin' : 'gov';
             const productLabel = product === 'admin' ? 'Admin Helper' : 'GOV Helper';
             const daysField = product === 'admin' ? 'admhelper_days' : 'govhelper_days';
             const issuedField = product === 'admin' ? 'admhelper_issued' : 'govhelper_issued';
 
+            // Fetch current expiry of target user
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             let startDate = today;
-            const currentVal = userData?.[daysField];
-            if (currentVal) {
-                const currentExpiry = new Date(currentVal);
-                if (currentExpiry > today) startDate = currentExpiry;
+            if (isGift) {
+                const { data: recipientData } = await supabaseClient
+                    .from('users')
+                    .select(daysField)
+                    .eq('idtg', targetIdtg)
+                    .maybeSingle();
+                if (recipientData?.[daysField]) {
+                    const currentExpiry = new Date(recipientData[daysField]);
+                    if (currentExpiry > today) startDate = currentExpiry;
+                }
+            } else {
+                const currentVal = userData?.[daysField];
+                if (currentVal) {
+                    const currentExpiry = new Date(currentVal);
+                    if (currentExpiry > today) startDate = currentExpiry;
+                }
             }
+
             const newDate = new Date(startDate);
             newDate.setDate(newDate.getDate() + parseInt(plan));
             const newExpiryString = newDate.toISOString().split('T')[0];
-            const newPurchasesCount = (userData?.total_purchases || 0) + 1;
+
             const updatePayload = {
                 [daysField]: newExpiryString,
-                [issuedField]: method,
-                total_purchases: newPurchasesCount
+                [issuedField]: isGift ? `Gift from ${buyerName}` : method
             };
+            if (!isGift) updatePayload.total_purchases = (userData?.total_purchases || 0) + 1;
+
             const { error: updateError } = await supabaseClient
                 .from('users')
                 .update(updatePayload)
-                .eq('idtg', userId);
+                .eq('idtg', targetIdtg);
             if (updateError) throw updateError;
-            if (userData) {
+
+            if (!isGift && userData) {
                 userData[daysField] = newExpiryString;
                 userData[issuedField] = method;
-                userData.total_purchases = newPurchasesCount;
+                userData.total_purchases = updatePayload.total_purchases;
             }
-            await supabaseClient.from('logs').insert([{ title: `Выдача подписки`, content: `Пользователю ${userName} (ID: ${userId}) выдана подписка ${productLabel} на ${plan} дней через ${method}`, admin: 'system', created_at: new Date().toISOString() }]);
+
+            const logContent = isGift
+                ? `${buyerName} (ID: ${buyerId}) подарил подписку ${productLabel} на ${plan} дней пользователю ${targetName} (ID: ${targetIdtg}) через ${method}`
+                : `Пользователю ${buyerName} (ID: ${buyerId}) выдана подписка ${productLabel} на ${plan} дней через ${method}`;
+            await supabaseClient.from('logs').insert([{
+                title: isGift ? 'Подарок подписки' : 'Выдача подписки',
+                content: logContent,
+                admin: 'system',
+                created_at: new Date().toISOString()
+            }]);
+
             const fee = paidAmount * 0.05;
-            await supabaseClient.from('payments').insert([{ user_id: userId, user_name: userName, amount: paidAmount, fee: fee, net_amount: paidAmount - fee, method: method, status: 'completed', description: `Подписка на ${plan} дней (${isRenewalForce ? 'Продление' : 'Новая'})`, created_at: new Date().toISOString() }]);
-            if (activeDiscount) {
-                await supabaseClient.from('user_discounts').update({ is_used: true }).eq('user_idtg', userId).eq('promo_id', activeDiscount.promoId);
+            await supabaseClient.from('payments').insert([{
+                user_id: buyerId,
+                user_name: buyerName,
+                amount: paidAmount,
+                fee: fee,
+                net_amount: paidAmount - fee,
+                method: method,
+                status: 'completed',
+                description: `${isGift ? `Подарок ${targetName} — ` : ''}Подписка на ${plan} дней (${isRenewalForce ? 'Продление' : 'Новая'})`,
+                created_at: new Date().toISOString()
+            }]);
+
+            if (activeDiscount && !isGift) {
+                await supabaseClient.from('user_discounts').update({ is_used: true }).eq('user_idtg', buyerId).eq('promo_id', activeDiscount.promoId);
                 activeDiscount = null;
             }
-            pricingMode = 'renew';
+
+            if (isGift) {
+                giftMode = false;
+                giftRecipientIdtg = null;
+                giftRecipientNameStr = '';
+            } else {
+                pricingMode = 'renew';
+            }
             return true;
         } catch (error) { console.error('Subscription activation error:', error); throw error; }
     }
