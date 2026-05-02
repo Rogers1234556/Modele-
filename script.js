@@ -381,7 +381,9 @@ class UIManager {
         document.querySelectorAll('.btn-buy').forEach(btn => {
             btn.addEventListener('click', () => {
                 const plan = parseInt(btn.dataset.plan);
-                // isRenewal определяется текущим продуктом, чтобы цены совпадали с TG-ботом
+                giftMode = false;
+                giftRecipientIdtg = null;
+                giftRecipientNameStr = '';
                 UIManager.showPaymentMethodSelection(plan, getBotIsRenewal());
             });
         });
