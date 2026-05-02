@@ -505,25 +505,26 @@ body {
 }
 
 .profile-container {
-    padding: 16px;
+    padding: 10px 8px 20px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 0;
 }
 
 /* Главная карточка с аватаркой */
 .profile-hero-card {
     background: linear-gradient(175deg, rgba(30, 55, 120, 0.55) 0%, rgba(6, 12, 35, 0.88) 100%);
     border: 1px solid rgba(59, 130, 246, 0.18);
-    border-radius: 28px;
-    padding: 26px 16px 16px;
+    border-radius: 24px;
+    padding: 26px 14px 18px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0;
     overflow: hidden;
     position: relative;
-    margin-top: 10px;
+    margin-top: 0;
+    width: 100%;
 }
 
 .profile-hero-card::before {
@@ -635,6 +636,7 @@ body {
     align-items: center;
     gap: 11px;
     width: calc(100% - 4px);
+    margin-bottom: 4px;
 }
 
 /* Иконки в карточках подписок */
@@ -1322,7 +1324,7 @@ body {
     box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important;
 }
 
-.modal-body-simple {
+.payment-modal-style .modal-body-simple {
     padding: 16px 4px 8px 4px !important;
 }
 
