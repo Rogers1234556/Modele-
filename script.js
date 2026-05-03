@@ -4,6 +4,32 @@ const tg = window.Telegram.WebApp;
 // false = оплата недоступна (показывает сообщение о разработке)
 const paymentOnthebuy = false;
 
+// --- POLLING INTERVALS ---
+let profileRefreshInterval = null;
+let adminRefreshInterval = null;
+
+function startProfilePolling() {
+    stopProfilePolling();
+    profileRefreshInterval = setInterval(async () => {
+        const user = tg.initDataUnsafe?.user;
+        if (!user) return;
+        try {
+            const { data } = await supabaseClient.from('users').select('*').eq('idtg', user.id).maybeSingle();
+            if (data) { userData = data; await UIManager.updateProfileUI(); }
+        } catch(e) {}
+    }, 30000);
+}
+function stopProfilePolling() {
+    if (profileRefreshInterval) { clearInterval(profileRefreshInterval); profileRefreshInterval = null; }
+}
+function startAdminPolling() {
+    stopAdminPolling();
+    adminRefreshInterval = setInterval(() => { loadAdminPanelData(); }, 30000);
+}
+function stopAdminPolling() {
+    if (adminRefreshInterval) { clearInterval(adminRefreshInterval); adminRefreshInterval = null; }
+}
+
 // --- GIFT MODE ---
 let giftMode = false;
 let giftRecipientIdtg = null;
@@ -251,9 +277,19 @@ class UIManager {
                 const page = document.getElementById(pageId);
                 if (page) {
                     page.classList.add('active');
-                    if (pageId === 'profile') UIManager.updateProfileUI();
+                    if (pageId === 'profile') {
+                        UIManager.updateProfileUI();
+                        startProfilePolling();
+                        stopAdminPolling();
+                    } else if (pageId === 'admin-panel') {
+                        loadAdminPanelData();
+                        startAdminPolling();
+                        stopProfilePolling();
+                    } else {
+                        stopProfilePolling();
+                        stopAdminPolling();
+                    }
                     if (pageId === 'contests') UIManager.loadContests();
-                    if (pageId === 'admin-panel') loadAdminPanelData();
                     loadAdminRadmirList();
                 }
             });
@@ -1524,6 +1560,22 @@ window.editProfileField = async function(field) {
 
         valSpan.innerText = newVal;
         Utils.showToast('Данные обновлены', 'success');
+
+        if (field === 'reports') {
+            const tr = document.getElementById('targetReports');
+            if (tr) tr.textContent = `цель: ${parseInt(newVal)}`;
+        }
+        if (field === 'online') {
+            const to = document.getElementById('targetOnline');
+            if (to) {
+                const parts = newVal.split(':');
+                to.textContent = `цель: ${parseInt(parts[0])}ч ${parseInt(parts[1])}м`;
+            }
+        }
+        if (field === 'jails') {
+            const tj = document.getElementById('targetJails');
+            if (tj) tj.textContent = `цель: ${parseInt(newVal)}`;
+        }
     } catch (e) {
         console.error('Ошибка сохранения:', e);
         valSpan.innerText = currentVal;
@@ -1546,6 +1598,15 @@ window.toggleJailsGoal = async function(checkbox) {
             .update({ enable_jail: enabled })
             .eq('key', userKey);
         if (error) throw error;
+
+        const targetJails = document.getElementById('targetJails');
+        if (targetJails) {
+            if (enabled) {
+                targetJails.style.display = 'block';
+            } else {
+                targetJails.style.display = 'none';
+            }
+        }
     } catch (e) {
         console.error('Ошибка переключения джаилов:', e);
         checkbox.checked = !enabled;
