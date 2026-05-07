@@ -99,10 +99,6 @@
                                         <span class="price">1400</span>
                                         <span class="currency"><i class="fas fa-star price-star-icon"></i></span>
                                     </div>
-                                    <div class="pricing-savings">
-                                        <i class="fas fa-percentage"></i>
-                                        <span>Экономия 33%</span>
-                                    </div>
                                 </div>
                                 <ul class="pricing-features">
                                     <li><i class="fas fa-check"></i> Полный доступ ко всем функциям</li>
@@ -174,10 +170,6 @@
                                     <div class="pricing-price">
                                         <span class="price">3600</span>
                                         <span class="currency"><i class="fas fa-star price-star-icon"></i></span>
-                                    </div>
-                                    <div class="pricing-savings">
-                                        <i class="fas fa-percentage"></i>
-                                        <span>Экономия 30%</span>
                                     </div>
                                 </div>
                                 <ul class="pricing-features">
@@ -308,52 +300,103 @@
 
                     <!-- ====== ADMIN HELPER INFO ====== -->
                     <div id="info-admin-content" class="info-content-block" style="display: none;">
-                        <div class="info-video-card" data-youtube="dQw4w9WgXcQ">
-                            <div class="info-video-thumb">
-                                <img loading="lazy" alt="Admin Helper preview" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg">
-                                <button type="button" class="info-video-play" aria-label="Воспроизвести видео">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                                <span class="info-video-badge"><i class="fab fa-youtube"></i> YouTube</span>
-                            </div>
-                            <div class="info-video-meta">
-                                <span class="info-video-title">Обзор Admin Helper</span>
-                                <a class="info-video-link" target="_blank" rel="noopener" href="https://youtu.be/dQw4w9WgXcQ">
-                                    Открыть на YouTube <i class="fas fa-arrow-up-right-from-square"></i>
-                                </a>
-                            </div>
-                        </div>
 
                         <div class="info-cards-stack">
+
+                            <!-- Основное меню -->
                             <div class="info-card-modern">
                                 <div class="info-card-head">
-                                    <div class="info-card-icon" style="background:rgba(245,158,11,0.15);color:#F59E0B;"><i class="fas fa-star"></i></div>
-                                    <h4>Основной функционал</h4>
+                                    <div class="info-card-icon" style="background:rgba(245,158,11,0.15);color:#F59E0B;"><i class="fas fa-bars"></i></div>
+                                    <h4>Основное меню</h4>
                                 </div>
                                 <ul class="info-card-list">
-                                    <li><i class="fas fa-check"></i> Подсчёт нормы</li>
+                                    <li><i class="fas fa-check"></i> <strong>Авто вход</strong> — автоматический ввод пароля при входе на сервер</li>
+                                    <li><i class="fas fa-check"></i> <strong>Анти заморозка</strong> — не даёт системе заморозить администратора</li>
+                                    <li><i class="fas fa-check"></i> <strong>Спавн по координатам</strong> — телепорт на заданные координаты при входе</li>
+                                    <li><i class="fas fa-check"></i> <strong>Авто /n</strong> — сообщения из обычного чата уходят в ООС автоматически</li>
+                                    <li><i class="fas fa-check"></i> <strong>Визуальный скин</strong> — выбор скина для отображения</li>
+                                    <li><i class="fas fa-check"></i> <strong>Скорость /fly</strong> — выбор скорости полёта, применяется автоматически</li>
+                                    <li><i class="fas fa-check"></i> <strong>Слап стрелками /sp</strong> — подброс игрока вверх/вниз стрелками клавиатуры</li>
+                                    <li><i class="fas fa-check"></i> <strong>Копировать ник</strong> — авто-копирование ника игрока вышедшего во время слежки</li>
+                                    <li><i class="fas fa-check"></i> <strong>Неотвеченный репорт</strong> — подсветка репортов без ответа</li>
+                                    <li><i class="fas fa-check"></i> <strong>Репорт над игроком</strong> — отображение репорта 20 сек над головой</li>
+                                    <li><i class="fas fa-check"></i> <strong>Отметка /sp</strong> — подчёркивает сообщения игрока под слежкой</li>
+                                    <li><i class="fas fa-check"></i> <strong>Корректор чата</strong> — заглавная буква, убирает капс, ставит точку</li>
+                                    <li><i class="fas fa-check"></i> <strong>Варнинг на ракботов</strong> — уведомление об игроке с ракботом</li>
+                                    <li><i class="fas fa-check"></i> <strong>Скрытие админ строк</strong> — убирает лишние сообщения в чате на выбор</li>
                                 </ul>
                             </div>
 
+                            <!-- Админ ПО -->
                             <div class="info-card-modern">
                                 <div class="info-card-head">
-                                    <div class="info-card-icon" style="background:rgba(96,165,250,0.15);color:#60A5FA;"><i class="fas fa-layer-group"></i></div>
-                                    <h4>Доступные меню</h4>
+                                    <div class="info-card-icon" style="background:rgba(96,165,250,0.15);color:#60A5FA;"><i class="fas fa-shield-halved"></i></div>
+                                    <h4>Админ ПО</h4>
                                 </div>
                                 <ul class="info-card-list">
-                                    <li><i class="fas fa-check"></i> Основное меню плагина</li>
+                                    <li><i class="fas fa-check"></i> <strong>WH на игроков</strong> — ники всех игроков в зоне стрима</li>
+                                    <li><i class="fas fa-check"></i> <strong>WH на авто</strong> — все машины в зоне стрима с настройками</li>
+                                    <li><i class="fas fa-check"></i> <strong>Бессмертие</strong> — бессмертие персонажа и авто, авто хил без Гма</li>
+                                    <li><i class="fas fa-check"></i> <strong>Трайсер</strong> — отображение выстрелов из оружия в текстуры</li>
+                                    <li><i class="fas fa-check"></i> <strong>Клик варп</strong> — телепорт по метке на карте</li>
+                                    <li><i class="fas fa-check"></i> <strong>FOV</strong> — изменение угла обзора камеры</li>
+                                    <li><i class="fas fa-check"></i> <strong>Круговое меню</strong> — быстрое взаимодействие с игроками и авто</li>
                                 </ul>
                             </div>
 
+                            <!-- Мониторинг -->
                             <div class="info-card-modern">
                                 <div class="info-card-head">
-                                    <div class="info-card-icon" style="background:rgba(16,185,129,0.15);color:#10B981;"><i class="fas fa-keyboard"></i></div>
-                                    <h4>Горячие клавиши</h4>
+                                    <div class="info-card-icon" style="background:rgba(16,185,129,0.15);color:#10B981;"><i class="fas fa-chart-line"></i></div>
+                                    <h4>Мониторинг</h4>
+                                </div>
+                                <ul class="info-card-list">
+                                    <li><i class="fas fa-check"></i> <strong>Игровая статистика</strong> — подсчёт работы и синхронизация с мини-приложением</li>
+                                    <li><i class="fas fa-check"></i> <strong>Чекер зоны стрима</strong> — список игроков, слежка и копирование ника</li>
+                                    <li><i class="fas fa-check"></i> <strong>Лог подключения</strong> — кто зашёл и кто вышел с сервера в реальном времени</li>
+                                </ul>
+                            </div>
+
+                            <!-- Режим слежки -->
+                            <div class="info-card-modern">
+                                <div class="info-card-head">
+                                    <div class="info-card-icon" style="background:rgba(239,68,68,0.13);color:#EF4444;"><i class="fas fa-eye"></i></div>
+                                    <h4>Режим слежки</h4>
+                                </div>
+                                <ul class="info-card-list">
+                                    <li><i class="fas fa-check"></i> <strong>Быстрые наказания</strong> — мгновенная выдача наказания игроку под слежкой</li>
+                                    <li><i class="fas fa-check"></i> <strong>Лог нажатий</strong> — отображение нажатых клавиш у игрока</li>
+                                    <li><i class="fas fa-check"></i> <strong>Биндер</strong> — настройка собственных пользовательских функций</li>
+                                    <li><i class="fas fa-check"></i> <strong>Проверка ников</strong> — просмотр всех НРП ников и уведомление игроков</li>
+                                    <li><i class="fas fa-check"></i> <strong>Админ-формы</strong> — выдача форм администраторов прямо из admin чата</li>
+                                    <li><i class="fas fa-check"></i> <strong>Выдача</strong> — выдача без потери времени на админку параллельно</li>
+                                </ul>
+                            </div>
+
+                            <!-- Команды -->
+                            <div class="info-card-modern">
+                                <div class="info-card-head">
+                                    <div class="info-card-icon" style="background:rgba(168,85,247,0.13);color:#A855F7;"><i class="fas fa-terminal"></i></div>
+                                    <h4>Доступные команды</h4>
                                 </div>
                                 <div class="hotkeys-grid">
-                                    <div class="hotkey-item"><kbd>ALT + F4</kbd><span>Открыть меню</span></div>
+                                    <div class="hotkey-item"><kbd>/amenu</kbd><span>Главное меню</span></div>
+                                    <div class="hotkey-item"><kbd>/admhelp</kbd><span>Справка</span></div>
+                                    <div class="hotkey-item"><kbd>/disconnect</kbd><span>Отключиться</span></div>
+                                    <div class="hotkey-item"><kbd>/rec</kbd><span>Реконнект</span></div>
+                                    <div class="hotkey-item"><kbd>/sskin</kbd><span>Визуальный скин</span></div>
+                                    <div class="hotkey-item"><kbd>/rules</kbd><span>Правила сервера</span></div>
+                                    <div class="hotkey-item"><kbd>/note</kbd><span>Блокнот</span></div>
+                                    <div class="hotkey-item"><kbd>/online</kbd><span>Онлайн за неделю</span></div>
+                                    <div class="hotkey-item"><kbd>/giveoff</kbd><span>Открыть выдачу</span></div>
+                                    <div class="hotkey-item"><kbd>/nick</kbd><span>Скопировать ник по ID</span></div>
+                                    <div class="hotkey-item"><kbd>/cauth</kbd><span>Неавторизованные игроки</span></div>
+                                    <div class="hotkey-item"><kbd>/getskin</kbd><span>Скин игрока</span></div>
+                                    <div class="hotkey-item"><kbd>/lveh</kbd><span>Заспавнить последнее авто</span></div>
+                                    <div class="hotkey-item"><kbd>/tpg</kbd><span>Телепорт по метке GPS</span></div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
