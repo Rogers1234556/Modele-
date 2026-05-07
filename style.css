@@ -3653,6 +3653,46 @@ article.contest-card {
     flex-shrink: 0;
 }
 
+.func-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 2px;
+}
+
+.func-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 12px 4px;
+    color: rgba(255,255,255,0.82);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.func-list-item:last-child {
+    border-bottom: none;
+}
+
+.func-list-item:active {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+.func-list-item i.fa-chevron-right {
+    color: rgba(255,255,255,0.25);
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
 .hotkeys-grid {
     display: flex;
     flex-direction: column;

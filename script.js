@@ -2117,6 +2117,20 @@ window.copyUserKey = function() {
 };
 
 
+window.openFuncDetail = function(name, desc, imageUrl) {
+    document.getElementById('funcDetailTitle').textContent = name;
+    document.getElementById('funcDetailDesc').textContent = desc;
+    const img = document.getElementById('funcDetailImage');
+    if (imageUrl) {
+        img.src = imageUrl;
+        img.style.display = 'block';
+    } else {
+        img.src = '';
+        img.style.display = 'none';
+    }
+    document.getElementById('funcDetailModal').classList.add('active');
+};
+
 function resetAdminStats() {
     ['statReports', 'statJails', 'statBans', 'statWarns', 'statMutes'].forEach(id => {    
         document.getElementById(id).textContent = "0";

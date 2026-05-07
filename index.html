@@ -301,6 +301,22 @@
                     <!-- ====== ADMIN HELPER INFO ====== -->
                     <div id="info-admin-content" class="info-content-block" style="display: none;">
 
+                        <div class="info-video-card" data-youtube="dQw4w9WgXcQ">
+                            <div class="info-video-thumb">
+                                <img loading="lazy" alt="Admin Helper preview" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg">
+                                <button type="button" class="info-video-play" aria-label="Воспроизвести видео">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="info-video-badge"><i class="fab fa-youtube"></i> YouTube</span>
+                            </div>
+                            <div class="info-video-meta">
+                                <span class="info-video-title">Обзор Admin Helper</span>
+                                <a class="info-video-link" target="_blank" rel="noopener" href="https://youtu.be/dQw4w9WgXcQ">
+                                    Открыть на YouTube <i class="fas fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
                         <div class="info-cards-stack">
 
                             <!-- Основное меню -->
@@ -309,22 +325,22 @@
                                     <div class="info-card-icon" style="background:rgba(245,158,11,0.15);color:#F59E0B;"><i class="fas fa-bars"></i></div>
                                     <h4>Основное меню</h4>
                                 </div>
-                                <ul class="info-card-list">
-                                    <li><i class="fas fa-check"></i> <strong>Авто вход</strong> — автоматический ввод пароля при входе на сервер</li>
-                                    <li><i class="fas fa-check"></i> <strong>Анти заморозка</strong> — не даёт системе заморозить администратора</li>
-                                    <li><i class="fas fa-check"></i> <strong>Спавн по координатам</strong> — телепорт на заданные координаты при входе</li>
-                                    <li><i class="fas fa-check"></i> <strong>Авто /n</strong> — сообщения из обычного чата уходят в ООС автоматически</li>
-                                    <li><i class="fas fa-check"></i> <strong>Визуальный скин</strong> — выбор скина для отображения</li>
-                                    <li><i class="fas fa-check"></i> <strong>Скорость /fly</strong> — выбор скорости полёта, применяется автоматически</li>
-                                    <li><i class="fas fa-check"></i> <strong>Слап стрелками /sp</strong> — подброс игрока вверх/вниз стрелками клавиатуры</li>
-                                    <li><i class="fas fa-check"></i> <strong>Копировать ник</strong> — авто-копирование ника игрока вышедшего во время слежки</li>
-                                    <li><i class="fas fa-check"></i> <strong>Неотвеченный репорт</strong> — подсветка репортов без ответа</li>
-                                    <li><i class="fas fa-check"></i> <strong>Репорт над игроком</strong> — отображение репорта 20 сек над головой</li>
-                                    <li><i class="fas fa-check"></i> <strong>Отметка /sp</strong> — подчёркивает сообщения игрока под слежкой</li>
-                                    <li><i class="fas fa-check"></i> <strong>Корректор чата</strong> — заглавная буква, убирает капс, ставит точку</li>
-                                    <li><i class="fas fa-check"></i> <strong>Варнинг на ракботов</strong> — уведомление об игроке с ракботом</li>
-                                    <li><i class="fas fa-check"></i> <strong>Скрытие админ строк</strong> — убирает лишние сообщения в чате на выбор</li>
-                                </ul>
+                                <div class="func-list">
+                                    <button class="func-list-item" onclick="openFuncDetail('Авто вход','После активации данной функции будет производиться автоматический ввод пароля который вы ввели в текст бокс при входе на сервер.','')"><span>Авто вход</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Анти заморозка','Функция которая не даст системе заморозить администратора.','')"><span>Анти заморозка</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Спавн по координатам','Функция которая будет телепортировать администратора на выбранные им координаты после входа на сервер.','')"><span>Спавн по координатам</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Авто /n','Функция позволяет писать в обычный чат и сообщение будет автоматически отправляться в ООС чат.','')"><span>Авто /n</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Визуальный скин','Функция позволяет выбрать понравившийся скин для себя.','')"><span>Визуальный скин</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Скорость /fly','Функция после активации которой будет возможен выбор скорости полёта, скорость будет автоматически настраиваться после входа на сервер.','')"><span>Скорость /fly</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Слап стрелками /sp','Функция, которая позволяет подкидывать игрока вверх/вниз в режиме слежки используя только стрелочки на клавиатуре.','')"><span>Слап стрелками /sp</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Копировать ник вышедшего','После активации данной функции будет автоматически копировать никнейм игрока который покинул игру в момент вашей слежки за ним.','')"><span>Копировать ник вышедшего</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Неотвеченный репорт','Функция, которая будет подсвечивать неотвеченный репорт игрока.','')"><span>Неотвеченный репорт</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Репорт над игроком','Функция рисует репорт игрока 20 секунд над его головой.','')"><span>Репорт над игроком</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Отметка сообщения /sp','Функция позволяет подчёркивать сообщение игрока за которым нахожусь в слежке.','')"><span>Отметка сообщения /sp</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Корректор чата','Функция, которая будет автоматически делать первую букву заглавной, убирать капс и ставить точку в конце сообщения.','')"><span>Корректор чата</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Варнинг на ракботов','Сообщение в чате с информацией об игроке который использует ракбота.','')"><span>Варнинг на ракботов</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Скрытие админ строк','Функция, которая позволяет убрать ненужные сообщения на выбор в чате.','')"><span>Скрытие админ строк</span><i class="fas fa-chevron-right"></i></button>
+                                </div>
                             </div>
 
                             <!-- Админ ПО -->
@@ -333,15 +349,15 @@
                                     <div class="info-card-icon" style="background:rgba(96,165,250,0.15);color:#60A5FA;"><i class="fas fa-shield-halved"></i></div>
                                     <h4>Админ ПО</h4>
                                 </div>
-                                <ul class="info-card-list">
-                                    <li><i class="fas fa-check"></i> <strong>WH на игроков</strong> — ники всех игроков в зоне стрима</li>
-                                    <li><i class="fas fa-check"></i> <strong>WH на авто</strong> — все машины в зоне стрима с настройками</li>
-                                    <li><i class="fas fa-check"></i> <strong>Бессмертие</strong> — бессмертие персонажа и авто, авто хил без Гма</li>
-                                    <li><i class="fas fa-check"></i> <strong>Трайсер</strong> — отображение выстрелов из оружия в текстуры</li>
-                                    <li><i class="fas fa-check"></i> <strong>Клик варп</strong> — телепорт по метке на карте</li>
-                                    <li><i class="fas fa-check"></i> <strong>FOV</strong> — изменение угла обзора камеры</li>
-                                    <li><i class="fas fa-check"></i> <strong>Круговое меню</strong> — быстрое взаимодействие с игроками и авто</li>
-                                </ul>
+                                <div class="func-list">
+                                    <button class="func-list-item" onclick="openFuncDetail('WH на игроков','Функция дающая возможность видеть все ники игроков в зоне стрима.','')"><span>WH на игроков</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('WH на авто','Полностью настраиваемая функция, которая позволяет видеть все авто в зоне стрима.','')"><span>WH на авто</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Бессмертие','Функция даёт бессмертие персонажу и авто, а также включает авто хил из-за отсутствия Гма против пуль.','')"><span>Бессмертие</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Трайсер','Функция показывает выстрелы из оружия в текстуры.','')"><span>Трайсер</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Клик варп','Функция, которая добавляет возможность телепорта по метке.','')"><span>Клик варп</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('FOV','Функция, которая позволяет сменить угол обзора камеры.','')"><span>FOV</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Круговое меню','Полностью настраиваемая функция кругового меню позволяющая быстро взаимодействовать с игроками либо авто.','')"><span>Круговое меню</span><i class="fas fa-chevron-right"></i></button>
+                                </div>
                             </div>
 
                             <!-- Мониторинг -->
@@ -350,11 +366,11 @@
                                     <div class="info-card-icon" style="background:rgba(16,185,129,0.15);color:#10B981;"><i class="fas fa-chart-line"></i></div>
                                     <h4>Мониторинг</h4>
                                 </div>
-                                <ul class="info-card-list">
-                                    <li><i class="fas fa-check"></i> <strong>Игровая статистика</strong> — подсчёт работы и синхронизация с мини-приложением</li>
-                                    <li><i class="fas fa-check"></i> <strong>Чекер зоны стрима</strong> — список игроков, слежка и копирование ника</li>
-                                    <li><i class="fas fa-check"></i> <strong>Лог подключения</strong> — кто зашёл и кто вышел с сервера в реальном времени</li>
-                                </ul>
+                                <div class="func-list">
+                                    <button class="func-list-item" onclick="openFuncDetail('Игровая статистика','Функция подсчёта проделанной работы администратора которая сразу дублируется в мини приложении АдминХелпера.','')"><span>Игровая статистика</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Чекер зоны стрима','Функция добавляет список игроков в зоне стрима и позволяет зайти в слежку/скопировать никнейм игрока из списка.','')"><span>Чекер зоны стрима</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Лог подключения','Функция добавляет список игроков которые вышли/заходят на сервер.','')"><span>Лог подключения</span><i class="fas fa-chevron-right"></i></button>
+                                </div>
                             </div>
 
                             <!-- Режим слежки -->
@@ -363,14 +379,14 @@
                                     <div class="info-card-icon" style="background:rgba(239,68,68,0.13);color:#EF4444;"><i class="fas fa-eye"></i></div>
                                     <h4>Режим слежки</h4>
                                 </div>
-                                <ul class="info-card-list">
-                                    <li><i class="fas fa-check"></i> <strong>Быстрые наказания</strong> — мгновенная выдача наказания игроку под слежкой</li>
-                                    <li><i class="fas fa-check"></i> <strong>Лог нажатий</strong> — отображение нажатых клавиш у игрока</li>
-                                    <li><i class="fas fa-check"></i> <strong>Биндер</strong> — настройка собственных пользовательских функций</li>
-                                    <li><i class="fas fa-check"></i> <strong>Проверка ников</strong> — просмотр всех НРП ников и уведомление игроков</li>
-                                    <li><i class="fas fa-check"></i> <strong>Админ-формы</strong> — выдача форм администраторов прямо из admin чата</li>
-                                    <li><i class="fas fa-check"></i> <strong>Выдача</strong> — выдача без потери времени на админку параллельно</li>
-                                </ul>
+                                <div class="func-list">
+                                    <button class="func-list-item" onclick="openFuncDetail('Быстрые наказания','Полностью настраиваемая функция, которая позволяет быстро выдать наказание игроку за которым находишься в слежке.','')"><span>Быстрые наказания</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Лог нажатий','Функция, которая показывает нажатые клавиши у игрока.','')"><span>Лог нажатий</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Биндер','Биндер в котором можно настроить собственные функции.','')"><span>Биндер</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Проверка ников','Функция позволяет просматривать все НРП ники на сервере и сообщить игрокам об этом.','')"><span>Проверка ников</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Админ-формы','Полностью настраиваемая функция позволяет выдавать формы администраторов из админ чата.','')"><span>Админ-формы</span><i class="fas fa-chevron-right"></i></button>
+                                    <button class="func-list-item" onclick="openFuncDetail('Выдача','Функция, которая даёт возможность выдавать выдачу и параллельно продолжать админить без проблем и не тратить время на выдачу.','')"><span>Выдача</span><i class="fas fa-chevron-right"></i></button>
+                                </div>
                             </div>
 
                             <!-- Команды -->
@@ -847,6 +863,20 @@
                     <i class="fas fa-gift" id="giftBtnIcon"></i>
                     <span id="giftBtnText">Оплатить</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Function Detail Modal -->
+    <div id="funcDetailModal" class="modal">
+        <div class="modal-content promo-card-style">
+            <div class="modal-header-simple">
+                <h3 id="funcDetailTitle" style="font-size:16px;font-weight:700;"></h3>
+                <button class="modal-close" onclick="document.getElementById('funcDetailModal').classList.remove('active')">&times;</button>
+            </div>
+            <div class="modal-body-simple">
+                <img id="funcDetailImage" src="" alt="" style="display:none;width:100%;border-radius:14px;margin-bottom:14px;object-fit:cover;max-height:210px;">
+                <p id="funcDetailDesc" style="color:rgba(255,255,255,0.78);font-size:14px;line-height:1.7;margin:0;"></p>
             </div>
         </div>
     </div>
