@@ -509,41 +509,10 @@
                     <p style="color: var(--gray-400); font-size: 14px; margin-top: 6px;">Испытай удачу и получи подписку бесплатно</p>
                 </div>
 
-                <div class="contests-grid">
-                    <div class="contest-card premium gov">
-                    
-                        <div class="contest-header">
-                            <div class="contest-icon helper-gov"><i class="fas fa-shield-alt"></i></div>
-                            <div>
-                                <h3>Розыгрыш GOV Helper</h3>
-                                <span class="contest-date"><i class="far fa-calendar-alt"></i> 30 дней подписки</span>
-                            </div>
-                        </div>
-                        
-                        <div class="contest-footer">
-                            <button class="btn-primary contest-btn btn-disabled" disabled>
-                                <i class="fas fa-flag-checkered"></i>
-                                <span>Завершён</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="contest-card premium admin">
-                        
-                        <div class="contest-header">
-                            <div class="contest-icon helper-admin"><i class="fas fa-user-shield"></i></div>
-                            <div>
-                                <h3>Розыгрыш ADMIN Helper</h3>
-                                <span class="contest-date"><i class="far fa-calendar-alt"></i> 30 дней подписки</span>
-                            </div>
-                        </div>
-                        
-                        <div class="contest-footer">
-                            <button class="btn-primary contest-btn btn-disabled" disabled>
-                                <i class="fas fa-flag-checkered"></i>
-                                <span>Завершён</span>
-                            </button>
-                        </div>
+                <div class="contests-grid" id="contests-container">
+                    <div class="contests-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Загрузка розыгрышей...</span>
                     </div>
                 </div>
             </div>

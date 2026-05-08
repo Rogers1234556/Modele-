@@ -181,6 +181,15 @@ const factionsData = [
 ];
 
 class Utils {
+    static escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     static showToast(message, type = 'info', title = '') {
         let container = document.getElementById('toastContainer');
         if (!container) {
@@ -945,70 +954,205 @@ class UIManager {
     }
 
     static async loadContests() {
-        // Розыгрыши временно отключены — все карточки в состоянии "Завершён".
-        document.querySelectorAll('.contests-grid .contest-btn').forEach(btn => {
-            btn.disabled = true;
-            btn.classList.add('btn-disabled');
-            btn.innerHTML = '<i class="fas fa-flag-checkered"></i><span>Завершён</span>';
-            btn.onclick = null;
-        });
-        return;
-        // eslint-disable-next-line no-unreachable
+        const container = document.getElementById('contests-container');
+        if (!container) return;
+
+        const userId = String(tg.initDataUnsafe?.user?.id || '');
+        container.innerHTML = '<div class="contests-loading"><i class="fas fa-spinner fa-spin"></i><span>Загрузка розыгрышей...</span></div>';
+
         try {
-            const { data: contest, error } = await supabaseClient
+            // Fetch all currently active contests
+            const { data: activeContests, error } = await supabaseClient
                 .from('contests')
                 .select('*')
                 .eq('is_active', true)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            if (error || !contest) return;
-            const timerEl = document.getElementById('contestTimer');
-            const participantsEl = document.getElementById('contestParticipants');
-            const contestBtn = document.querySelector('.contests-section .btn-secondary');
-            if (timerEl) {
-                const end = new Date(contest.ends_at);
-                const now = new Date();
-                if (end > now) {
-                    timerEl.textContent = Utils.formatDate(contest.ends_at);
-                    const timeLeft = end.getTime() - now.getTime();
-                    if (timeLeft < 86400000) setTimeout(() => UIManager.loadContests(), timeLeft + 1000);
-                } else {
-                    timerEl.textContent = 'Завершено';
-                    if (!contest.winner_idtg) UIManager.determineWinner(contest.id);
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            const now = new Date();
+
+            // Auto-end contests whose ends_at has passed
+            for (const c of (activeContests || [])) {
+                if (new Date(c.ends_at) <= now && !c.winner_idtg) {
+                    await UIManager.determineWinner(c.id);
                 }
             }
-            const { count } = await supabaseClient
-                .from('contest_participants')
-                .select('*', { count: 'exact', head: true })
-                .eq('contest_id', contest.id);
-            if (participantsEl) participantsEl.textContent = count || 0;
-            if (contestBtn) {
-                const { data: participation } = await supabaseClient
+
+            // Re-fetch to get updated state after any auto-endings
+            const { data: currentContests } = await supabaseClient
+                .from('contests')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false });
+
+            // Index by type
+            const byType = {};
+            for (const c of (currentContests || [])) {
+                byType[c.type] = c;
+            }
+
+            // Check user participation for all active contests
+            const participationMap = {};
+            if (userId && currentContests && currentContests.length > 0) {
+                const ids = currentContests.map(c => c.id);
+                const { data: parts } = await supabaseClient
                     .from('contest_participants')
-                    .select('*')
-                    .eq('contest_id', contest.id)
-                    .eq('user_idtg', tg.initDataUnsafe?.user?.id)
-                    .single();
-                if (participation) {
-                    contestBtn.innerHTML = '<i class="fas fa-check"></i><span>Вы участвуете</span>';
-                    contestBtn.classList.add('btn-disabled');
-                    contestBtn.disabled = true;
-                } else if (new Date(contest.ends_at) > new Date()) {
-                    contestBtn.innerHTML = '<i class="fas fa-plus"></i><span>Участвовать</span>';
-                    contestBtn.classList.remove('btn-disabled');
-                    contestBtn.disabled = false;
-                    contestBtn.onclick = () => UIManager.joinContest(contest.id);
+                    .select('contest_id')
+                    .eq('user_idtg', userId)
+                    .in('contest_id', ids);
+                for (const p of (parts || [])) {
+                    participationMap[p.contest_id] = true;
                 }
             }
-        } catch (e) { console.error('Contest load error:', e); }
+
+            // Render one card per product type
+            container.innerHTML =
+                UIManager.renderContestCard(byType['gov'], 'gov', participationMap) +
+                UIManager.renderContestCard(byType['adm'], 'adm', participationMap);
+
+            // Attach join button listeners (event delegation-safe)
+            container.querySelectorAll('.contest-join-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.contestId);
+                    UIManager.joinContest(id);
+                });
+            });
+
+            // Set auto-refresh when each active contest expires
+            for (const c of (currentContests || [])) {
+                const timeLeft = new Date(c.ends_at).getTime() - Date.now();
+                if (timeLeft > 0) {
+                    setTimeout(() => UIManager.loadContests(), timeLeft + 1500);
+                }
+            }
+
+        } catch (e) {
+            console.error('Contest load error:', e);
+            container.innerHTML = '<div class="contests-loading"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i><span>Ошибка загрузки. Попробуйте позже.</span></div>';
+        }
+    }
+
+    static renderContestCard(contest, type, participationMap) {
+        const isGov = type === 'gov';
+        const typeClass = isGov ? 'gov' : 'admin';
+        const iconClass = isGov ? 'helper-gov' : 'helper-admin';
+        const iconEl = isGov ? 'fas fa-shield-alt' : 'fas fa-user-shield';
+        const name = isGov ? 'GOV Helper' : 'ADMIN Helper';
+
+        if (!contest) {
+            return `<div class="contest-card premium ${typeClass}">
+                <div class="contest-header">
+                    <div class="contest-icon ${iconClass}"><i class="${iconEl}"></i></div>
+                    <div>
+                        <h3>Розыгрыш ${name}</h3>
+                        <span class="contest-date"><i class="far fa-calendar-alt"></i> 30 дней подписки</span>
+                    </div>
+                </div>
+                <div class="contest-footer">
+                    <button class="btn-primary contest-btn btn-disabled" disabled>
+                        <i class="fas fa-flag-checkered"></i><span>Завершён</span>
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        const isParticipating = !!participationMap[contest.id];
+        const endsAt = new Date(contest.ends_at);
+        const dd = String(endsAt.getDate()).padStart(2, '0');
+        const mm = String(endsAt.getMonth() + 1).padStart(2, '0');
+        const yyyy = endsAt.getFullYear();
+        const hh = String(endsAt.getHours()).padStart(2, '0');
+        const min = String(endsAt.getMinutes()).padStart(2, '0');
+        const deadlineStr = `${dd}.${mm}.${yyyy} ${hh}:${min}`;
+
+        const titleHtml = contest.title
+            ? `<span class="contest-title-extra">${Utils.escapeHtml(contest.title)}</span>`
+            : '';
+
+        let btnHtml;
+        if (isParticipating) {
+            btnHtml = `<button class="btn-primary contest-btn btn-disabled" disabled>
+                <i class="fas fa-check"></i><span>Вы участвуете</span>
+            </button>`;
+        } else {
+            btnHtml = `<button class="btn-primary contest-btn contest-join-btn" data-contest-id="${contest.id}">
+                <i class="fas fa-ticket-alt"></i><span>Участвовать</span>
+            </button>`;
+        }
+
+        return `<div class="contest-card premium ${typeClass} active">
+            <div class="contest-header">
+                <div class="contest-icon ${iconClass}"><i class="${iconEl}"></i></div>
+                <div>
+                    <h3>Розыгрыш ${name}</h3>
+                    ${titleHtml}
+                    <span class="contest-date"><i class="far fa-calendar-alt"></i> 30 дней подписки</span>
+                    <span class="contest-deadline"><i class="far fa-clock"></i> До: ${deadlineStr}</span>
+                </div>
+            </div>
+            <div class="contest-footer">
+                ${btnHtml}
+            </div>
+        </div>`;
     }
 
     static async joinContest(contestId) {
+        const userId = String(tg.initDataUnsafe?.user?.id || '');
+        if (!userId) {
+            Utils.showToast('Не удалось определить пользователя Telegram', 'error');
+            return;
+        }
+
         try {
-            const { error } = await supabaseClient.from('contest_participants').insert([{ contest_id: contestId, user_idtg: tg.initDataUnsafe?.user?.id }]);
-            if (error) throw error;
-            Utils.showToast('Вы успешно зарегистрированы в конкурсе!', 'success');
+            // Re-verify contest is still active (server-side check)
+            const { data: contest, error: cErr } = await supabaseClient
+                .from('contests')
+                .select('id, is_active, ends_at')
+                .eq('id', contestId)
+                .eq('is_active', true)
+                .maybeSingle();
+
+            if (cErr || !contest) {
+                Utils.showToast('Розыгрыш уже завершён', 'error');
+                UIManager.loadContests();
+                return;
+            }
+            if (new Date(contest.ends_at) <= new Date()) {
+                Utils.showToast('Розыгрыш уже завершён', 'error');
+                UIManager.loadContests();
+                return;
+            }
+
+            // Check if already participating
+            const { data: existing } = await supabaseClient
+                .from('contest_participants')
+                .select('id')
+                .eq('contest_id', contestId)
+                .eq('user_idtg', userId)
+                .maybeSingle();
+
+            if (existing) {
+                Utils.showToast('Вы уже участвуете в этом розыгрыше', 'info');
+                UIManager.loadContests();
+                return;
+            }
+
+            // Register participation
+            const { error } = await supabaseClient
+                .from('contest_participants')
+                .insert([{ contest_id: contestId, user_idtg: userId }]);
+
+            if (error) {
+                if (error.code === '23505') {
+                    Utils.showToast('Вы уже участвуете в этом розыгрыше', 'info');
+                } else {
+                    throw error;
+                }
+            } else {
+                Utils.showToast('Вы успешно зарегистрированы в розыгрыше!', 'success');
+            }
+
             UIManager.loadContests();
         } catch (e) {
             console.error('Join contest error:', e);
@@ -1018,14 +1162,27 @@ class UIManager {
 
     static async determineWinner(contestId) {
         try {
-            const { data: participants, error: pError } = await supabaseClient.from('contest_participants').select('user_idtg').eq('contest_id', contestId);
-            if (pError || !participants || participants.length === 0) return;
-            const winner = participants[Math.floor(Math.random() * participants.length)];
-            const { error: uError } = await supabaseClient.from('contests').update({ winner_idtg: winner.user_idtg, is_active: false }).eq('id', contestId);
-            if (uError) throw uError;
-            console.log('Winner determined:', winner.user_idtg);
-            UIManager.loadContests();
-        } catch (e) { console.error('Determine winner error:', e); }
+            const { data: participants, error: pError } = await supabaseClient
+                .from('contest_participants')
+                .select('user_idtg')
+                .eq('contest_id', contestId);
+
+            if (pError) throw pError;
+
+            const winnerIdtg = (participants && participants.length > 0)
+                ? participants[Math.floor(Math.random() * participants.length)].user_idtg
+                : null;
+
+            await supabaseClient
+                .from('contests')
+                .update({ winner_idtg: winnerIdtg, is_active: false })
+                .eq('id', contestId)
+                .eq('is_active', true); // Only update if still active (race-condition guard)
+
+            console.log(`Contest ${contestId} ended. Winner: ${winnerIdtg}`);
+        } catch (e) {
+            console.error('Determine winner error:', e);
+        }
     }
 
     static openGiftModalFromPayment(plan) {

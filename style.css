@@ -3345,6 +3345,43 @@ input:disabled + .slider { opacity: 0.5; cursor: not-allowed; }
     gap: 5px;
 }
 
+.contest-title-extra {
+    display: block;
+    color: rgba(255,255,255,0.75);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.contest-deadline {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(245,158,11,0.85);
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.contests-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 40px 20px;
+    color: rgba(255,255,255,0.35);
+    font-size: 14px;
+}
+
+.contest-footer {
+    margin-top: 16px;
+}
+
+.contest-card.active {
+    border-color: rgba(59, 130, 246, 0.30);
+    background: linear-gradient(145deg, rgba(5,10,30,0.7) 0%, rgba(37,99,235,0.08) 100%);
+}
+
 .contest-body p {
     color: var(--gray-300);
     font-size: 14px;
