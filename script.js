@@ -1449,12 +1449,14 @@ class UIManager {
 
         const adminTabBtn = document.getElementById('adminTabBtn');
         if (adminTabBtn) {
-            if (daysAdmin > 0) {
-                adminTabBtn.style.display = 'flex'; 
+            const isCuratorRole = getCuratorNumber(userData?.role) !== null;
+            if (daysAdmin > 0 || isCuratorRole) {
+                adminTabBtn.style.display = 'flex';
             } else {
-                adminTabBtn.style.display = 'none';  
+                adminTabBtn.style.display = 'none';
             }
         }
+        loadCuratorSection();
 
         const adminEl = document.getElementById('adminDays');
         if (daysAdmin > 0) {
@@ -1548,7 +1550,7 @@ async function initApp() {
             UIManager.updateProfileUI();
         }
 
-        if (userData && Utils.calculateDaysLeft(userData.admhelper_days) > 0) {
+        if (userData && (Utils.calculateDaysLeft(userData.admhelper_days) > 0 || getCuratorNumber(userData?.role) !== null)) {
             loadAdminPanelData();
         }
 
@@ -1581,8 +1583,7 @@ async function initApp() {
 }
 
 async function loadAdminRadmirList() {
-    const listContainer = document.getElementById('adminRadmirList');
-    if (!listContainer) return;
+    await loadCuratorSection();
 }
 
 async function loadActiveDiscount() {
@@ -2297,5 +2298,201 @@ function resetAdminStats() {
     document.getElementById('normaStatus').textContent = "НЕТ ДАННЫХ";
     document.getElementById('normaStatus').className = "status-value warning";
 }
+
+// ==================== КУРАТОР ====================
+
+function getCuratorNumber(role) {
+    if (!role) return null;
+    const m = role.match(/^CurAdm(\d+)$/i);
+    return m ? parseInt(m[1]) : null;
+}
+
+async function loadCuratorSection() {
+    const curatorSection = document.getElementById('curatorSection');
+    const listContainer = document.getElementById('curatorAdminList');
+    if (!curatorSection || !listContainer) return;
+
+    const curNum = getCuratorNumber(userData?.role);
+    if (curNum === null) {
+        curatorSection.style.display = 'none';
+        return;
+    }
+
+    curatorSection.style.display = 'block';
+
+    const badge = document.getElementById('curatorGroupBadge');
+    if (badge) badge.textContent = curNum === 0 ? 'Все группы' : `freeadm${curNum}`;
+
+    listContainer.innerHTML = '<div class="curator-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+
+    try {
+        let query = supabaseClient.from('users').select('idtg, name, user_name_tg, role');
+
+        if (curNum === 0) {
+            const roles = Array.from({ length: 20 }, (_, i) => `freeadm${i + 1}`);
+            query = query.in('role', roles);
+        } else {
+            query = query.eq('role', `freeadm${curNum}`);
+        }
+
+        const { data, error } = await query.order('name', { ascending: true });
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = `<div class="curator-empty"><i class="fas fa-user-slash" style="display:block;font-size:26px;margin-bottom:10px;opacity:0.4;"></i>Нет администраторов в группе</div>`;
+            return;
+        }
+
+        listContainer.innerHTML = data.map(u => {
+            const name = Utils.escapeHtml(u.name || u.user_name_tg || `ID: ${u.idtg}`);
+            const sub = u.user_name_tg ? `@${u.user_name_tg.replace(/^@/, '')}` : `ID: ${u.idtg}`;
+            const safeIdtg = String(u.idtg);
+            const safeName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            return `
+                <div class="curator-admin-card" id="ccard-${safeIdtg}">
+                    <div class="curator-admin-info">
+                        <span class="curator-admin-name">${name}</span>
+                        <span class="curator-admin-sub">${Utils.escapeHtml(sub)}</span>
+                    </div>
+                    <div class="curator-admin-right">
+                        <span class="curator-role-badge">${u.role}</span>
+                        <button class="curator-del-btn" onclick="curatorDeleteAdmin('${safeIdtg}','${safeName}')">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>`;
+        }).join('');
+    } catch (e) {
+        console.error('loadCuratorSection error:', e);
+        listContainer.innerHTML = `<div class="curator-empty"><i class="fas fa-exclamation-triangle" style="display:block;font-size:26px;margin-bottom:10px;color:var(--warning);opacity:0.7;"></i>Ошибка загрузки</div>`;
+    }
+}
+
+window.curatorDeleteAdmin = async function(idtg, name) {
+    const doDelete = async () => {
+        const card = document.getElementById(`ccard-${idtg}`);
+        if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+        try {
+            const { error } = await supabaseClient.from('users').update({ role: 'user' }).eq('idtg', String(idtg));
+            if (error) throw error;
+            Utils.showToast(`${name} убран из группы`, 'success');
+            await loadCuratorSection();
+        } catch (e) {
+            console.error('curatorDeleteAdmin error:', e);
+            Utils.showToast('Ошибка при удалении', 'error');
+            if (card) { card.style.opacity = ''; card.style.pointerEvents = ''; }
+        }
+    };
+
+    if (tg && tg.showPopup) {
+        tg.showPopup({
+            title: 'Удалить администратора?',
+            message: `${name} получит роль «user»`,
+            buttons: [
+                { id: 'del', type: 'destructive', text: 'Удалить' },
+                { id: 'cancel', type: 'cancel', text: 'Отмена' }
+            ]
+        }, (btnId) => { if (btnId === 'del') doDelete(); });
+    } else {
+        if (confirm(`Убрать ${name} из группы?`)) doDelete();
+    }
+};
+
+window.openCuratorAddModal = function() {
+    const curNum = getCuratorNumber(userData?.role);
+    if (curNum === null) return;
+
+    const modal = document.getElementById('curatorAddModal');
+    const searchInput = document.getElementById('curatorSearchInput');
+    const resultDiv = document.getElementById('curatorAddResult');
+    const groupWrapper = document.getElementById('curatorGroupSelectWrapper');
+    const groupSelect = document.getElementById('curatorGroupSelect');
+
+    if (searchInput) searchInput.value = '';
+    if (resultDiv) resultDiv.innerHTML = '';
+
+    if (curNum === 0 && groupSelect) {
+        groupWrapper.style.display = 'block';
+        groupSelect.innerHTML = '<option value="">Выберите группу...</option>' +
+            Array.from({ length: 20 }, (_, i) =>
+                `<option value="freeadm${i + 1}">freeadm${i + 1}</option>`
+            ).join('');
+    } else if (groupWrapper) {
+        groupWrapper.style.display = 'none';
+    }
+
+    modal.classList.add('active');
+    setTimeout(() => { if (searchInput) searchInput.focus(); }, 300);
+};
+
+window.curatorSearchUser = async function() {
+    const query = (document.getElementById('curatorSearchInput')?.value || '').trim();
+    const resultDiv = document.getElementById('curatorAddResult');
+    if (!query) { Utils.showToast('Введите имя, @username или ID', 'info'); return; }
+
+    resultDiv.innerHTML = '<div class="curator-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+
+    try {
+        let data = null;
+
+        if (/^\d+$/.test(query)) {
+            const { data: d } = await supabaseClient
+                .from('users').select('idtg, name, user_name_tg, role')
+                .eq('idtg', parseInt(query)).maybeSingle();
+            if (d) data = [d];
+        }
+
+        if (!data || data.length === 0) {
+            const clean = query.replace(/^@/, '');
+            const { data: d2 } = await supabaseClient
+                .from('users').select('idtg, name, user_name_tg, role')
+                .or(`name.ilike.%${clean}%,user_name_tg.ilike.%${clean}%`)
+                .limit(6);
+            if (d2 && d2.length > 0) data = d2;
+        }
+
+        if (!data || data.length === 0) {
+            resultDiv.innerHTML = '<div class="curator-empty">Пользователь не найден</div>';
+            return;
+        }
+
+        const curNum = getCuratorNumber(userData?.role);
+        const fixedRole = curNum !== 0 ? `'freeadm${curNum}'` : null;
+
+        resultDiv.innerHTML = data.map(u => {
+            const name = Utils.escapeHtml(u.name || u.user_name_tg || `ID: ${u.idtg}`);
+            const sub = u.user_name_tg ? `@${u.user_name_tg.replace(/^@/, '')}` : `ID: ${u.idtg}`;
+            const safeName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const roleArg = fixedRole !== null ? fixedRole : `document.getElementById('curatorGroupSelect').value`;
+            return `
+                <div class="curator-search-result-card">
+                    <div class="curator-admin-info">
+                        <span class="curator-admin-name">${name}</span>
+                        <span class="curator-admin-sub">${Utils.escapeHtml(sub)}</span>
+                    </div>
+                    <button class="curator-assign-btn" onclick="curatorAssignRole('${u.idtg}','${safeName}',${roleArg})">
+                        Добавить
+                    </button>
+                </div>`;
+        }).join('');
+    } catch (e) {
+        console.error('curatorSearchUser error:', e);
+        resultDiv.innerHTML = '<div class="curator-empty" style="color:var(--warning);">Ошибка поиска</div>';
+    }
+};
+
+window.curatorAssignRole = async function(idtg, name, role) {
+    if (!role) { Utils.showToast('Выберите группу из списка', 'info'); return; }
+    try {
+        const { error } = await supabaseClient.from('users').update({ role }).eq('idtg', String(idtg));
+        if (error) throw error;
+        Utils.showToast(`${name} добавлен в ${role}`, 'success');
+        UIManager.closeModals();
+        await loadCuratorSection();
+    } catch (e) {
+        console.error('curatorAssignRole error:', e);
+        Utils.showToast('Ошибка при добавлении', 'error');
+    }
+};
 
 document.addEventListener('DOMContentLoaded', initApp);

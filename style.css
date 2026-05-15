@@ -4056,3 +4056,212 @@ code {
     background: rgba(37, 99, 235, 0.10);
     border-left: 2px solid var(--primary);
 }
+
+/* ========== КУРАТОР ========== */
+.curator-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.curator-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2px;
+}
+
+.curator-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+
+.curator-section-title i {
+    color: #A5B4FC;
+    font-size: 13px;
+}
+
+.curator-group-badge {
+    background: rgba(99, 102, 241, 0.15);
+    color: #A5B4FC;
+    border: 1px solid rgba(99, 102, 241, 0.28);
+    border-radius: 20px;
+    padding: 3px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.curator-admin-card {
+    background: rgba(5, 10, 30, 0.55);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 14px;
+    padding: 11px 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.18s;
+}
+
+.curator-admin-card:hover {
+    border-color: rgba(99, 102, 241, 0.32);
+}
+
+.curator-admin-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.curator-admin-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-50);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.curator-admin-sub {
+    font-size: 12px;
+    color: var(--gray-500);
+}
+
+.curator-admin-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.curator-role-badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34D399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 20px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.curator-del-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid rgba(239, 68, 68, 0.22);
+    background: rgba(239, 68, 68, 0.07);
+    color: #F87171;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+    flex-shrink: 0;
+}
+
+.curator-del-btn:active {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: scale(0.93);
+}
+
+.curator-add-btn {
+    width: 100%;
+    padding: 13px;
+    background: rgba(99, 102, 241, 0.07);
+    border: 1px dashed rgba(99, 102, 241, 0.32);
+    border-radius: 14px;
+    color: #A5B4FC;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+}
+
+.curator-add-btn:active {
+    background: rgba(99, 102, 241, 0.16);
+    border-color: rgba(99, 102, 241, 0.55);
+    transform: scale(0.98);
+}
+
+.curator-empty {
+    text-align: center;
+    padding: 28px 12px;
+    color: var(--gray-500);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.curator-loading {
+    text-align: center;
+    padding: 24px;
+    color: var(--gray-500);
+    font-size: 22px;
+}
+
+.curator-search-result-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.curator-assign-btn {
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: rgba(99, 102, 241, 0.18);
+    border: 1px solid rgba(99, 102, 241, 0.38);
+    color: #A5B4FC;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.18s;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.curator-assign-btn:active {
+    background: rgba(99, 102, 241, 0.32);
+}
+
+.curator-group-select {
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.curator-group-select option {
+    background: #0F172A;
+    color: white;
+}
