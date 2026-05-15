@@ -4066,26 +4066,24 @@ code {
     border-left: 2px solid var(--primary);
 }
 
+/* ========== adminNormaSection: восстановить gap как у container ========== */
+#adminNormaSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
 /* ========== КУРАТОР ========== */
 .curator-section {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 10px;
     margin-top: 16px;
-}
-
-.curator-section > .curator-section-header {
-    margin-bottom: 10px;
-}
-
-.curator-section > .admin-radmir-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    padding-top: 4px;
 }
 
 .curator-section > .curator-add-btn {
-    margin-top: 14px;
+    margin-top: 6px;
 }
 
 .curator-section-header {

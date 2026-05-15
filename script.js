@@ -2013,6 +2013,10 @@ async function loadAdminPanelData() {
         if (!userId) return;
         const userKey = userData?.key;
 
+        const daysAdminNow = Utils.calculateDaysLeft(userData?.admhelper_days);
+        const normaEl = document.getElementById('adminNormaSection');
+        if (normaEl) normaEl.style.display = daysAdminNow > 0 ? 'flex' : 'none';
+
         let reportGoal = 245;
         let onlineGoalStr = "02:55";
         let jailsGoal = 10;
