@@ -188,6 +188,15 @@ body {
     overflow: hidden !important;
 }
 
+.tab-btn.tab-hidden {
+    display: none !important;
+    flex: 0 !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+}
+
 /* ========== СТРАНИЦЫ ========== */
 .page {
     display: none;

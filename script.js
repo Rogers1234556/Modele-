@@ -147,7 +147,13 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 const API_BASE = "https://normal-meadowlark-funtalingo-5c982800.koyeb.app";
 
 let userData = null;
-let currentProduct = 'gov'; 
+let currentProduct = 'gov';
+
+function getCuratorNumber(role) {
+    if (!role) return null;
+    const m = String(role).trim().match(/^CurAdm(\d+)$/i);
+    return m ? parseInt(m[1]) : null;
+}
 
 // ВАЖНО: GOV Helper использует ветку `new` в TG-боте, а ADM Helper — ветку `renew`.
 // Цены здесь должны полностью совпадать со STARS_PRICES / CRYPTO_PRICES в боте.
@@ -1450,11 +1456,9 @@ class UIManager {
         const adminTabBtn = document.getElementById('adminTabBtn');
         if (adminTabBtn) {
             const isCuratorRole = getCuratorNumber(userData?.role) !== null;
-            if (daysAdmin > 0 || isCuratorRole) {
-                adminTabBtn.style.display = 'flex';
-            } else {
-                adminTabBtn.style.display = 'none';
-            }
+            const shouldShow = daysAdmin > 0 || isCuratorRole;
+            adminTabBtn.classList.toggle('tab-hidden', !shouldShow);
+            if (!shouldShow) adminTabBtn.style.display = '';
         }
         loadCuratorSection();
 
@@ -2300,12 +2304,6 @@ function resetAdminStats() {
 }
 
 // ==================== КУРАТОР ====================
-
-function getCuratorNumber(role) {
-    if (!role) return null;
-    const m = role.match(/^CurAdm(\d+)$/i);
-    return m ? parseInt(m[1]) : null;
-}
 
 async function loadCuratorSection() {
     const curatorSection = document.getElementById('curatorSection');
