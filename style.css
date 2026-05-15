@@ -4070,8 +4070,22 @@ code {
 .curator-section {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 4px;
+    gap: 0;
+    margin-top: 16px;
+}
+
+.curator-section > .curator-section-header {
+    margin-bottom: 10px;
+}
+
+.curator-section > .admin-radmir-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.curator-section > .curator-add-btn {
+    margin-top: 14px;
 }
 
 .curator-section-header {

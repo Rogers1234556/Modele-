@@ -422,80 +422,82 @@
             <section id="admin-panel" class="page">
                 <div class="admin-panel-container">
 
-                    <div class="admin-top-strip">
-                        <span class="admin-top-title">Admin Helper</span>
-                        <div class="admin-top-right">
-                            <div class="admin-top-box">
-                                <span id="adminTopDate">—</span>
-                            </div>
-                            <div class="admin-top-box admin-fire-box">
-                                <i id="adminStreakIcon" class="fas fa-fire"></i>
-                                <span id="adminStreak">0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="admin-main-card">
-                        <div class="admin-card-header">
-                            <div class="norma-status-box">
-                                <span class="status-label">Статус нормы</span>
-                                <div class="status-value" id="normaStatus">ПРОВЕРКА...</div>
-                                <span class="admin-date-label" id="adminStatDate">Статистика за сегодня</span>
-                            </div>
-                            <div class="admin-card-right">
-                                <div class="points-box">
-                                    <span class="points-count" id="adminPoints">0.0</span>
-                                    <span class="points-label">баллов</span>
+                    <div id="adminNormaSection">
+                        <div class="admin-top-strip">
+                            <span class="admin-top-title">Admin Helper</span>
+                            <div class="admin-top-right">
+                                <div class="admin-top-box">
+                                    <span id="adminTopDate">—</span>
+                                </div>
+                                <div class="admin-top-box admin-fire-box">
+                                    <i id="adminStreakIcon" class="fas fa-fire"></i>
+                                    <span id="adminStreak">0</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="admin-stats-grid">
-                        <div class="stat-mini-card">
-                            <span class="stat-num" id="statReports">0</span>
-                            <span class="stat-name">Report</span>
-                            <small class="stat-target" id="targetReports">цель: 245</small>
+                        <div class="admin-main-card">
+                            <div class="admin-card-header">
+                                <div class="norma-status-box">
+                                    <span class="status-label">Статус нормы</span>
+                                    <div class="status-value" id="normaStatus">ПРОВЕРКА...</div>
+                                    <span class="admin-date-label" id="adminStatDate">Статистика за сегодня</span>
+                                </div>
+                                <div class="admin-card-right">
+                                    <div class="points-box">
+                                        <span class="points-count" id="adminPoints">0.0</span>
+                                        <span class="points-label">баллов</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-mini-card">
-                            <span class="stat-num" id="statOnline">0ч 0м</span>
-                            <span class="stat-name">Online</span>
-                            <small class="stat-target" id="targetOnline">цель: 2ч 55м</small>
-                        </div>
-                        <div class="stat-mini-card">
-                            <span class="stat-num" id="statJails">0</span>
-                            <span class="stat-name">Jails</span>
-                            <small class="stat-target" id="targetJails" style="display: none;"></small>
-                        </div>
-                        <div class="stat-mini-card">
-                            <span class="stat-num" id="statBans">0</span>
-                            <span class="stat-name">Bans</span>
-                        </div>
-                        <div class="stat-mini-card">
-                            <span class="stat-num" id="statWarns">0</span>
-                            <span class="stat-name">Warns</span>
-                        </div>
-                        <div class="stat-mini-card">
-                            <span class="stat-num" id="statMutes">0</span>
-                            <span class="stat-name">Mutes</span>
-                        </div>
-                    </div>
 
-                    <div class="admin-compact-actions">
-                        <button class="action-btn-sm" id="btnAdminProfileMenu">
-                            <i class="fas fa-sliders-h"></i>
-                            <div class="action-btn-text">
-                                <span class="action-btn-title">Настройки</span>
-                                <span class="action-btn-sub">Цели нормы</span>
+                        <div class="admin-stats-grid">
+                            <div class="stat-mini-card">
+                                <span class="stat-num" id="statReports">0</span>
+                                <span class="stat-name">Report</span>
+                                <small class="stat-target" id="targetReports">цель: 245</small>
                             </div>
-                        </button>
-                        <button class="action-btn-sm" id="btnAdminOnline">
-                            <i class="fas fa-chart-line"></i>
-                            <div class="action-btn-text">
-                                <span class="action-btn-title">Статистика</span>
-                                <span class="action-btn-sub">Месяц / всё время</span>
+                            <div class="stat-mini-card">
+                                <span class="stat-num" id="statOnline">0ч 0м</span>
+                                <span class="stat-name">Online</span>
+                                <small class="stat-target" id="targetOnline">цель: 2ч 55м</small>
                             </div>
-                        </button>
+                            <div class="stat-mini-card">
+                                <span class="stat-num" id="statJails">0</span>
+                                <span class="stat-name">Jails</span>
+                                <small class="stat-target" id="targetJails" style="display: none;"></small>
+                            </div>
+                            <div class="stat-mini-card">
+                                <span class="stat-num" id="statBans">0</span>
+                                <span class="stat-name">Bans</span>
+                            </div>
+                            <div class="stat-mini-card">
+                                <span class="stat-num" id="statWarns">0</span>
+                                <span class="stat-name">Warns</span>
+                            </div>
+                            <div class="stat-mini-card">
+                                <span class="stat-num" id="statMutes">0</span>
+                                <span class="stat-name">Mutes</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-compact-actions">
+                            <button class="action-btn-sm" id="btnAdminProfileMenu">
+                                <i class="fas fa-sliders-h"></i>
+                                <div class="action-btn-text">
+                                    <span class="action-btn-title">Настройки</span>
+                                    <span class="action-btn-sub">Цели нормы</span>
+                                </div>
+                            </button>
+                            <button class="action-btn-sm" id="btnAdminOnline">
+                                <i class="fas fa-chart-line"></i>
+                                <div class="action-btn-text">
+                                    <span class="action-btn-title">Статистика</span>
+                                    <span class="action-btn-sub">Месяц / всё время</span>
+                                </div>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="curator-section" id="curatorSection" style="display:none;">

@@ -1460,6 +1460,12 @@ class UIManager {
             adminTabBtn.classList.toggle('tab-hidden', !shouldShow);
             if (!shouldShow) adminTabBtn.style.display = '';
         }
+
+        const adminNormaSection = document.getElementById('adminNormaSection');
+        if (adminNormaSection) {
+            adminNormaSection.style.display = daysAdmin > 0 ? '' : 'none';
+        }
+
         loadCuratorSection();
 
         const adminEl = document.getElementById('adminDays');
@@ -2319,7 +2325,7 @@ async function loadCuratorSection() {
     curatorSection.style.display = 'block';
 
     const badge = document.getElementById('curatorGroupBadge');
-    if (badge) badge.textContent = curNum === 0 ? 'Все группы' : `freeadm${curNum}`;
+    if (badge) badge.textContent = curNum === 0 ? 'Все группы' : `${curNum} serv.`;
 
     listContainer.innerHTML = '<div class="curator-loading"><i class="fas fa-spinner fa-spin"></i></div>';
 
@@ -2353,7 +2359,7 @@ async function loadCuratorSection() {
                         <span class="curator-admin-sub">${Utils.escapeHtml(sub)}</span>
                     </div>
                     <div class="curator-admin-right">
-                        <span class="curator-role-badge">${u.role}</span>
+                        <span class="curator-role-badge">${(() => { const m = String(u.role).match(/freeadm(\d+)/i); return m ? `${m[1]} serv.` : u.role; })()}</span>
                         <button class="curator-del-btn" onclick="curatorDeleteAdmin('${safeIdtg}','${safeName}')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
