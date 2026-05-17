@@ -2437,7 +2437,7 @@ window.openCuratorAddModal = function() {
 window.curatorSearchUser = async function() {
     const query = (document.getElementById('curatorSearchInput')?.value || '').trim();
     const resultDiv = document.getElementById('curatorAddResult');
-    if (!query) { Utils.showToast('Введите имя, @username или ID', 'info'); return; }
+    if (!query) { Utils.showToast('Введите ID', 'info'); return; }
 
     resultDiv.innerHTML = '<div class="curator-loading"><i class="fas fa-spinner fa-spin"></i></div>';
 
