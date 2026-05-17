@@ -510,6 +510,7 @@ class UIManager {
             });
         }
 
+
         const activatePromoBtn = document.getElementById('activatePromoBtn');
         if (activatePromoBtn) {
             activatePromoBtn.addEventListener('click', () => {
@@ -664,107 +665,65 @@ class UIManager {
         }
     }
 
+
     static async activatePromoCode(code) {
         try {
             const userId = tg.initDataUnsafe?.user?.id;
-            if (!userId) {
-                Utils.showToast('Не удалось определить пользователя Telegram', 'error');
-                return;
-            }
+            if (!userId) { Utils.showToast('Не удалось определить пользователя Telegram', 'error'); return; }
             const cleanCode = (code || '').trim().toUpperCase();
-            if (!cleanCode) {
-                Utils.showToast('Введите промокод', 'error');
-                return;
-            }
+            if (!cleanCode) { Utils.showToast('Введите промокод', 'error'); return; }
 
             const { data: promo, error: promoError } = await supabaseClient
-                .from('promocodes')
-                .select('*')
-                .eq('code', cleanCode)
-                .maybeSingle();
-
-            if (promoError) {
-                console.error('Supabase promo lookup error:', promoError);
-                Utils.showToast(`Ошибка базы данных: ${promoError.message || promoError.code || 'неизвестная'}`, 'error');
-                return;
-            }
-            if (!promo) {
-                Utils.showToast(`Промокод «${cleanCode}» не существует`, 'error');
-                return;
-            }
-            if (promo.is_active === false) {
-                Utils.showToast('Промокод деактивирован администратором', 'error');
-                return;
-            }
+                .from('promocodes').select('*').eq('code', cleanCode).maybeSingle();
+            if (promoError) { Utils.showToast(`Ошибка базы данных: ${promoError.message || promoError.code || 'неизвестная'}`, 'error'); return; }
+            if (!promo) { Utils.showToast(`Промокод «${cleanCode}» не существует`, 'error'); return; }
+            if (promo.is_active === false) { Utils.showToast('Промокод деактивирован администратором', 'error'); return; }
             if (promo.expires_at && new Date(promo.expires_at) < new Date()) {
-                const expDate = new Date(promo.expires_at).toLocaleDateString('ru-RU');
-                Utils.showToast(`Срок действия промокода истёк ${expDate}`, 'error');
-                return;
+                Utils.showToast(`Срок действия промокода истёк ${new Date(promo.expires_at).toLocaleDateString('ru-RU')}`, 'error'); return;
             }
 
-            // Глобальная проверка лимита активаций по таблице promo_usages
-            // (учитываем все аккаунты, а не только локальный счётчик used_count)
             const { count: totalUsages, error: totalUsagesError } = await supabaseClient
-                .from('promo_usages')
-                .select('id', { count: 'exact', head: true })
-                .eq('promo_id', promo.id);
-            if (totalUsagesError) {
-                console.error('Supabase total usages lookup error:', totalUsagesError);
-                Utils.showToast(`Ошибка проверки лимита: ${totalUsagesError.message || totalUsagesError.code}`, 'error');
-                return;
-            }
-            const realUsedCount = totalUsages || 0;
-            if (promo.max_uses && realUsedCount >= promo.max_uses) {
-                Utils.showToast(`Лимит активаций исчерпан (${realUsedCount}/${promo.max_uses})`, 'error');
-                return;
+                .from('promo_usages').select('id', { count: 'exact', head: true }).eq('promo_id', promo.id);
+            if (totalUsagesError) { Utils.showToast(`Ошибка проверки лимита: ${totalUsagesError.message || totalUsagesError.code}`, 'error'); return; }
+            if (promo.max_uses && (totalUsages || 0) >= promo.max_uses) {
+                Utils.showToast(`Лимит активаций исчерпан (${totalUsages}/${promo.max_uses})`, 'error'); return;
             }
 
             const { data: usage, error: usageError } = await supabaseClient
-                .from('promo_usages')
-                .select('*')
-                .eq('promo_id', promo.id)
-                .eq('user_idtg', String(userId))
-                .maybeSingle();
-            if (usageError) {
-                console.error('Supabase usage lookup error:', usageError);
-                Utils.showToast(`Ошибка проверки активации: ${usageError.message || usageError.code}`, 'error');
-                return;
-            }
-            if (usage) {
-                Utils.showToast('Вы уже активировали этот промокод ранее', 'error');
-                return;
-            }
+                .from('promo_usages').select('*').eq('promo_id', promo.id).eq('user_idtg', String(userId)).maybeSingle();
+            if (usageError) { Utils.showToast(`Ошибка проверки активации: ${usageError.message || usageError.code}`, 'error'); return; }
+            if (usage) { Utils.showToast('Вы уже активировали этот промокод ранее', 'error'); return; }
+
             const hasDays = promo.days && promo.days > 0;
             const hasDiscount = promo.discount_percent && promo.discount_percent > 0;
-
-            if (!hasDays && !hasDiscount) {
-                Utils.showToast('Ошибка: промокод не содержит ни дней, ни скидки', 'error');
-                return;
-            }
+            if (!hasDays && !hasDiscount) { Utils.showToast('Ошибка: промокод не содержит ни дней, ни скидки', 'error'); return; }
 
             if (hasDiscount) {
-                const { error: discountError } = await supabaseClient
-                    .from('user_discounts')
+                const { error: discountError } = await supabaseClient.from('user_discounts')
                     .insert([{ user_idtg: String(userId), promo_id: promo.id, discount_percent: promo.discount_percent, is_used: false }]);
                 if (discountError) throw discountError;
                 activeDiscount = { percent: promo.discount_percent, promoId: promo.id, code: promo.code };
             }
 
-            let bonusDaysAdded = 0;
             const promoProduct = (promo.product || 'GOV').toUpperCase();
+            let bonusDaysAdded = 0;
             if (hasDays) {
                 await UIManager.addDaysToUser(userId, promo.days, `Активация промокода ${promo.code} (${promo.type})`, promoProduct);
                 bonusDaysAdded = promo.days;
             }
 
             await supabaseClient.from('promo_usages').insert([{ user_idtg: String(userId), promo_id: promo.id }]);
-            await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id }).then(() => {}).catch(err => {
-                console.warn('increment_promo_uses RPC недоступен, обновим напрямую', err);
+            await supabaseClient.rpc('increment_promo_uses', { promo_id: promo.id }).catch(() => {
                 supabaseClient.from('promocodes').update({ used_count: (promo.used_count || 0) + 1 }).eq('id', promo.id);
             });
 
             const productLabel = promoProduct === 'ADM' ? 'ADM Helper' : 'GOV Helper';
-            await UIManager.logPromoActivation(bonusDaysAdded, productLabel, hasDiscount ? promo.discount_percent : 0);
+            try {
+                const nick = userData?.name || tg.initDataUnsafe?.user?.first_name || 'Пользователь';
+                let content = `Пользователь ${nick} (ID: ${userData?.id ?? '—'} | ${userId}) активировал промокод на ${productLabel}`;
+                content += bonusDaysAdded > 0 ? ` на ${bonusDaysAdded} ${Utils.getDaysWord(bonusDaysAdded)}.` : hasDiscount ? ` (скидка ${promo.discount_percent}%).` : '.';
+                await supabaseClient.from('logs').insert([{ title: 'Активировал промокод', content, admin: 'system', type: 'promo', created_at: new Date().toISOString() }]);
+            } catch (e) { console.error('Ошибка записи лога промокода:', e); }
 
             if (hasDiscount && hasDays) {
                 Utils.showToast(`Промокод активирован! Скидка ${promo.discount_percent}% + ${promo.days} ${Utils.getDaysWord(promo.days)} (${productLabel})`, 'success');
@@ -780,33 +739,7 @@ class UIManager {
             await UIManager.updateProfileUI();
         } catch (e) {
             console.error('Promo activation error:', e);
-            const reason = e?.message || e?.code || e?.details || 'неизвестная ошибка';
-            Utils.showToast(`Ошибка активации: ${reason}`, 'error');
-        }
-    }
-
-    static async logPromoActivation(days, productLabel, discountPercent = 0) {
-        try {
-            const userId = tg.initDataUnsafe?.user?.id;
-            const nick = userData?.name || tg.initDataUnsafe?.user?.first_name || 'Пользователь';
-            const dbId = userData?.id ?? '—';
-            let content = `Пользователь ${nick} (ID: ${dbId} | ${userId}) активировал промокод на ${productLabel}`;
-            if (days > 0) {
-                content += ` на ${days} ${Utils.getDaysWord(days)}.`;
-            } else if (discountPercent > 0) {
-                content += ` (скидка ${discountPercent}%).`;
-            } else {
-                content += '.';
-            }
-            await supabaseClient.from('logs').insert([{
-                title: 'Активировал промокод',
-                content,
-                admin: 'system',
-                type: 'promo',
-                created_at: new Date().toISOString()
-            }]);
-        } catch (e) {
-            console.error('Ошибка записи лога промокода:', e);
+            Utils.showToast(`Ошибка активации: ${e?.message || e?.code || e?.details || 'неизвестная ошибка'}`, 'error');
         }
     }
 
@@ -1486,7 +1419,8 @@ class UIManager {
 
         const launcherBtn = document.getElementById('launcherBtn');
         if (launcherBtn) {
-            launcherBtn.style.display = (daysGov > 0 || daysAdmin > 0) ? 'flex' : 'none';
+            const hasAdmRole = getRoles(userData?.role).some(r => /^adm\d+$/i.test(r));
+            launcherBtn.style.display = (daysGov > 0 || daysAdmin > 0 || hasAdmRole) ? 'flex' : 'none';
         }
     }
 
@@ -2329,12 +2263,18 @@ async function loadCuratorSection() {
     if (!curatorSection || !listContainer) return;
 
     const curNum = getCuratorNumber(userData?.role);
+    const divider = document.getElementById('adminSectionDivider');
     if (curNum === null) {
         curatorSection.style.display = 'none';
+        if (divider) divider.style.display = 'none';
         return;
     }
 
     curatorSection.style.display = 'block';
+    if (divider) {
+        const normaEl = document.getElementById('adminNormaSection');
+        divider.style.display = (normaEl && normaEl.style.display !== 'none') ? 'block' : 'none';
+    }
 
     const badge = document.getElementById('curatorGroupBadge');
     if (badge) badge.textContent = curNum === 0 ? 'Все группы' : `${curNum} serv.`;
