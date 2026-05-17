@@ -1771,6 +1771,7 @@ window.toggleJailsGoal = async function(checkbox) {
         if (targetJails) {
             if (enabled) {
                 targetJails.style.display = 'block';
+                await loadAdminPanelData();
             } else {
                 targetJails.style.display = 'none';
             }
