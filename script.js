@@ -149,10 +149,17 @@ const API_BASE = "https://normal-meadowlark-funtalingo-5c982800.koyeb.app";
 let userData = null;
 let currentProduct = 'gov';
 
-function getCuratorNumber(role) {
-    if (!role) return null;
-    const m = String(role).trim().match(/^CurAdm(\d+)$/i);
-    return m ? parseInt(m[1]) : null;
+function getRoles(roleStr) {
+    if (!roleStr) return [];
+    return String(roleStr).split(',').map(r => r.trim()).filter(Boolean);
+}
+
+function getCuratorNumber(roleStr) {
+    for (const r of getRoles(roleStr)) {
+        const m = r.match(/^CurAdm(\d+)$/i);
+        if (m) return parseInt(m[1]);
+    }
+    return null;
 }
 
 // ВАЖНО: GOV Helper использует ветку `new` в TG-боте, а ADM Helper — ветку `renew`.
@@ -2338,25 +2345,32 @@ async function loadCuratorSection() {
         let query = supabaseClient.from('users').select('idtg, name, user_name_tg, role');
 
         if (curNum === 0) {
-            const roles = Array.from({ length: 20 }, (_, i) => `freeadm${i + 1}`);
-            query = query.in('role', roles);
+            query = query.ilike('role', '%adm%');
         } else {
-            query = query.eq('role', `freeadm${curNum}`);
+            query = query.ilike('role', `%adm${curNum}%`);
         }
 
         const { data, error } = await query.order('name', { ascending: true });
         if (error) throw error;
 
-        if (!data || data.length === 0) {
+        const filtered = (data || []).filter(u => {
+            const roles = getRoles(u.role);
+            if (curNum === 0) return roles.some(r => /^adm\d+$/i.test(r));
+            return roles.some(r => r.toLowerCase() === `adm${curNum}`);
+        });
+
+        if (filtered.length === 0) {
             listContainer.innerHTML = `<div class="curator-empty"><i class="fas fa-user-slash" style="display:block;font-size:26px;margin-bottom:10px;opacity:0.4;"></i>Нет администраторов в группе</div>`;
             return;
         }
 
-        listContainer.innerHTML = data.map(u => {
+        listContainer.innerHTML = filtered.map(u => {
             const name = Utils.escapeHtml(u.name || u.user_name_tg || `ID: ${u.idtg}`);
             const sub = u.user_name_tg ? `@${u.user_name_tg.replace(/^@/, '')}` : `ID: ${u.idtg}`;
             const safeIdtg = String(u.idtg);
             const safeName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const admRole = getRoles(u.role).find(r => /^adm\d+$/i.test(r));
+            const badgeText = admRole ? (() => { const m = admRole.match(/^adm(\d+)$/i); return m ? `${m[1]} serv.` : admRole; })() : u.role;
             return `
                 <div class="curator-admin-card" id="ccard-${safeIdtg}">
                     <div class="curator-admin-info">
@@ -2364,7 +2378,7 @@ async function loadCuratorSection() {
                         <span class="curator-admin-sub">${Utils.escapeHtml(sub)}</span>
                     </div>
                     <div class="curator-admin-right">
-                        <span class="curator-role-badge">${(() => { const m = String(u.role).match(/freeadm(\d+)/i); return m ? `${m[1]} serv.` : u.role; })()}</span>
+                        <span class="curator-role-badge">${badgeText}</span>
                         <button class="curator-del-btn" onclick="curatorDeleteAdmin('${safeIdtg}','${safeName}')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
@@ -2382,7 +2396,10 @@ window.curatorDeleteAdmin = async function(idtg, name) {
         const card = document.getElementById(`ccard-${idtg}`);
         if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
         try {
-            const { error } = await supabaseClient.from('users').update({ role: 'user' }).eq('idtg', String(idtg));
+            const { data: user } = await supabaseClient.from('users').select('role').eq('idtg', String(idtg)).maybeSingle();
+            const remaining = getRoles(user?.role).filter(r => !/^adm\d+$/i.test(r));
+            const finalRole = remaining.length > 0 ? remaining.join(',') : 'user';
+            const { error } = await supabaseClient.from('users').update({ role: finalRole }).eq('idtg', String(idtg));
             if (error) throw error;
             Utils.showToast(`${name} убран из группы`, 'success');
             await loadCuratorSection();
@@ -2423,8 +2440,8 @@ window.openCuratorAddModal = function() {
     if (curNum === 0 && groupSelect) {
         groupWrapper.style.display = 'block';
         groupSelect.innerHTML = '<option value="">Выберите группу...</option>' +
-            Array.from({ length: 20 }, (_, i) =>
-                `<option value="freeadm${i + 1}">freeadm${i + 1}</option>`
+            Array.from({ length: 21 }, (_, i) =>
+                `<option value="adm${i + 1}">${i + 1} Server</option>`
             ).join('');
     } else if (groupWrapper) {
         groupWrapper.style.display = 'none';
@@ -2466,7 +2483,7 @@ window.curatorSearchUser = async function() {
         }
 
         const curNum = getCuratorNumber(userData?.role);
-        const fixedRole = curNum !== 0 ? `'freeadm${curNum}'` : null;
+        const fixedRole = curNum !== 0 ? `'adm${curNum}'` : null;
 
         resultDiv.innerHTML = data.map(u => {
             const name = Utils.escapeHtml(u.name || u.user_name_tg || `ID: ${u.idtg}`);
@@ -2490,12 +2507,16 @@ window.curatorSearchUser = async function() {
     }
 };
 
-window.curatorAssignRole = async function(idtg, name, role) {
-    if (!role) { Utils.showToast('Выберите группу из списка', 'info'); return; }
+window.curatorAssignRole = async function(idtg, name, newRole) {
+    if (!newRole) { Utils.showToast('Выберите группу из списка', 'info'); return; }
     try {
-        const { error } = await supabaseClient.from('users').update({ role }).eq('idtg', String(idtg));
+        const { data: user } = await supabaseClient.from('users').select('role').eq('idtg', String(idtg)).maybeSingle();
+        const existing = getRoles(user?.role).filter(r => !/^adm\d+$/i.test(r));
+        existing.push(newRole);
+        const finalRole = existing.join(',');
+        const { error } = await supabaseClient.from('users').update({ role: finalRole }).eq('idtg', String(idtg));
         if (error) throw error;
-        Utils.showToast(`${name} добавлен в ${role}`, 'success');
+        Utils.showToast(`${name} добавлен в ${newRole}`, 'success');
         UIManager.closeModals();
         await loadCuratorSection();
     } catch (e) {
