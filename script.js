@@ -440,7 +440,7 @@ class UIManager {
         // (см. window.copyUserKey ниже), здесь повторный listener не вешаем,
         // иначе всплывают два тоста одновременно.
 
-        document.querySelectorAll('.btn-buy').forEach(btn => {
+        document.querySelectorAll('.btn-buy-card').forEach(btn => {
             btn.addEventListener('click', () => {
                 const plan = parseInt(btn.dataset.plan);
                 giftMode = false;

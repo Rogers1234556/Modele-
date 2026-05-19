@@ -44,66 +44,71 @@
                     <div class="pricing-section" id="newUserPricing">
                         <div class="pricing-cards">
                             <div class="pricing-card" data-plan="15">
-                                <div class="pricing-badge">
-                                    <i class="fas fa-bolt"></i>
-                                    <span>ПОПРОБОВАТЬ</span>
-                                </div>
+                                <div class="plan-tier-label">СТАРТ</div>
                                 <div class="pricing-header">
                                     <h3>15 дней</h3>
                                     <div class="pricing-price">
                                         <span class="price">90</span>
                                         <span class="currency"><i class="fas fa-star price-star-icon"></i></span>
                                     </div>
+                                    <div class="pricing-per-day">≈ 6 <i class="fas fa-star price-star-icon" style="font-size:10px"></i> в день</div>
                                 </div>
+                                <div class="pricing-divider"></div>
                                 <ul class="pricing-features">
-                                    <li><i class="fas fa-check"></i> Все функции</li>
+                                    <li><i class="fas fa-check-circle"></i> Полный доступ ко всем функциям</li>
+                                    <li><i class="fas fa-check-circle"></i> Онлайн-карта зон и точек</li>
+                                    <li><i class="fas fa-check-circle"></i> История событий (30 дней)</li>
+                                    <li><i class="fas fa-check-circle"></i> Поддержка в чате</li>
                                 </ul>
-                                <button class="btn-primary btn-buy" data-plan="15" data-for="new">
+                                <button class="btn-buy-card" data-plan="15" data-for="new">
                                     <i class="fas fa-shopping-cart"></i>
                                     <span>Купить</span>
                                 </button>
                             </div>
-                            <div class="pricing-card" data-plan="30">
-                                <div class="pricing-badge">
-                                    <i class="fas fa-crown"></i>
-                                    <span>30 ДНЕЙ</span>
-                                </div>
+                            <div class="pricing-card featured" data-plan="30">
+                                <div class="plan-tier-label featured-label">ЛУЧШИЙ ВЫБОР</div>
                                 <div class="pricing-header">
                                     <h3>30 дней</h3>
                                     <div class="pricing-price">
                                         <span class="price">150</span>
                                         <span class="currency"><i class="fas fa-star price-star-icon"></i></span>
                                     </div>
+                                    <div class="pricing-per-day">≈ 5 <i class="fas fa-star price-star-icon" style="font-size:10px"></i> в день</div>
                                 </div>
+                                <div class="pricing-divider"></div>
                                 <ul class="pricing-features">
-                                    <li><i class="fas fa-check"></i> Все функции</li>
-                                    <li><i class="fas fa-check"></i> Ранний доступ к обновлениям</li>
-                                    <li><i class="fas fa-check"></i> Приоритетная поддержка</li>
+                                    <li><i class="fas fa-check-circle"></i> Полный доступ ко всем функциям</li>
+                                    <li><i class="fas fa-check-circle"></i> Онлайн-карта зон и точек</li>
+                                    <li><i class="fas fa-check-circle"></i> История событий (90 дней)</li>
+                                    <li><i class="fas fa-check-circle"></i> Ранний доступ к обновлениям</li>
+                                    <li><i class="fas fa-check-circle"></i> Приоритетная поддержка</li>
                                 </ul>
-                                <button class="btn-primary btn-buy" data-plan="30" data-for="new">
+                                <button class="btn-buy-card featured-btn" data-plan="30" data-for="new">
                                     <i class="fas fa-shopping-cart"></i>
                                     <span>Купить</span>
                                 </button>
                             </div>
-                            <div class="pricing-card" data-plan="365">
-                                <div class="pricing-badge">
-                                    <i class="fas fa-gem"></i>
-                                    <span>ВЫГОДНО</span>
-                                </div>
+                            <div class="pricing-card premium" data-plan="365">
+                                <div class="plan-tier-label premium-label"><i class="fas fa-gem"></i> МАКСИМУМ</div>
                                 <div class="pricing-header">
                                     <h3>365 дней</h3>
                                     <div class="pricing-price">
                                         <span class="price">1400</span>
                                         <span class="currency"><i class="fas fa-star price-star-icon"></i></span>
                                     </div>
+                                    <div class="pricing-per-day pricing-economy">Экономия ~69% vs месячный</div>
                                 </div>
+                                <div class="pricing-divider"></div>
                                 <ul class="pricing-features">
-                                    <li><i class="fas fa-check"></i> Все функции</li>
-                                    <li><i class="fas fa-check"></i> Ранний доступ + бета-тест</li>
-                                    <li><i class="fas fa-check"></i> VIP поддержка 24/7</li>
+                                    <li><i class="fas fa-check-circle"></i> Полный доступ ко всем функциям</li>
+                                    <li><i class="fas fa-check-circle"></i> Онлайн-карта зон и точек</li>
+                                    <li><i class="fas fa-check-circle"></i> Полная история событий</li>
+                                    <li><i class="fas fa-check-circle"></i> Ранний доступ + бета-тест</li>
+                                    <li><i class="fas fa-check-circle"></i> VIP поддержка 24/7</li>
+                                    <li><i class="fas fa-check-circle"></i> Автоматические обновления</li>
                                 </ul>
-                                <button class="btn-primary btn-buy" data-plan="365" data-for="new">
-                                    <i class="fas fa-shopping-cart"></i>
+                                <button class="btn-buy-card premium-btn" data-plan="365" data-for="new">
+                                    <i class="fas fa-gem"></i>
                                     <span>Купить</span>
                                 </button>
                             </div>
@@ -112,70 +117,70 @@
                     <div class="pricing-section hidden" id="renewalPricing">
                         <div class="pricing-cards">
                             <div class="pricing-card" data-plan="15-renew">
-                                <div class="pricing-badge">
-                                    <i class="fas fa-bolt"></i>
-                                    <span>ПРОДЛЕНИЕ</span>
-                                </div>
+                                <div class="plan-tier-label">СТАРТ</div>
                                 <div class="pricing-header">
                                     <h3>15 дней</h3>
                                     <div class="pricing-price">
                                         <span class="price">120</span>
                                         <span class="currency"><i class="fas fa-star price-star-icon"></i></span>
                                     </div>
+                                    <div class="pricing-per-day">≈ 8 <i class="fas fa-star price-star-icon" style="font-size:10px"></i> в день</div>
                                 </div>
+                                <div class="pricing-divider"></div>
                                 <ul class="pricing-features">
-                                    <li><i class="fas fa-check"></i> Продление подписки</li>
-                                    <li><i class="fas fa-check"></i> Все функции GOV Helper</li>
-                                    <li><i class="fas fa-check"></i> Поддержка в чате</li>
+                                    <li><i class="fas fa-check-circle"></i> Продление подписки</li>
+                                    <li><i class="fas fa-check-circle"></i> Полный доступ к функциям</li>
+                                    <li><i class="fas fa-check-circle"></i> История событий (30 дней)</li>
+                                    <li><i class="fas fa-check-circle"></i> Поддержка в чате</li>
                                 </ul>
-                                <button class="btn-primary btn-buy" data-plan="15" data-for="renew">
+                                <button class="btn-buy-card" data-plan="15" data-for="renew">
                                     <i class="fas fa-sync-alt"></i>
                                     <span>Продлить</span>
                                 </button>
                             </div>
-                            <div class="pricing-card" data-plan="30-renew">
-                                <div class="pricing-badge">
-                                    <i class="fas fa-crown"></i>
-                                    <span>30 ДНЕЙ</span>
-                                </div>
+                            <div class="pricing-card featured" data-plan="30-renew">
+                                <div class="plan-tier-label featured-label">ЛУЧШИЙ ВЫБОР</div>
                                 <div class="pricing-header">
                                     <h3>30 дней</h3>
                                     <div class="pricing-price">
                                         <span class="price">1900</span>
                                         <span class="currency"><i class="fas fa-star price-star-icon"></i></span>
                                     </div>
+                                    <div class="pricing-per-day">≈ 63 <i class="fas fa-star price-star-icon" style="font-size:10px"></i> в день</div>
                                 </div>
+                                <div class="pricing-divider"></div>
                                 <ul class="pricing-features">
-                                    <li><i class="fas fa-check"></i> Продление подписки</li>
-                                    <li><i class="fas fa-check"></i> Все функции GOV Helper</li>
-                                    <li><i class="fas fa-check"></i> Ранний доступ к обновлениям</li>
-                                    <li><i class="fas fa-check"></i> Приоритетная поддержка</li>
+                                    <li><i class="fas fa-check-circle"></i> Продление подписки</li>
+                                    <li><i class="fas fa-check-circle"></i> Полный доступ к функциям</li>
+                                    <li><i class="fas fa-check-circle"></i> История событий (90 дней)</li>
+                                    <li><i class="fas fa-check-circle"></i> Ранний доступ к обновлениям</li>
+                                    <li><i class="fas fa-check-circle"></i> Приоритетная поддержка</li>
                                 </ul>
-                                <button class="btn-primary btn-buy" data-plan="30" data-for="renew">
+                                <button class="btn-buy-card featured-btn" data-plan="30" data-for="renew">
                                     <i class="fas fa-sync-alt"></i>
                                     <span>Продлить</span>
                                 </button>
                             </div>
-                            <div class="pricing-card" data-plan="365-renew">
-                                <div class="pricing-badge">
-                                    <i class="fas fa-gem"></i>
-                                    <span>МАКСИМУМ</span>
-                                </div>
+                            <div class="pricing-card premium" data-plan="365-renew">
+                                <div class="plan-tier-label premium-label"><i class="fas fa-gem"></i> МАКСИМУМ</div>
                                 <div class="pricing-header">
                                     <h3>365 дней</h3>
                                     <div class="pricing-price">
                                         <span class="price">3600</span>
                                         <span class="currency"><i class="fas fa-star price-star-icon"></i></span>
                                     </div>
+                                    <div class="pricing-per-day pricing-economy">Экономия ~84% vs месячный</div>
                                 </div>
+                                <div class="pricing-divider"></div>
                                 <ul class="pricing-features">
-                                    <li><i class="fas fa-check"></i> Продление подписки</li>
-                                    <li><i class="fas fa-check"></i> Все функции GOV Helper</li>
-                                    <li><i class="fas fa-check"></i> Ранний доступ + бета-тест</li>
-                                    <li><i class="fas fa-check"></i> Автоматические обновления</li>
-                                    <li><i class="fas fa-check"></i> VIP поддержка 24/7</li>
+                                    <li><i class="fas fa-check-circle"></i> Продление подписки</li>
+                                    <li><i class="fas fa-check-circle"></i> Полный доступ к функциям</li>
+                                    <li><i class="fas fa-check-circle"></i> Полная история событий</li>
+                                    <li><i class="fas fa-check-circle"></i> Ранний доступ + бета-тест</li>
+                                    <li><i class="fas fa-check-circle"></i> VIP поддержка 24/7</li>
+                                    <li><i class="fas fa-check-circle"></i> Автоматические обновления</li>
                                 </ul>
-                                <button class="btn-primary btn-buy" data-plan="365" data-for="renew">
+                                <button class="btn-buy-card premium-btn" data-plan="365" data-for="renew">
                                     <i class="fas fa-sync-alt"></i>
                                     <span>Продлить</span>
                                 </button>
