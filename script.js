@@ -1998,6 +1998,15 @@ async function loadAdminPanelData() {
             }
         }
 
+        const mskNow = getMSKDate();
+        const topDateEl = document.getElementById('adminTopDate');
+        if (topDateEl) {
+            const dd = String(mskNow.getDate()).padStart(2,'0');
+            const mm = String(mskNow.getMonth()+1).padStart(2,'0');
+            const yyyy = mskNow.getFullYear();
+            topDateEl.textContent = `${dd}.${mm}.${yyyy}`;
+        }
+
         if (!userKey) { resetAdminStats(); return; }
 
         const today = getMSKDateString();
@@ -2062,16 +2071,8 @@ async function loadAdminPanelData() {
 
         await updateStreakUI(userKey, reportGoal, onlineGoalStr);
 
-        const mskNow = getMSKDate();
-        document.getElementById('adminStatDate').textContent = `Статистика за ${mskNow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}`;
-        const topDateEl = document.getElementById('adminTopDate');
-        if (topDateEl) {
-            const d = mskNow;
-            const dd = String(d.getDate()).padStart(2,'0');
-            const mm = String(d.getMonth()+1).padStart(2,'0');
-            const yyyy = d.getFullYear();
-            topDateEl.textContent = `${dd}.${mm}.${yyyy}`;
-        }
+        const mskNowStat = getMSKDate();
+        document.getElementById('adminStatDate').textContent = `Статистика за ${mskNowStat.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}`;
 
     } catch (e) {
         console.error('Ошибка loadAdminPanelData:', e);
